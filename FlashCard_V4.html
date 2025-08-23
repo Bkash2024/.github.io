@@ -145,35 +145,46 @@
             box-sizing: border-box;
         }
         .fullscreen .flashcard {
-            height: 70vh;
+            height: 80vh;
             font-size: 36px;
             background-color: #f0f8ff;
             width: 90%;
             max-width: 800px;
+            border: 2px solid #fff;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
         .fullscreen-controls {
             position: fixed;
-            bottom: 20px;
-            display: flex;
-            gap: 10px;
+            top: 20px;
+            right: 20px;
             z-index: 1001;
         }
-        .exit-fullscreen {
-            background-color: #f44336;
+        .close-fullscreen {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 24px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
         }
-        .exit-fullscreen:hover {
-            background-color: #d32f2f;
+        .close-fullscreen:hover {
+            background-color: rgba(255, 255, 255, 0.3);
         }
         .fullscreen-indicator {
             position: fixed;
-            top: 10px;
-            right: 10px;
+            bottom: 20px;
             color: white;
             font-size: 14px;
             z-index: 1001;
-            background-color: rgba(0,0,0,0.5);
-            padding: 5px 10px;
-            border-radius: 5px;
+        }
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -241,13 +252,11 @@ CSS,Styling language</pre>
             <div class="zone-overlay right-zone" id="fullscreen-right-zone"></div>
             <div id="fullscreen-content"></div>
         </div>
-        <div class="fullscreen-indicator">Full Screen Mode (Press ESC or F to exit)</div>
+        <div class="fullscreen-indicator">
+            Use keyboard: ← → to navigate | ↑ ↓ to flip | ESC to exit
+        </div>
         <div class="fullscreen-controls">
-            <button id="fullscreen-prev">Previous</button>
-            <button id="fullscreen-flip">Flip</button>
-            <button id="fullscreen-shuffle">Shuffle</button>
-            <button id="exit-fullscreen" class="exit-fullscreen">Exit Full Screen</button>
-            <button id="fullscreen-next">Next</button>
+            <button id="close-fullscreen" class="close-fullscreen">×</button>
         </div>
     </div>
 
@@ -281,11 +290,7 @@ CSS,Styling language</pre>
         const fullscreenContainer = document.getElementById('fullscreen-container');
         const fullscreenFlashcard = document.getElementById('fullscreen-flashcard');
         const fullscreenContent = document.getElementById('fullscreen-content');
-        const fullscreenPrev = document.getElementById('fullscreen-prev');
-        const fullscreenNext = document.getElementById('fullscreen-next');
-        const fullscreenFlip = document.getElementById('fullscreen-flip');
-        const fullscreenShuffle = document.getElementById('fullscreen-shuffle');
-        const exitFullscreen = document.getElementById('exit-fullscreen');
+        const closeFullscreen = document.getElementById('close-fullscreen');
         const fullscreenLeftZone = document.getElementById('fullscreen-left-zone');
         const fullscreenMiddleZone = document.getElementById('fullscreen-middle-zone');
         const fullscreenRightZone = document.getElementById('fullscreen-right-zone');
@@ -362,12 +367,8 @@ CSS,Styling language</pre>
         shuffleButton.addEventListener('click', toggleShuffle);
         fullscreenButton.addEventListener('click', enterFullscreen);
         
-        // Full screen button event listeners
-        fullscreenFlip.addEventListener('click', () => flipCard(true));
-        fullscreenPrev.addEventListener('click', () => showPreviousCard(true));
-        fullscreenNext.addEventListener('click', () => showNextCard(true));
-        fullscreenShuffle.addEventListener('click', toggleShuffle);
-        exitFullscreen.addEventListener('click', exitFullscreenMode);
+        // Close full screen button
+        closeFullscreen.addEventListener('click', exitFullscreenMode);
         
         // Keyboard event listener
         document.addEventListener('keydown', (e) => {
@@ -503,10 +504,6 @@ CSS,Styling language</pre>
             
             // Update appearance based on which side is showing
             fullscreenFlashcard.style.background = isShowingFront ? '#f0f8ff' : '#fff8dc';
-            
-            // Update button states
-            fullscreenPrev.disabled = currentCardIndex === 0;
-            fullscreenNext.disabled = currentCardIndex === flashcards.length - 1;
         }
         
         function flipCard(fullscreen) {
