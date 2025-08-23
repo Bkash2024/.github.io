@@ -1,0 +1,244 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Flashcard Program</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .upload-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px dashed #ccc;
+            text-align: center;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .flashcard {
+            height: 200px;
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            background-color: #f0f8ff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .flashcard:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .navigation {
+            margin-top: 10px;
+            text-align: center;
+            color: #666;
+        }
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        #file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CSV Flashcard Program</h1>
+        
+        <div class="upload-section">
+            <p>Upload a CSV file to create flashcards</p>
+            <input type="file" id="file-input" accept=".csv">
+            <button id="upload-button">Choose CSV File</button>
+            <p id="file-name">No file selected</p>
+        </div>
+        
+        <div id="flashcard-container">
+            <div id="flashcard" class="flashcard" style="display: none;">
+                <div id="flashcard-content"></div>
+            </div>
+            
+            <div class="navigation">
+                <span id="card-counter">0 of 0</span>
+            </div>
+            
+            <div class="controls">
+                <button id="prev-button" disabled>Previous</button>
+                <button id="flip-button" disabled>Flip</button>
+                <button id="next-button" disabled>Next</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <p>1. Upload a CSV file with your flashcard data.</p>
+            <p>2. Each row should contain at least two columns (e.g., term and definition).</p>
+            <p>3. Click on the flashcard to flip between the two sides.</p>
+            <p>4. Use the navigation buttons to move between cards.</p>
+            <p><strong>CSV Format Example:</strong></p>
+            <pre>Python,Programming language
+HTML,Markup language
+CSS,Styling language</pre>
+        </div>
+    </div>
+
+    <script>
+        // Variables to store flashcards and current state
+        let flashcards = [];
+        let currentCardIndex = 0;
+        let isShowingFront = true;
+        
+        // DOM elements
+        const fileInput = document.getElementById('file-input');
+        const uploadButton = document.getElementById('upload-button');
+        const fileName = document.getElementById('file-name');
+        const flashcard = document.getElementById('flashcard');
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const flipButton = document.getElementById('flip-button');
+        
+        // Event listeners
+        uploadButton.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            fileName.textContent = file.name;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csvData = e.target.result;
+                parseCSV(csvData);
+            };
+            reader.readAsText(file);
+        });
+        
+        flashcard.addEventListener('click', flipCard);
+        flipButton.addEventListener('click', flipCard);
+        prevButton.addEventListener('click', showPreviousCard);
+        nextButton.addEventListener('click', showNextCard);
+        
+        // Functions
+        function parseCSV(csvData) {
+            // Split by newlines
+            const rows = csvData.split(/\r\n|\n/);
+            flashcards = [];
+            
+            // Process each row
+            for (let row of rows) {
+                if (row.trim() === '') continue;
+                
+                // Simple CSV parsing (doesn't handle quoted fields with commas)
+                const columns = row.split(',');
+                if (columns.length >= 2) {
+                    flashcards.push({
+                        front: columns[0].trim(),
+                        back: columns[1].trim()
+                    });
+                }
+            }
+            
+            // Initialize the flashcard display
+            if (flashcards.length > 0) {
+                currentCardIndex = 0;
+                isShowingFront = true;
+                updateFlashcardDisplay();
+                flashcard.style.display = 'flex';
+                prevButton.disabled = false;
+                nextButton.disabled = flashcards.length <= 1;
+                flipButton.disabled = false;
+            }
+        }
+        
+        function updateFlashcardDisplay() {
+            if (flashcards.length === 0) return;
+            
+            const card = flashcards[currentCardIndex];
+            flashcardContent.textContent = isShowingFront ? card.front : card.back;
+            cardCounter.textContent = `${currentCardIndex + 1} of ${flashcards.length}`;
+            
+            // Update appearance based on which side is showing
+            flashcard.style.background = isShowingFront ? '#f0f8ff' : '#fff8dc';
+        }
+        
+        function flipCard() {
+            if (flashcards.length === 0) return;
+            
+            isShowingFront = !isShowingFront;
+            updateFlashcardDisplay();
+        }
+        
+        function showNextCard() {
+            if (currentCardIndex < flashcards.length - 1) {
+                currentCardIndex++;
+                isShowingFront = true;
+                updateFlashcardDisplay();
+            }
+            
+            prevButton.disabled = false;
+            nextButton.disabled = currentCardIndex === flashcards.length - 1;
+        }
+        
+        function showPreviousCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                isShowingFront = true;
+                updateFlashcardDisplay();
+            }
+            
+            nextButton.disabled = false;
+            prevButton.disabled = currentCardIndex === 0;
+        }
+    </script>
+</body>
+</html>
+```
