@@ -1,0 +1,754 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Flashcard Program</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            user-select: none;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .upload-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px dashed #ccc;
+            text-align: center;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .flashcard {
+            height: 200px;
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            background-color: #f0f8ff;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .flashcard:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .zone-overlay {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .zone-overlay:hover {
+            opacity: 0.1;
+        }
+        .left-zone {
+            left: 0;
+            width: 33.33%;
+            background-color: #ff0000;
+        }
+        .middle-zone {
+            left: 33.33%;
+            width: 33.33%;
+            background-color: #00ff00;
+        }
+        .right-zone {
+            right: 0;
+            width: 33.33%;
+            background-color: #0000ff;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .navigation {
+            margin-top: 10px;
+            text-align: center;
+            color: #666;
+        }
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        #file-input {
+            display: none;
+        }
+        .keyboard-help {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .mode-indicator {
+            font-size: 14px;
+            color: #4CAF50;
+            text-align: center;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        
+        /* Full screen mode styles */
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .fullscreen .flashcard {
+            height: 80vh;
+            font-size: 36px;
+            background-color: #f0f8ff;
+            width: 90%;
+            max-width: 800px;
+            border: 2px solid #fff;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+        .fullscreen-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+        .close-fullscreen {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 24px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .close-fullscreen:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .slideshow-controls {
+            margin-top: 10px;
+            text-align: center;
+        }
+        .slideshow-button {
+            background-color: #2196F3;
+            margin: 0 5px;
+        }
+        .slideshow-button:hover {
+            background-color: #0b7dda;
+        }
+        .pause-button {
+            background-color: #ff9800;
+        }
+        .pause-button:hover {
+            background-color: #e68a00;
+        }
+        .autoplay-indicator {
+            font-weight: bold;
+            color: #2196F3;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CSV Flashcard Program</h1>
+        
+        <div class="upload-section">
+            <p>Upload a CSV file to create flashcards</p>
+            <input type="file" id="file-input" accept=".csv">
+            <button id="upload-button">Choose CSV File</button>
+            <p id="file-name">No file selected</p>
+        </div>
+        
+        <div id="flashcard-container">
+            <div id="flashcard" class="flashcard" style="display: none;">
+                <div class="zone-overlay left-zone" id="left-zone"></div>
+                <div class="zone-overlay middle-zone" id="middle-zone"></div>
+                <div class="zone-overlay right-zone" id="right-zone"></div>
+                <div id="flashcard-content"></div>
+            </div>
+            
+            <div class="navigation">
+                <span id="card-counter">0 of 0</span>
+                <div class="mode-indicator" id="mode-indicator"></div>
+                <div class="autoplay-indicator" id="autoplay-indicator" style="display: none;">Autoplay Mode: On</div>
+                <div class="keyboard-help">
+                    Keyboard: ← Previous | ↑↓ Flip | → Next | S: Shuffle | F: Full Screen | A: Autoplay
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="prev-button" disabled>Previous</button>
+                <button id="flip-button" disabled>Flip</button>
+                <button id="shuffle-button">Shuffle</button>
+                <button id="autoplay-button" class="slideshow-button">Autoplay</button>
+                <button id="pause-button" class="slideshow-button pause-button" style="display: none;">Pause</button>
+                <button id="fullscreen-button">Full Screen</button>
+                <button id="next-button" disabled>Next</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <p>1. Upload a CSV file with your flashcard data.</p>
+            <p>2. Each row should contain at least two columns (e.g., term and definition).</p>
+            <p>3. <strong>Interact with flashcards:</strong></p>
+            <ul>
+                <li><strong>Click anywhere</strong> on the card to flip it</li>
+                <li><strong>Left third</strong> of card or <strong>Left Arrow</strong> → Previous card</li>
+                <li><strong>Middle third</strong> of card or <strong>Up/Down Arrows</strong> → Flip card</li>
+                <li><strong>Right third</strong> of card or <strong>Right Arrow</strong> → Next card</li>
+                <li><strong>S key</strong> or <strong>Shuffle button</strong> → Randomize card order</li>
+                <li><strong>A key</strong> or <strong>Autoplay button</strong> → Start automatic slideshow</li>
+                <li><strong>F key</strong> or <strong>Full Screen button</strong> → View in full screen mode</li>
+            </ul>
+            <p><strong>Autoplay Mode:</strong> Front (4 sec) → Flip → Back (5 sec) → Next card</p>
+            <p><strong>CSV Format Example:</strong></p>
+            <pre>Python,Programming language
+HTML,Markup language
+CSS,Styling language</pre>
+        </div>
+    </div>
+
+    <!-- Full screen container -->
+    <div id="fullscreen-container" class="fullscreen" style="display: none;">
+        <div id="fullscreen-flashcard" class="flashcard">
+            <div class="zone-overlay left-zone" id="fullscreen-left-zone"></div>
+            <div class="zone-overlay middle-zone" id="fullscreen-middle-zone"></div>
+            <div class="zone-overlay right-zone" id="fullscreen-right-zone"></div>
+            <div id="fullscreen-content"></div>
+        </div>
+        <div class="fullscreen-indicator">
+            Use keyboard: ← → to navigate | ↑ ↓ to flip | A: Autoplay | ESC to exit
+        </div>
+        <div class="fullscreen-controls">
+            <button id="close-fullscreen" class="close-fullscreen">×</button>
+        </div>
+    </div>
+
+    <script>
+        // Variables to store flashcards and current state
+        let flashcards = [];
+        let originalFlashcards = []; // To store the original order
+        let currentCardIndex = 0;
+        let isShowingFront = true;
+        let isShuffled = false;
+        let isFullscreen = false;
+        let isAutoplay = false;
+        let autoplayTimer = null;
+        
+        // Autoplay timing (in milliseconds)
+        const FRONT_DISPLAY_TIME = 4000; // 4 seconds for front
+        const BACK_DISPLAY_TIME = 5000;  // 5 seconds for back
+        
+        // DOM elements
+        const fileInput = document.getElementById('file-input');
+        const uploadButton = document.getElementById('upload-button');
+        const fileName = document.getElementById('file-name');
+        const flashcard = document.getElementById('flashcard');
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const modeIndicator = document.getElementById('mode-indicator');
+        const autoplayIndicator = document.getElementById('autoplay-indicator');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const flipButton = document.getElementById('flip-button');
+        const shuffleButton = document.getElementById('shuffle-button');
+        const autoplayButton = document.getElementById('autoplay-button');
+        const pauseButton = document.getElementById('pause-button');
+        const fullscreenButton = document.getElementById('fullscreen-button');
+        const leftZone = document.getElementById('left-zone');
+        const middleZone = document.getElementById('middle-zone');
+        const rightZone = document.getElementById('right-zone');
+        
+        // Full screen elements
+        const fullscreenContainer = document.getElementById('fullscreen-container');
+        const fullscreenFlashcard = document.getElementById('fullscreen-flashcard');
+        const fullscreenContent = document.getElementById('fullscreen-content');
+        const closeFullscreen = document.getElementById('close-fullscreen');
+        const fullscreenLeftZone = document.getElementById('fullscreen-left-zone');
+        const fullscreenMiddleZone = document.getElementById('fullscreen-middle-zone');
+        const fullscreenRightZone = document.getElementById('fullscreen-right-zone');
+        
+        // Event listeners
+        uploadButton.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            fileName.textContent = file.name;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csvData = e.target.result;
+                parseCSV(csvData);
+            };
+            reader.readAsText(file);
+        });
+        
+        // Click zone handlers for normal mode
+        leftZone.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isAutoplay) {
+                stopAutoplay();
+            }
+            showPreviousCard();
+        });
+        
+        middleZone.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isAutoplay) {
+                stopAutoplay();
+            }
+            flipCard();
+        });
+        
+        rightZone.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isAutoplay) {
+                stopAutoplay();
+            }
+            showNextCard();
+        });
+        
+        // Regular flashcard click for flipping (normal mode)
+        flashcard.addEventListener('click', function(e) {
+            // Only flip if the click was on the main card area, not on the zone overlays
+            if (e.target === flashcard || e.target === flashcardContent) {
+                if (isAutoplay) {
+                    stopAutoplay();
+                }
+                flipCard();
+            }
+        });
+        
+        // Click zone handlers for full screen mode
+        fullscreenLeftZone.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isAutoplay) {
+                stopAutoplay();
+            }
+            showPreviousCard(true);
+        });
+        
+        fullscreenMiddleZone.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isAutoplay) {
+                stopAutoplay();
+            }
+            flipCard(true);
+        });
+        
+        fullscreenRightZone.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isAutoplay) {
+                stopAutoplay();
+            }
+            showNextCard(true);
+        });
+        
+        // Regular flashcard click for flipping (full screen mode)
+        fullscreenFlashcard.addEventListener('click', function(e) {
+            // Only flip if the click was on the main card area, not on the zone overlays
+            if (e.target === fullscreenFlashcard || e.target === fullscreenContent) {
+                if (isAutoplay) {
+                    stopAutoplay();
+                }
+                flipCard(true);
+            }
+        });
+        
+        // Button event listeners
+        flipButton.addEventListener('click', () => {
+            if (isAutoplay) {
+                stopAutoplay();
+            }
+            flipCard(false);
+        });
+        
+        prevButton.addEventListener('click', () => {
+            if (isAutoplay) {
+                stopAutoplay();
+            }
+            showPreviousCard(false);
+        });
+        
+        nextButton.addEventListener('click', () => {
+            if (isAutoplay) {
+                stopAutoplay();
+            }
+            showNextCard(false);
+        });
+        
+        shuffleButton.addEventListener('click', () => {
+            if (isAutoplay) {
+                stopAutoplay();
+            }
+            toggleShuffle();
+        });
+        
+        autoplayButton.addEventListener('click', startAutoplay);
+        pauseButton.addEventListener('click', stopAutoplay);
+        fullscreenButton.addEventListener('click', enterFullscreen);
+        
+        // Close full screen button
+        closeFullscreen.addEventListener('click', exitFullscreenMode);
+        
+        // Keyboard event listener
+        document.addEventListener('keydown', (e) => {
+            // Only respond to keyboard events if flashcards are loaded
+            if (flashcards.length === 0) return;
+            
+            switch(e.key) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    if (isAutoplay) {
+                        stopAutoplay();
+                    }
+                    showPreviousCard(isFullscreen);
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    if (isAutoplay) {
+                        stopAutoplay();
+                    }
+                    showNextCard(isFullscreen);
+                    break;
+                case 'ArrowUp':
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (isAutoplay) {
+                        stopAutoplay();
+                    }
+                    flipCard(isFullscreen);
+                    break;
+                case 's':
+                case 'S':
+                    e.preventDefault();
+                    if (isAutoplay) {
+                        stopAutoplay();
+                    }
+                    toggleShuffle();
+                    break;
+                case 'a':
+                case 'A':
+                    e.preventDefault();
+                    if (isAutoplay) {
+                        stopAutoplay();
+                    } else {
+                        startAutoplay();
+                    }
+                    break;
+                case 'f':
+                case 'F':
+                    e.preventDefault();
+                    if (isFullscreen) {
+                        exitFullscreenMode();
+                    } else {
+                        enterFullscreen();
+                    }
+                    break;
+                case 'Escape':
+                    if (isFullscreen) {
+                        e.preventDefault();
+                        exitFullscreenMode();
+                    }
+                    break;
+            }
+        });
+        
+        // Functions
+        function parseCSV(csvData) {
+            // Split by newlines
+            const rows = csvData.split(/\r\n|\n/);
+            flashcards = [];
+            originalFlashcards = [];
+            
+            // Process each row
+            for (let row of rows) {
+                if (row.trim() === '') continue;
+                
+                // Simple CSV parsing (doesn't handle quoted fields with commas)
+                const columns = row.split(',');
+                if (columns.length >= 2) {
+                    const card = {
+                        front: columns[0].trim(),
+                        back: columns[1].trim()
+                    };
+                    flashcards.push(card);
+                    originalFlashcards.push({...card});
+                }
+            }
+            
+            // Initialize the flashcard display
+            if (flashcards.length > 0) {
+                currentCardIndex = 0;
+                isShowingFront = true;
+                isShuffled = false;
+                isAutoplay = false;
+                updateFlashcardDisplay();
+                updateFullscreenDisplay();
+                flashcard.style.display = 'flex';
+                prevButton.disabled = false;
+                nextButton.disabled = flashcards.length <= 1;
+                flipButton.disabled = false;
+                modeIndicator.textContent = '';
+                autoplayIndicator.style.display = 'none';
+                pauseButton.style.display = 'none';
+                autoplayButton.style.display = 'inline-block';
+            }
+        }
+        
+        function shuffleArray(array) {
+            // Fisher-Yates shuffle algorithm
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        function toggleShuffle() {
+            if (flashcards.length <= 1) return;
+            
+            if (isShuffled) {
+                // Return to original order
+                flashcards = originalFlashcards.map(card => ({...card}));
+                isShuffled = false;
+                modeIndicator.textContent = '';
+            } else {
+                // Create a shuffled copy, preserving the original
+                flashcards = shuffleArray(originalFlashcards.map(card => ({...card})));
+                isShuffled = true;
+                modeIndicator.textContent = 'SHUFFLED MODE';
+            }
+            
+            // Reset to first card in the new order
+            currentCardIndex = 0;
+            isShowingFront = true;
+            updateFlashcardDisplay();
+            updateFullscreenDisplay();
+        }
+        
+        function updateFlashcardDisplay() {
+            if (flashcards.length === 0) return;
+            
+            const card = flashcards[currentCardIndex];
+            flashcardContent.textContent = isShowingFront ? card.front : card.back;
+            cardCounter.textContent = `${currentCardIndex + 1} of ${flashcards.length}`;
+            
+            // Update appearance based on which side is showing
+            flashcard.style.background = isShowingFront ? '#f0f8ff' : '#fff8dc';
+            
+            // Update button states
+            prevButton.disabled = currentCardIndex === 0;
+            nextButton.disabled = currentCardIndex === flashcards.length - 1;
+        }
+        
+        function updateFullscreenDisplay() {
+            if (flashcards.length === 0) return;
+            
+            const card = flashcards[currentCardIndex];
+            fullscreenContent.textContent = isShowingFront ? card.front : card.back;
+            
+            // Update appearance based on which side is showing
+            fullscreenFlashcard.style.background = isShowingFront ? '#f0f8ff' : '#fff8dc';
+        }
+        
+        function flipCard(fullscreen = false) {
+            if (flashcards.length === 0) return;
+            
+            isShowingFront = !isShowingFront;
+            updateFlashcardDisplay();
+            
+            if (fullscreen) {
+                updateFullscreenDisplay();
+            }
+            
+            // If in autoplay mode, reset the timer with appropriate delay
+            if (isAutoplay) {
+                clearTimeout(autoplayTimer);
+                const displayTime = isShowingFront ? FRONT_DISPLAY_TIME : BACK_DISPLAY_TIME;
+                autoplayTimer = setTimeout(() => {
+                    if (isShowingFront) {
+                        // After front display time, flip to back
+                        flipCard(fullscreen);
+                    } else {
+                        // After back display time, go to next card
+                        showNextCard(fullscreen);
+                        
+                        // If we're at the end, restart from beginning
+                        if (currentCardIndex === 0 && !isShowingFront) {
+                            // We just tried to go past the end, so we're back at 0
+                            // Start the cycle again
+                            if (isAutoplay) {
+                                autoplayTimer = setTimeout(() => {
+                                    flipCard(fullscreen);
+                                }, FRONT_DISPLAY_TIME);
+                            }
+                        } else if (isAutoplay) {
+                            // Continue autoplay with front display
+                            autoplayTimer = setTimeout(() => {
+                                flipCard(fullscreen);
+                            }, FRONT_DISPLAY_TIME);
+                        }
+                    }
+                }, displayTime);
+            }
+        }
+        
+        function showNextCard(fullscreen = false) {
+            if (currentCardIndex < flashcards.length - 1) {
+                currentCardIndex++;
+                isShowingFront = true;
+                updateFlashcardDisplay();
+                
+                if (fullscreen) {
+                    updateFullscreenDisplay();
+                }
+                
+                // If autoplay is on, start the timer for this card
+                if (isAutoplay) {
+                    clearTimeout(autoplayTimer);
+                    autoplayTimer = setTimeout(() => {
+                        flipCard(fullscreen);
+                    }, FRONT_DISPLAY_TIME);
+                }
+            }
+        }
+        
+        function showPreviousCard(fullscreen = false) {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                isShowingFront = true;
+                updateFlashcardDisplay();
+                
+                if (fullscreen) {
+                    updateFullscreenDisplay();
+                }
+                
+                // If autoplay is on, start the timer for this card
+                if (isAutoplay) {
+                    clearTimeout(autoplayTimer);
+                    autoplayTimer = setTimeout(() => {
+                        flipCard(fullscreen);
+                    }, FRONT_DISPLAY_TIME);
+                }
+            }
+        }
+        
+        function startAutoplay() {
+            if (flashcards.length === 0) return;
+            
+            isAutoplay = true;
+            autoplayIndicator.style.display = 'block';
+            autoplayButton.style.display = 'none';
+            pauseButton.style.display = 'inline-block';
+            
+            // Make sure we're showing the front of the current card
+            isShowingFront = true;
+            updateFlashcardDisplay();
+            updateFullscreenDisplay();
+            
+            // Start the autoplay sequence
+            autoplayTimer = setTimeout(() => {
+                flipCard(isFullscreen);
+            }, FRONT_DISPLAY_TIME);
+        }
+        
+        function stopAutoplay() {
+            if (!isAutoplay) return;
+            
+            isAutoplay = false;
+            clearTimeout(autoplayTimer);
+            autoplayIndicator.style.display = 'none';
+            pauseButton.style.display = 'none';
+            autoplayButton.style.display = 'inline-block';
+        }
+        
+        function enterFullscreen() {
+            if (flashcards.length === 0) return;
+            
+            isFullscreen = true;
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            fullscreenContainer.style.display = 'flex';
+            updateFullscreenDisplay();
+            
+            // If autoplay is on, restart it in fullscreen mode
+            if (isAutoplay) {
+                clearTimeout(autoplayTimer);
+                autoplayTimer = setTimeout(() => {
+                    flipCard(true);
+                }, FRONT_DISPLAY_TIME);
+            }
+        }
+        
+        function exitFullscreenMode() {
+            isFullscreen = false;
+            document.body.style.overflow = ''; // Restore scrolling
+            fullscreenContainer.style.display = 'none';
+            
+            // If autoplay is on, restart it in normal mode
+            if (isAutoplay) {
+                clearTimeout(autoplayTimer);
+                autoplayTimer = setTimeout(() => {
+                    flipCard(false);
+                }, FRONT_DISPLAY_TIME);
+            }
+        }
+    </script>
+</body>
+</html>
+```
