@@ -1163,6 +1163,10 @@
         document.getElementById('close-modal').addEventListener('click', closeModal);
         document.getElementById('save-task').addEventListener('click', saveEditedTask);
         document.getElementById('delete-task').addEventListener('click', deleteTask);
+        
+        // --- NEW EVENT LISTENER ---
+        document.getElementById('complete-task').addEventListener('click', markTaskComplete); 
+        // --------------------------
 
         document.getElementById('edit-modal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeModal();
@@ -1526,7 +1530,6 @@
 
         tasks.push(newTask);
         saveTasks();
-        document.getElementById('task-form').reset();
         document.getElementById('task-title').value = '';
         document.getElementById('task-desc').value = '';
         renderCurrentView();
@@ -1568,6 +1571,20 @@
         closeModal();
     }
     
+    // --- NEW FUNCTION for the "Done" button ---
+    function markTaskComplete() {
+        if (currentEditTaskId === null) return;
+        
+        const task = tasks.find(t => t.id == currentEditTaskId);
+        if (task) {
+            task.completed = true;
+            saveTasks();
+            renderCurrentView(); // This will refresh both the schedule and the list
+            closeModal();
+        }
+    }
+    // ----------------------------------------
+
     function deleteTaskFromList(taskId) {
         if (!confirm('Are you sure you want to delete this task?')) return;
         tasks = tasks.filter(t => t.id != taskId);
@@ -1576,6 +1593,7 @@
     }
     
     function deleteTask() {
+        // This function is for the modal's delete button
         deleteTaskFromList(currentEditTaskId);
         closeModal();
     }
