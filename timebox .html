@@ -1,4 +1,1077 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeBlock Planner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border: #dee2e6;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            z-index: 10;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo i {
+            font-size: 24px;
+            color: var(--primary);
+            margin-right: 12px;
+        }
+        
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .date-selector {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .date-selector h2 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: var(--gray);
+        }
+        
+        .date-display {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+        
+        .date-nav {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .btn-nav {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--light-gray);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+        
+        .btn-nav:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* View Toggle Buttons */
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .view-btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .view-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .view-btn:hover:not(.active) {
+            background: var(--light-gray);
+        }
+        
+        .task-form {
+            background: var(--light);
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        /* Hamburger menu in task form for mobile */
+        .form-menu-toggle {
+            display: none;
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+        
+        .task-form h3 {
+            margin-bottom: 12px;
+            color: var(--dark);
+            font-size: 17px;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--gray);
+            font-size: 13px;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        /* Day color selector */
+        .day-selector {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .day-btn {
+            padding: 8px 0;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            background: var(--light-gray);
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            transition: var(--transition);
+        }
+        
+        .day-btn.active {
+            border-color: var(--dark);
+            transform: scale(1.05);
+        }
+        
+        .day-btn:nth-child(1) { background: #ff6b6b; color: white; }
+        .day-btn:nth-child(2) { background: #4ecdc4; color: white; }
+        .day-btn:nth-child(3) { background: #45b7d1; color: white; }
+        .day-btn:nth-child(4) { background: #96ceb4; color: white; }
+        .day-btn:nth-child(5) { background: #feca57; color: var(--dark); }
+        .day-btn:nth-child(6) { background: #ff9ff3; color: white; }
+        .day-btn:nth-child(7) { background: #54a0ff; color: white; }
+        
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark);
+            width: 100%;
+            margin-top: 8px;
+        }
+        
+        .btn-secondary:hover {
+            background: #d8d8d8;
+        }
+        
+        .btn-export {
+            background: var(--success);
+            color: white;
+            width: 100%;
+            margin-top: 12px;
+        }
+        
+        .btn-export:hover {
+            opacity: 0.9;
+        }
+        
+        .task-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .task-list h3 {
+            margin-bottom: 12px;
+            color: var(--dark);
+            font-size: 17px;
+        }
+        
+        .task-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .task-item.completed {
+            opacity: 0.7;
+            background: #f8f9fa;
+        }
+        
+        .task-item.completed h4,
+        .task-item.completed p,
+        .task-item.completed .task-time {
+            text-decoration: line-through;
+            color: var(--gray);
+        }
+        
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .task-item h4 {
+            font-size: 15px;
+            margin-bottom: 5px;
+            color: var(--dark);
+            word-break: break-word;
+        }
+        
+        .task-item p {
+            font-size: 13px;
+            color: var(--gray);
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+        
+        .task-time {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .task-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 6px;
+        }
+        
+        .task-action-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            background: var(--light-gray);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .task-item:hover .task-action-btn {
+            opacity: 1;
+        }
+        
+        /* Task completion checkbox */
+        .task-checkbox {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .task-item:hover .task-checkbox {
+            opacity: 1;
+        }
+        
+        .task-checkbox:checked + .task-content {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header h2 {
+            font-size: 24px;
+            color: var(--dark);
+        }
+        
+        .mobile-controls {
+            display: none;
+            gap: 10px;
+        }
+        
+        /* Daily View */
+        .time-grid {
+            display: grid;
+            grid-template-columns: 70px 1fr;
+            gap: 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .time-labels {
+            background: white;
+            border-right: 1px solid var(--border);
+            padding: 0 8px;
+        }
+        
+        .time-slot {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            font-size: 13px;
+            color: var(--gray);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .schedule-grid {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .hour-slot {
+            height: 60px;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        
+        .hour-slot:last-child {
+            border-bottom: none;
+        }
+        
+        /* Dynamic task blocks with proper height */
+        .task-block {
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            background: var(--primary);
+            color: white;
+            border-radius: 6px;
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .task-block.completed {
+            opacity: 0.6;
+            background: #6c757d;
+        }
+        
+        .task-block.completed h4,
+        .task-block.completed p {
+            text-decoration: line-through;
+        }
+        
+        .task-block:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .task-block h4 {
+            font-size: 13px;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .task-block p {
+            font-size: 11px;
+            opacity: 0.9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .empty-slot {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--gray);
+            font-style: italic;
+            font-size: 13px;
+        }
+        
+        /* Weekly View */
+        .weekly-view {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .weekly-view.active {
+            display: block;
+        }
+        
+        .week-header {
+            display: grid;
+            grid-template-columns: 80px repeat(7, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+        
+        .week-day-header {
+            background: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .week-time-label {
+            background: white;
+            padding: 12px 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .week-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(7, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+        }
+        
+        .week-time-slot {
+            background: white;
+            padding: 8px 4px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .week-day-slot {
+            background: white;
+            min-height: 60px;
+            position: relative;
+        }
+        
+        .week-task-block {
+            position: absolute;
+            left: 4px;
+            right: 4px;
+            background: var(--primary);
+            color: white;
+            border-radius: 4px;
+            padding: 6px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .week-task-block.completed {
+            opacity: 0.6;
+            background: #6c757d;
+            text-decoration: line-through;
+        }
+        
+        /* Monthly View */
+        .monthly-view {
+            display: none;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .monthly-view.active {
+            display: block;
+        }
+        
+        .month-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+        
+        .calendar-header {
+            background: var(--primary);
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            font-weight: 600;
+            border-radius: 6px;
+        }
+        
+        .calendar-day {
+            background: white;
+            min-height: 100px;
+            padding: 8px;
+            border-radius: 6px;
+            position: relative;
+        }
+        
+        .calendar-day-number {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        
+        .calendar-day.other-month {
+            background: #f8f9fa;
+            color: var(--gray);
+        }
+        
+        .calendar-day.today {
+            background: #e3f2fd;
+            border: 2px solid var(--primary);
+        }
+        
+        .month-task {
+            display: block;
+            background: var(--primary);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .month-task.completed {
+            opacity: 0.6;
+            background: #6c757d;
+            text-decoration: line-through;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-header h3 {
+            font-size: 20px;
+            color: var(--dark);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-modal:hover {
+            background: var(--light-gray);
+        }
+        
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-footer .btn {
+            flex: 1;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 15px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                overflow-y: auto;
+            }
+            
+            .sidebar.hidden {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                padding: 15px;
+                margin-top: 60px;
+            }
+            
+            .time-grid {
+                grid-template-columns: 60px 1fr;
+            }
+            
+            .time-slot {
+                font-size: 12px;
+                padding-right: 6px;
+            }
+            
+            .mobile-controls {
+                display: flex;
+            }
+            
+            .menu-toggle {
+                background: var(--primary);
+                color: white;
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                border: none;
+                font-size: 18px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* Show hamburger in task form on mobile */
+            .form-menu-toggle {
+                display: flex;
+            }
+            
+            .week-header, .week-grid {
+                grid-template-columns: 60px repeat(7, 1fr);
+            }
+            
+            .calendar-day {
+                min-height: 80px;
+                padding: 6px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .sidebar {
+                padding: 12px;
+            }
+            
+            .logo h1 {
+                font-size: 18px;
+            }
+            
+            .date-display {
+                font-size: 18px;
+            }
+            
+            .main-content {
+                padding: 12px;
+            }
+            
+            .header h2 {
+                font-size: 20px;
+            }
+            
+            .time-grid {
+                grid-template-columns: 50px 1fr;
+            }
+            
+            .time-slot {
+                font-size: 11px;
+                padding-right: 4px;
+            }
+            
+            .task-block {
+                padding: 6px 8px;
+            }
+            
+            .task-block h4 {
+                font-size: 12px;
+            }
+            
+            .task-block p {
+                font-size: 10px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .form-menu-toggle {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
+            
+            .week-header, .week-grid {
+                grid-template-columns: 50px repeat(7, 1fr);
+            }
+            
+            .week-time-slot, .week-day-header {
+                font-size: 11px;
+                padding: 6px 2px;
+            }
+            
+            .calendar-grid {
+                gap: 1px;
+            }
+            
+            .calendar-day {
+                min-height: 60px;
+                padding: 4px;
+            }
+            
+            .calendar-day-number {
+                font-size: 12px;
+            }
+        }
+        
+        /* Animation for new tasks */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-controls">
+        <button class="menu-toggle" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+    
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="logo">
+                <i class="fas fa-calendar-alt"></i>
+                <h1>TimeBlock Planner</h1>
+            </div>
+            
+            <div class="date-selector">
+                <h2>Today</h2>
+                <div class="date-display" id="current-date">October 24, 2025</div>
+                <div class="date-nav">
+                    <button class="btn-nav" id="prev-day"><i class="fas fa-chevron-left"></i></button>
+                    <button class="btn-nav" id="today-btn"><i class="fas fa-calendar-day"></i></button>
+                    <button class="btn-nav" id="next-day"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="daily">Daily</button>
+                <button class="view-btn" data-view="weekly">Weekly</button>
+                <button class="view-btn" data-view="monthly">Monthly</button>
+            </div>
+            
+            <div class="task-form">
+                <!-- Hamburger menu inside task form for mobile -->
+                <button class="form-menu-toggle" id="form-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h3>Add New Task</h3>
+                <div class="form-group">
+                    <label for="task-title">Task Title</label>
+                    <input type="text" id="task-title" placeholder="Enter task title">
+                </div>
+                <div class="form-group">
+                    <label for="task-desc">Description</label>
+                    <input type="text" id="task-desc" placeholder="Optional description">
+                </div>
+                <div class="form-group">
+                    <label>Select Day (Color Coded)</label>
+                    <div class="day-selector">
+                        <button class="day-btn active" data-day="0">Sun</button>
+                        <button class="day-btn" data-day="1">Mon</button>
+                        <button class="day-btn" data-day="2">Tue</button>
+                        <button class="day-btn" data-day="3">Wed</button>
+                        <button class="day-btn" data-day="4">Thu</button>
+                        <button class="day-btn" data-day="5">Fri</button>
+                        <button class="day-btn" data-day="6">Sat</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="start-time">Start Time</label>
+                    <input type="time" id="start-time" value="09:00">
+                </div>
+                <div class="form-group">
+                    <label for="end-time">End Time</label>
+                    <input type="time" id="end-time" value="10:00">
+                </div>
+                <button class="btn btn-primary" id="add-task">
+                    <i class="fas fa-plus"></i> Add Task
+                </button>
+                <button class="btn btn-export" id="export-calendar">
+                    <i class="fas fa-calendar-plus"></i> Export to Calendar
+                </button>
+            </div>
+            
+            <div class="task-list">
+                <h3>Task List</h3>
+                <div id="task-items">
+                    <!-- Tasks will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h2>Daily Schedule</h2>
+                <div class="mobile-controls">
+                    <button class="menu-toggle" id="menu-toggle-header">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Daily View -->
+            <div class="daily-view active">
+                <div class="time-grid">
+                    <div class="time-labels" id="time-labels">
+                        <!-- Time labels will be generated here -->
+                    </div>
+                    <div class="schedule-grid" id="schedule-grid">
+                        <!-- Schedule blocks will be generated here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Weekly View -->
+            <div class="weekly-view" id="weekly-view">
+                <div class="week-header" id="week-header">
+                    <!-- Week headers will be generated here -->
+                </div>
+                <div class="week-grid" id="week-grid">
+                    <!-- Week grid will be generated here -->
+                </div>
+            </div>
+            
+            <!-- Monthly View -->
+            <div class="monthly-view" id="monthly-view">
+                <div class="month-header">
+                    <h3 id="month-title">October 2025</h3>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Calendar will be generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Task Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Task</h3>
+                <button class="close-modal" id="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="edit-task-title">Task Title</label>
+                <input type="text" id="edit-task-title" placeholder="Enter task title">
+            </div>
+            <div class="form-group">
+                <label for="edit-task-desc">Description</label>
+                <input type="text" id="edit-task-desc" placeholder="Optional description">
+            </div>
+            <div class="form-group">
+                <label for="edit-start-time">Start Time</label>
+                <input type="time" id="edit-start-time">
+            </div>
+            <div class="form-group">
+                <label for="edit-end-time">End Time</label>
+                <input type="time" id="edit-end-time">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="delete-task">Delete</button>
+                <button class="btn btn-primary" id="save-task">Save Changes</button>
+            </div>
+        </div>
+    </div>
+<script>
     // ---------- Configuration ----------
     const LABEL_START_HOUR = 6;
     const LABEL_END_HOUR = 22;
@@ -615,5 +1688,8 @@
         saveTasks();
         renderCurrentView();
     }
+</script>
+    
+</body>
 </html>
 
