@@ -1,9 +1,8 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>TimeBlock Planner</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -312,6 +311,9 @@
             transition: var(--transition);
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             position: relative;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
         }
         
         .task-item.completed {
@@ -354,51 +356,35 @@
         }
         
         .task-actions {
-            position: absolute;
-            top: 8px;
-            right: 8px;
+            margin-left: auto;
             display: flex;
             gap: 6px;
         }
         
         .task-action-btn {
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
+            width: 34px;
+            height: 34px;
+            border-radius: 6px;
             background: var(--light-gray);
             border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        
-        .task-item:hover .task-action-btn {
-            opacity: 1;
+            font-size: 14px;
         }
         
         /* Task completion checkbox */
         .task-checkbox {
-            position: absolute;
-            top: 8px;
-            left: 8px;
             width: 20px;
             height: 20px;
             cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.2s;
+            margin-top: 2px;
+            flex-shrink: 0;
         }
         
-        .task-item:hover .task-checkbox {
-            opacity: 1;
-        }
-        
-        .task-checkbox:checked + .task-content {
-            text-decoration: line-through;
-            opacity: 0.7;
+        .task-content {
+            flex: 1;
         }
         
         /* Main Content Styles */
@@ -458,6 +444,8 @@
             border-radius: 10px;
             overflow: hidden;
             box-shadow: var(--shadow);
+            position: relative;
+            min-height: calc(16 * 60px); /* ensure scroll height if many hours */
         }
         
         .hour-slot {
@@ -486,6 +474,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            z-index: 2;
         }
         
         .task-block.completed {
@@ -918,7 +907,7 @@
 <body>
     <!-- Mobile Menu Toggle -->
     <div class="mobile-controls">
-        <button class="menu-toggle" id="menu-toggle">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
             <i class="fas fa-bars"></i>
         </button>
     </div>
@@ -933,39 +922,39 @@
             
             <div class="date-selector">
                 <h2>Today</h2>
-                <div class="date-display" id="current-date">October 24, 2025</div>
+                <div class="date-display" id="current-date">--</div>
                 <div class="date-nav">
-                    <button class="btn-nav" id="prev-day"><i class="fas fa-chevron-left"></i></button>
-                    <button class="btn-nav" id="today-btn"><i class="fas fa-calendar-day"></i></button>
-                    <button class="btn-nav" id="next-day"><i class="fas fa-chevron-right"></i></button>
+                    <button class="btn-nav" id="prev-day" aria-label="Previous day"><i class="fas fa-chevron-left"></i></button>
+                    <button class="btn-nav" id="today-btn" aria-label="Today"><i class="fas fa-calendar-day"></i></button>
+                    <button class="btn-nav" id="next-day" aria-label="Next day"><i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
             
             <!-- View Toggle -->
-            <div class="view-toggle">
-                <button class="view-btn active" data-view="daily">Daily</button>
-                <button class="view-btn" data-view="weekly">Weekly</button>
-                <button class="view-btn" data-view="monthly">Monthly</button>
+            <div class="view-toggle" role="tablist" aria-label="View toggle">
+                <button class="view-btn active" data-view="daily" role="tab" aria-selected="true">Daily</button>
+                <button class="view-btn" data-view="weekly" role="tab" aria-selected="false">Weekly</button>
+                <button class="view-btn" data-view="monthly" role="tab" aria-selected="false">Monthly</button>
             </div>
             
             <div class="task-form">
                 <!-- Hamburger menu inside task form for mobile -->
-                <button class="form-menu-toggle" id="form-menu-toggle">
+                <button class="form-menu-toggle" id="form-menu-toggle" aria-label="Toggle menu (mobile)">
                     <i class="fas fa-bars"></i>
                 </button>
                 <h3>Add New Task</h3>
                 <div class="form-group">
                     <label for="task-title">Task Title</label>
-                    <input type="text" id="task-title" placeholder="Enter task title">
+                    <input type="text" id="task-title" placeholder="Enter task title" />
                 </div>
                 <div class="form-group">
                     <label for="task-desc">Description</label>
-                    <input type="text" id="task-desc" placeholder="Optional description">
+                    <input type="text" id="task-desc" placeholder="Optional description" />
                 </div>
                 <div class="form-group">
                     <label>Select Day (Color Coded)</label>
-                    <div class="day-selector">
-                        <button class="day-btn active" data-day="0">Sun</button>
+                    <div class="day-selector" id="day-selector">
+                        <button class="day-btn" data-day="0">Sun</button>
                         <button class="day-btn" data-day="1">Mon</button>
                         <button class="day-btn" data-day="2">Tue</button>
                         <button class="day-btn" data-day="3">Wed</button>
@@ -982,10 +971,10 @@
                     <label for="end-time">End Time</label>
                     <input type="time" id="end-time" value="10:00">
                 </div>
-                <button class="btn btn-primary" id="add-task">
+                <button class="btn btn-primary" id="add-task" aria-label="Add task">
                     <i class="fas fa-plus"></i> Add Task
                 </button>
-                <button class="btn btn-export" id="export-calendar">
+                <button class="btn btn-export" id="export-calendar" aria-label="Export calendar">
                     <i class="fas fa-calendar-plus"></i> Export to Calendar
                 </button>
             </div>
@@ -1003,9 +992,7 @@
             <div class="header">
                 <h2>Daily Schedule</h2>
                 <div class="mobile-controls">
-                    <button class="menu-toggle" id="menu-toggle-header">
-                        <i class="fas fa-bars"></i>
-                    </button>
+                    <button class="menu-toggle" id="menu-toggle-header" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
                 </div>
             </div>
             
@@ -1015,7 +1002,7 @@
                     <div class="time-labels" id="time-labels">
                         <!-- Time labels will be generated here -->
                     </div>
-                    <div class="schedule-grid" id="schedule-grid">
+                    <div class="schedule-grid" id="schedule-grid" aria-label="Daily schedule">
                         <!-- Schedule blocks will be generated here -->
                     </div>
                 </div>
@@ -1034,7 +1021,7 @@
             <!-- Monthly View -->
             <div class="monthly-view" id="monthly-view">
                 <div class="month-header">
-                    <h3 id="month-title">October 2025</h3>
+                    <h3 id="month-title">Month</h3>
                 </div>
                 <div class="calendar-grid" id="calendar-grid">
                     <!-- Calendar will be generated here -->
@@ -1044,11 +1031,11 @@
     </div>
     
     <!-- Edit Task Modal -->
-    <div class="modal" id="edit-modal">
+    <div class="modal" id="edit-modal" role="dialog" aria-modal="true" aria-hidden="true">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Edit Task</h3>
-                <button class="close-modal" id="close-modal">&times;</button>
+                <button class="close-modal" id="close-modal" aria-label="Close modal">&times;</button>
             </div>
             <div class="form-group">
                 <label for="edit-task-title">Task Title</label>
@@ -1067,93 +1054,156 @@
                 <input type="time" id="edit-end-time">
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" id="delete-task">Delete</button>
-                <button class="btn btn-primary" id="save-task">Save Changes</button>
+                <button class="btn btn-secondary" id="delete-task" aria-label="Delete task">Delete</button>
+                <button class="btn btn-primary" id="save-task" aria-label="Save changes">Save Changes</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Current date management
-        let currentDate = new Date(2025, 9, 24); // October 24, 2025
-        let currentView = 'daily';
-        
-        // Load tasks from localStorage or use sample data
-        let tasks = JSON.parse(localStorage.getItem('timeblock_tasks')) || [
-            {
-                id: 1,
-                title: "Morning Meeting",
-                description: "Team sync-up",
-                start: "09:00",
-                end: "10:00",
-                date: new Date(2025, 9, 24).toISOString(), // Friday
-                color: "#feca57", // Friday color
-                completed: false
-            },
-            {
-                id: 2,
-                title: "Project Work",
-                description: "Frontend development",
-                start: "10:30",
-                end: "12:00",
-                date: new Date(2025, 9, 24).toISOString(), // Friday
-                color: "#feca57",
-                completed: false
-            },
-            {
-                id: 3,
-                title: "Lunch Break",
-                description: "",
-                start: "12:00",
-                end: "13:00",
-                date: new Date(2025, 9, 24).toISOString(), // Friday
-                color: "#feca57",
-                completed: true
-            },
-            {
-                id: 4,
-                title: "Client Call",
-                description: "Discuss project requirements",
-                start: "14:00",
-                end: "15:00",
-                date: new Date(2025, 9, 25).toISOString(), // Saturday
-                color: "#ff9ff3", // Saturday color
-                completed: false
-            }
-        ];
-        
-        // Save tasks to localStorage
-        function saveTasks() {
-            localStorage.setItem('timeblock_tasks', JSON.stringify(tasks));
-        }
-        
-        // Day colors mapping (0=Sunday, 1=Monday, etc.)
+        // ---------- Configuration ----------
+        // Hours displayed: labels from 6..22 inclusive, slots for hours 6..21 (representing 6-7 ... 21-22)
+        const LABEL_START_HOUR = 6;
+        const LABEL_END_HOUR = 22; // inclusive label (6..22)
+        const SLOT_START_HOUR = 6;
+        const SLOT_END_HOUR = 21; // inclusive slot starts (6..21) representing through 22
+
+        // Day colors mapping (0=Sunday, 1=Monday, etc.) -> matches CSS day-btn nth-child backgrounds
         const dayColors = [
             '#ff6b6b', // Sunday
-            '#4ecdc4', // Monday  
+            '#4ecdc4', // Monday
             '#45b7d1', // Tuesday
             '#96ceb4', // Wednesday
             '#feca57', // Thursday
             '#ff9ff3', // Friday
             '#54a0ff'  // Saturday
         ];
-        
-        // Day names
+
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const shortDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        
-        // Current task being edited
+
+        // ---------- State ----------
+        let currentDate = new Date(); // use system date
+        let currentView = 'daily';
+        let selectedDayIndex = currentDate.getDay(); // default selection based on today's day
         let currentEditTaskId = null;
-        let selectedDayIndex = 5; // Default to Friday (Oct 24, 2025)
-        
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
+
+        // Load tasks from localStorage or sample data (ensure colors are consistent with dayColors)
+        let tasks = (function loadInitialTasks() {
+            const stored = localStorage.getItem('timeblock_tasks');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    // Backfill colors if missing or inconsistent
+                    parsed.forEach(t => {
+                        if (!t.color) {
+                            const d = new Date(t.date);
+                            t.color = dayColors[d.getDay()];
+                        }
+                    });
+                    return parsed;
+                } catch (e) {
+                    console.error('Failed to parse stored tasks', e);
+                }
+            }
+            // Sample tasks (dates relative to today for demo; keep sample days consistent)
+            const sampleBase = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+            const sample = [
+                {
+                    id: 1,
+                    title: "Morning Meeting",
+                    description: "Team sync-up",
+                    start: "09:00",
+                    end: "10:00",
+                    date: new Date(sampleBase).toISOString(),
+                    color: dayColors[sampleBase.getDay()],
+                    completed: false
+                },
+                {
+                    id: 2,
+                    title: "Project Work",
+                    description: "Frontend development",
+                    start: "10:30",
+                    end: "12:00",
+                    date: new Date(sampleBase).toISOString(),
+                    color: dayColors[sampleBase.getDay()],
+                    completed: false
+                },
+                {
+                    id: 3,
+                    title: "Lunch Break",
+                    description: "",
+                    start: "12:00",
+                    end: "13:00",
+                    date: new Date(sampleBase).toISOString(),
+                    color: dayColors[sampleBase.getDay()],
+                    completed: true
+                },
+                {
+                    id: 4,
+                    title: "Client Call",
+                    description: "Discuss project requirements",
+                    start: "14:00",
+                    end: "15:00",
+                    date: new Date(sampleBase.getTime() + 24*60*60*1000).toISOString(), // tomorrow
+                    color: dayColors[(sampleBase.getDay() + 1) % 7],
+                    completed: false
+                }
+            ];
+            return sample;
+        })();
+
+        function saveTasks() {
+            localStorage.setItem('timeblock_tasks', JSON.stringify(tasks));
+        }
+
+        // ---------- Utilities ----------
+        function formatHour(hour) {
+            if (hour === 0) return '12 AM';
+            if (hour < 12) return `${hour} AM`;
+            if (hour === 12) return '12 PM';
+            return `${hour - 12} PM`;
+        }
+
+        function timeToMinutes(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+
+        function minutesToTime(minutes) {
+            // Clamp to 0..(24*60 - 1)
+            const clamped = Math.max(0, Math.min(minutes, 24*60 - 1));
+            const hours = Math.floor(clamped / 60);
+            const mins = clamped % 60;
+            return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+        }
+
+        function toDateOnlyISO(date) {
+            return new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString();
+        }
+
+        // ---------- Rendering ----------
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize day buttons active state
+            const dayButtons = document.querySelectorAll('.day-btn');
+            dayButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.day) === selectedDayIndex) {
+                    btn.classList.add('active');
+                }
+                btn.addEventListener('click', function() {
+                    dayButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedDayIndex = parseInt(this.dataset.day);
+                });
+            });
+
             updateDateDisplay();
             generateTimeLabels();
             setupViewToggle();
             renderCurrentView();
             renderTaskList();
-            
+
             // Event listeners
             document.getElementById('add-task').addEventListener('click', addTask);
             document.getElementById('export-calendar').addEventListener('click', exportToCalendar);
@@ -1166,42 +1216,73 @@
             document.getElementById('close-modal').addEventListener('click', closeModal);
             document.getElementById('save-task').addEventListener('click', saveEditedTask);
             document.getElementById('delete-task').addEventListener('click', deleteTask);
-            
-            // Day selector buttons
-            document.querySelectorAll('.day-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    selectedDayIndex = parseInt(this.dataset.day);
-                });
-            });
-            
+
             // Close modal when clicking outside
             document.getElementById('edit-modal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeModal();
                 }
             });
-            
-            // Make task blocks draggable (for daily view)
-            setupDragAndDrop();
+
+            // Ensure sidebar visible on larger screens
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 900) {
+                    document.getElementById('sidebar').classList.remove('hidden');
+                }
+            });
         });
-        
-        // Setup view toggle
+
+        function updateDateDisplay() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = currentDate.toLocaleDateString('en-US', options);
+        }
+
+        function changeDate(days) {
+            currentDate.setDate(currentDate.getDate() + days);
+            updateDateDisplay();
+            renderCurrentView();
+            renderTaskList();
+        }
+
+        function resetToToday() {
+            currentDate = new Date();
+            updateDateDisplay();
+            renderCurrentView();
+            renderTaskList();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+        }
+
+        function generateTimeLabels() {
+            const timeLabels = document.getElementById('time-labels');
+            timeLabels.innerHTML = '';
+            for (let hour = LABEL_START_HOUR; hour <= LABEL_END_HOUR; hour++) {
+                const timeSlot = document.createElement('div');
+                timeSlot.className = 'time-slot';
+                timeSlot.textContent = formatHour(hour);
+                timeLabels.appendChild(timeSlot);
+            }
+        }
+
         function setupViewToggle() {
             document.querySelectorAll('.view-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.view-btn').forEach(b => {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-selected', 'false');
+                    });
                     this.classList.add('active');
+                    this.setAttribute('aria-selected', 'true');
                     currentView = this.dataset.view;
                     renderCurrentView();
                 });
             });
         }
-        
-        // Render current view based on selection
+
         function renderCurrentView() {
-            // Update header title
             const headerTitle = document.querySelector('.header h2');
             if (currentView === 'daily') {
                 headerTitle.textContent = 'Daily Schedule';
@@ -1223,321 +1304,260 @@
                 renderMonthlyView();
             }
         }
-        
-        // Update date display
-        function updateDateDisplay() {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('current-date').textContent = currentDate.toLocaleDateString('en-US', options);
-        }
-        
-        // Change date
-        function changeDate(days) {
-            currentDate.setDate(currentDate.getDate() + days);
-            updateDateDisplay();
-            renderCurrentView();
-            renderTaskList();
-        }
-        
-        // Reset to today
-        function resetToToday() {
-            currentDate = new Date(2025, 9, 24); // October 24, 2025
-            updateDateDisplay();
-            renderCurrentView();
-            renderTaskList();
-        }
-        
-        // Toggle sidebar on mobile
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('hidden');
-        }
-        
-        // Generate time labels (6AM to 10PM)
-        function generateTimeLabels() {
-            const timeLabels = document.getElementById('time-labels');
-            timeLabels.innerHTML = '';
-            
-            for (let hour = 6; hour <= 22; hour++) {
-                const timeSlot = document.createElement('div');
-                timeSlot.className = 'time-slot';
-                timeSlot.textContent = formatHour(hour);
-                timeLabels.appendChild(timeSlot);
-            }
-        }
-        
-        // Format hour for display
-        function formatHour(hour) {
-            if (hour === 0) return '12 AM';
-            if (hour < 12) return `${hour} AM`;
-            if (hour === 12) return '12 PM';
-            return `${hour - 12} PM`;
-        }
-        
-        // Convert time string to minutes
-        function timeToMinutes(timeStr) {
-            const [hours, minutes] = timeStr.split(':').map(Number);
-            return hours * 60 + minutes;
-        }
-        
-        // Convert minutes to time string
-        function minutesToTime(minutes) {
-            const hours = Math.floor(minutes / 60);
-            const mins = minutes % 60;
-            return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-        }
-        
-        // Render the daily schedule grid with dynamic heights
+
+        // Render daily schedule
         function renderSchedule() {
             const scheduleGrid = document.getElementById('schedule-grid');
             scheduleGrid.innerHTML = '';
-            
-            // Create hour slots from 6AM to 10PM
-            for (let hour = 6; hour <= 21; hour++) {
+
+            // Build an index of tasks for the current date to improve performance
+            const tasksForDate = tasks.filter(task => {
+                const td = new Date(task.date);
+                return td.toDateString() === currentDate.toDateString();
+            });
+
+            for (let hour = SLOT_START_HOUR; hour <= SLOT_END_HOUR; hour++) {
                 const hourSlot = document.createElement('div');
                 hourSlot.className = 'hour-slot';
                 hourSlot.dataset.hour = hour;
-                
-                // Find tasks for this hour on current date
-                const currentTasks = tasks.filter(task => {
-                    const taskDate = new Date(task.date);
-                    return taskDate.toDateString() === currentDate.toDateString();
-                });
-                
-                const hourTasks = currentTasks.filter(task => {
+                hourSlot.setAttribute('data-hour', hour);
+                hourSlot.setAttribute('aria-label', `Hour slot ${hour}`);
+                // Add tasks that overlap this hour
+                const hourStart = hour * 60;
+                const hourEnd = (hour + 1) * 60;
+                const hourTasks = tasksForDate.filter(task => {
                     const startMinutes = timeToMinutes(task.start);
                     const endMinutes = timeToMinutes(task.end);
-                    const hourStart = hour * 60;
-                    const hourEnd = (hour + 1) * 60;
-                    
-                    // Check if task overlaps with this hour
                     return !(endMinutes <= hourStart || startMinutes >= hourEnd);
                 });
-                
+
                 if (hourTasks.length > 0) {
-                    hourTasks.forEach(task => {
+                    // For now we stack tasks vertically within the hour (avoid overlap)
+                    let stackOffset = 4; // pixel offset to stack vertically
+                    hourTasks.forEach((task, idx) => {
                         const taskBlock = document.createElement('div');
                         taskBlock.className = 'task-block fade-in';
-                        if (task.completed) {
-                            taskBlock.classList.add('completed');
-                        }
+                        if (task.completed) taskBlock.classList.add('completed');
                         taskBlock.style.backgroundColor = task.color;
                         taskBlock.dataset.taskId = task.id;
-                        
-                        // Add click event to edit task
-                        taskBlock.addEventListener('click', () => openEditModal(task.id));
-                        
-                        // Calculate position and height based on actual duration
+                        taskBlock.setAttribute('draggable', 'true');
+                        taskBlock.setAttribute('role', 'button');
+                        taskBlock.setAttribute('aria-label', `Task ${task.title} ${task.start} to ${task.end}`);
+                        // Position and height within the hour
                         const startMinutes = timeToMinutes(task.start);
                         const endMinutes = timeToMinutes(task.end);
-                        const hourStart = hour * 60;
-                        
-                        // Calculate top position within the hour
-                        let top = 0;
+
+                        let topPercent;
                         if (startMinutes < hourStart) {
-                            top = 0;
+                            topPercent = 0;
                         } else {
-                            top = ((startMinutes - hourStart) / 60) * 100;
+                            topPercent = ((startMinutes - hourStart) / 60) * 100;
                         }
-                        
-                        // Calculate height based on actual duration in this hour
-                        let height = 100;
-                        if (endMinutes > (hour + 1) * 60) {
-                            height = 100 - top;
+
+                        let heightPercent;
+                        if (endMinutes > hourEnd) {
+                            heightPercent = 100 - topPercent;
                         } else {
-                            height = ((endMinutes - Math.max(startMinutes, hourStart)) / 60) * 100;
+                            heightPercent = ((endMinutes - Math.max(startMinutes, hourStart)) / 60) * 100;
                         }
-                        
-                        taskBlock.style.top = `${top}%`;
-                        taskBlock.style.height = `${height}%`;
-                        
-                        taskBlock.innerHTML = `
-                            <h4>${task.title}</h4>
-                            <p>${task.start} - ${task.end}</p>
-                        `;
-                        
+
+                        // Use stacking to avoid identical absolute positions overlapping exactly
+                        // Add a small top pixel offset per task to visually separate stacked tasks
+                        taskBlock.style.top = `${topPercent}%`;
+                        taskBlock.style.height = `${heightPercent}%`;
+                        taskBlock.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
+                        // Slight vertical offset inside hour to avoid exact overlap if multiple tasks share same top/height
+                        // keep left/right same to preserve width
+                        taskBlock.style.transform = `translateY(${idx * stackOffset}px)`;
+
+                        // Build content safely
+                        const h = document.createElement('h4');
+                        h.textContent = task.title;
+                        const p = document.createElement('p');
+                        p.textContent = `${task.start} - ${task.end}`;
+                        taskBlock.appendChild(h);
+                        taskBlock.appendChild(p);
+
+                        // click to edit
+                        taskBlock.addEventListener('click', (e) => {
+                            // prevent from triggering when dragging
+                            if (e.detail === 0) return;
+                            openEditModal(task.id);
+                        });
+
+                        // dragstart
+                        taskBlock.addEventListener('dragstart', dragStart);
+
                         hourSlot.appendChild(taskBlock);
                     });
                 } else {
                     const emptySlot = document.createElement('div');
                     emptySlot.className = 'empty-slot';
-                    emptySlot.textContent = 'Drag tasks here';
+                    emptySlot.textContent = 'Drop tasks here';
                     hourSlot.appendChild(emptySlot);
                 }
-                
+
+                // Add drop behavior to hourSlot
+                hourSlot.addEventListener('dragover', dragOver);
+                hourSlot.addEventListener('drop', drop);
+
                 scheduleGrid.appendChild(hourSlot);
             }
+            // Re-attach drag handlers for newly generated blocks
+            renderTaskList(); // re-render list so drag sources are present and listeners attached
         }
-        
+
         // Render weekly view
         function renderWeeklyView() {
             const weekHeader = document.getElementById('week-header');
             const weekGrid = document.getElementById('week-grid');
-            
-            // Clear existing content
             weekHeader.innerHTML = '';
             weekGrid.innerHTML = '';
-            
-            // Get the start of the week (Sunday)
+
             const startOfWeek = new Date(currentDate);
             startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-            
-            // Create header
+
+            // Time header
             const timeHeader = document.createElement('div');
             timeHeader.className = 'week-time-label';
             timeHeader.textContent = 'Time';
             weekHeader.appendChild(timeHeader);
-            
-            // Add day headers
+
+            // Day headers
             for (let i = 0; i < 7; i++) {
                 const day = new Date(startOfWeek);
                 day.setDate(startOfWeek.getDate() + i);
-                
                 const dayHeader = document.createElement('div');
                 dayHeader.className = 'week-day-header';
                 dayHeader.textContent = `${shortDayNames[i]} ${day.getDate()}`;
-                if (day.toDateString() === new Date(2025, 9, 24).toDateString()) {
+                // highlight today's date
+                const today = new Date();
+                if (day.toDateString() === today.toDateString()) {
                     dayHeader.style.backgroundColor = '#e3f2fd';
                     dayHeader.style.border = '2px solid var(--primary)';
                 }
                 weekHeader.appendChild(dayHeader);
             }
-            
-            // Create time slots (6AM to 10PM)
-            for (let hour = 6; hour <= 21; hour++) {
+
+            // Create rows by hour
+            for (let hour = SLOT_START_HOUR; hour <= SLOT_END_HOUR; hour++) {
                 const timeSlot = document.createElement('div');
                 timeSlot.className = 'week-time-slot';
                 timeSlot.textContent = formatHour(hour);
                 weekGrid.appendChild(timeSlot);
-                
-                // Create day slots for each day
+
                 for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
                     const daySlot = document.createElement('div');
                     daySlot.className = 'week-day-slot';
                     daySlot.dataset.day = dayIndex;
                     daySlot.dataset.hour = hour;
-                    
+
                     const dayDate = new Date(startOfWeek);
                     dayDate.setDate(startOfWeek.getDate() + dayIndex);
-                    
-                    // Find tasks for this day and hour
+
                     const dayTasks = tasks.filter(task => {
-                        const taskDate = new Date(task.date);
-                        return taskDate.toDateString() === dayDate.toDateString();
+                        const td = new Date(task.date);
+                        return td.toDateString() === dayDate.toDateString();
                     });
-                    
+
+                    const hourStart = hour * 60;
+                    const hourEnd = (hour + 1) * 60;
                     const hourTasks = dayTasks.filter(task => {
                         const startMinutes = timeToMinutes(task.start);
                         const endMinutes = timeToMinutes(task.end);
-                        const hourStart = hour * 60;
-                        const hourEnd = (hour + 1) * 60;
                         return !(endMinutes <= hourStart || startMinutes >= hourEnd);
                     });
-                    
+
                     if (hourTasks.length > 0) {
-                        hourTasks.forEach(task => {
+                        hourTasks.forEach((task, idx) => {
                             const taskBlock = document.createElement('div');
                             taskBlock.className = 'week-task-block';
-                            if (task.completed) {
-                                taskBlock.classList.add('completed');
-                            }
+                            if (task.completed) taskBlock.classList.add('completed');
                             taskBlock.style.backgroundColor = task.color;
                             taskBlock.dataset.taskId = task.id;
-                            taskBlock.addEventListener('click', () => openEditModal(task.id));
-                            
-                            // Calculate position and height
+                            // position inside daySlot similarly to daily view
                             const startMinutes = timeToMinutes(task.start);
                             const endMinutes = timeToMinutes(task.end);
-                            const hourStart = hour * 60;
-                            
-                            let top = 0;
-                            if (startMinutes < hourStart) {
-                                top = 0;
-                            } else {
-                                top = ((startMinutes - hourStart) / 60) * 100;
-                            }
-                            
-                            let height = 100;
-                            if (endMinutes > (hour + 1) * 60) {
-                                height = 100 - top;
-                            } else {
-                                height = ((endMinutes - Math.max(startMinutes, hourStart)) / 60) * 100;
-                            }
-                            
-                            taskBlock.style.top = `${top}%`;
-                            taskBlock.style.height = `${height}%`;
+                            let topPercent = startMinutes < hourStart ? 0 : ((startMinutes - hourStart) / 60) * 100;
+                            let heightPercent = endMinutes > hourEnd ? 100 - topPercent : ((endMinutes - Math.max(startMinutes, hourStart)) / 60) * 100;
+                            taskBlock.style.top = `${topPercent}%`;
+                            taskBlock.style.height = `${heightPercent}%`;
                             taskBlock.textContent = task.title;
-                            
+                            taskBlock.setAttribute('draggable', 'true');
+                            taskBlock.addEventListener('dragstart', dragStart);
+                            taskBlock.addEventListener('click', (e) => {
+                                if (e.detail === 0) return;
+                                openEditModal(task.id);
+                            });
                             daySlot.appendChild(taskBlock);
                         });
                     }
-                    
+
                     weekGrid.appendChild(daySlot);
                 }
             }
         }
-        
+
         // Render monthly view
         function renderMonthlyView() {
             const monthTitle = document.getElementById('month-title');
             const calendarGrid = document.getElementById('calendar-grid');
-            
-            // Set month title
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                              'July', 'August', 'September', 'October', 'November', 'December'];
+
+            const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
             monthTitle.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
-            
-            // Clear existing content
+
             calendarGrid.innerHTML = '';
-            
-            // Add day headers
+
+            // Day headers
             shortDayNames.forEach(day => {
                 const header = document.createElement('div');
                 header.className = 'calendar-header';
                 header.textContent = day;
                 calendarGrid.appendChild(header);
             });
-            
-            // Get first day of month and number of days
+
             const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
             const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
             const daysInMonth = lastDay.getDate();
-            const startingDayOfWeek = firstDay.getDay(); // 0 = Sunday
-            
-            // Add empty cells for days before the first day of the month
+            const startingDayOfWeek = firstDay.getDay();
+
+            // Empty cells for previous month
+            const prevMonthLastDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate();
             for (let i = 0; i < startingDayOfWeek; i++) {
                 const emptyDay = document.createElement('div');
                 emptyDay.className = 'calendar-day other-month';
-                const prevMonthLastDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate() - startingDayOfWeek + 1 + i;
-                emptyDay.innerHTML = `<div class="calendar-day-number">${prevMonthLastDay}</div>`;
+                const prevDayNumber = prevMonthLastDay - startingDayOfWeek + 1 + i;
+                const num = document.createElement('div');
+                num.className = 'calendar-day-number';
+                num.textContent = prevDayNumber;
+                emptyDay.appendChild(num);
                 calendarGrid.appendChild(emptyDay);
             }
-            
-            // Add days of the current month
-            const today = new Date(2025, 9, 24);
+
+            // Days of current month
+            const today = new Date();
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
-                if (day === today.getDate() && 
-                    currentDate.getMonth() === today.getMonth() && 
-                    currentDate.getFullYear() === today.getFullYear()) {
+                if (day === today.getDate() && currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear()) {
                     dayElement.classList.add('today');
                 }
-                dayElement.innerHTML = `<div class="calendar-day-number">${day}</div>`;
-                
-                // Find tasks for this day
+
+                const num = document.createElement('div');
+                num.className = 'calendar-day-number';
+                num.textContent = day;
+                dayElement.appendChild(num);
+
                 const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
                 const dayTasks = tasks.filter(task => {
-                    const taskDate = new Date(task.date);
-                    return taskDate.toDateString() === dayDate.toDateString();
+                    const td = new Date(task.date);
+                    return td.toDateString() === dayDate.toDateString();
                 });
-                
-                // Add task indicators
+
                 dayTasks.forEach(task => {
                     const taskElement = document.createElement('span');
                     taskElement.className = 'month-task';
-                    if (task.completed) {
-                        taskElement.classList.add('completed');
-                    }
+                    if (task.completed) taskElement.classList.add('completed');
                     taskElement.style.backgroundColor = task.color;
                     taskElement.textContent = task.title;
                     taskElement.addEventListener('click', (e) => {
@@ -1546,110 +1566,163 @@
                     });
                     dayElement.appendChild(taskElement);
                 });
-                
+
                 calendarGrid.appendChild(dayElement);
             }
-            
-            // Add empty cells for remaining days to complete the grid
-            const totalCells = 42; // 6 weeks * 7 days
-            const remainingCells = totalCells - (startingDayOfWeek + daysInMonth);
-            for (let i = 1; i <= remainingCells; i++) {
+
+            // Fill remaining cells to reach 6 weeks (42 cells)
+            const totalCells = 42;
+            const filled = startingDayOfWeek + daysInMonth;
+            const remaining = totalCells - filled;
+            for (let i = 1; i <= remaining; i++) {
                 const emptyDay = document.createElement('div');
                 emptyDay.className = 'calendar-day other-month';
-                emptyDay.innerHTML = `<div class="calendar-day-number">${i}</div>`;
+                const num = document.createElement('div');
+                num.className = 'calendar-day-number';
+                num.textContent = i;
+                emptyDay.appendChild(num);
                 calendarGrid.appendChild(emptyDay);
             }
         }
-        
+
         // Render task list in sidebar
         function renderTaskList() {
             const taskItems = document.getElementById('task-items');
             taskItems.innerHTML = '';
-            
-            tasks.forEach(task => {
+
+            // Sort tasks by date then start time
+            const sorted = tasks.slice().sort((a, b) => {
+                const ad = new Date(a.date);
+                const bd = new Date(b.date);
+                if (ad - bd !== 0) return ad - bd;
+                return timeToMinutes(a.start) - timeToMinutes(b.start);
+            });
+
+            sorted.forEach(task => {
                 const taskItem = document.createElement('div');
                 taskItem.className = 'task-item fade-in';
-                if (task.completed) {
-                    taskItem.classList.add('completed');
-                }
+                if (task.completed) taskItem.classList.add('completed');
                 taskItem.dataset.taskId = task.id;
                 taskItem.style.borderLeft = `4px solid ${task.color}`;
-                
-                // Add click event to edit task
-                taskItem.addEventListener('click', () => openEditModal(task.id));
-                
-                const taskDate = new Date(task.date);
-                const dateStr = taskDate.toLocaleDateString('en-US', { 
-                    weekday: 'short', 
-                    month: 'short', 
-                    day: 'numeric' 
-                });
-                
-                taskItem.innerHTML = `
-                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-task-id="${task.id}">
-                    <div class="task-content">
-                        <h4>${task.title}</h4>
-                        <p>${task.description || 'No description'} • ${dateStr}</p>
-                        <div class="task-time">
-                            <span>${task.start}</span>
-                            <span>${task.end}</span>
-                        </div>
-                    </div>
-                    <div class="task-actions">
-                        <button class="task-action-btn" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="task-action-btn" title="Delete" onclick="event.stopPropagation(); deleteTaskFromList(${task.id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                
-                // Add event listener for checkbox
-                const checkbox = taskItem.querySelector('.task-checkbox');
+                taskItem.setAttribute('draggable', 'true');
+
+                // checkbox
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'task-checkbox';
+                checkbox.checked = !!task.completed;
+                checkbox.dataset.taskId = task.id;
                 checkbox.addEventListener('change', function(e) {
                     e.stopPropagation();
                     toggleTaskCompletion(task.id, this.checked);
                 });
-                
+
+                const content = document.createElement('div');
+                content.className = 'task-content';
+
+                const h4 = document.createElement('h4');
+                h4.textContent = task.title;
+                const p = document.createElement('p');
+                const taskDate = new Date(task.date);
+                const dateStr = taskDate.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                p.textContent = `${task.description ? task.description : 'No description'} • ${dateStr}`;
+
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'task-time';
+                const sp1 = document.createElement('span');
+                sp1.textContent = task.start;
+                const sp2 = document.createElement('span');
+                sp2.textContent = task.end;
+                timeDiv.appendChild(sp1);
+                timeDiv.appendChild(sp2);
+
+                content.appendChild(h4);
+                content.appendChild(p);
+                content.appendChild(timeDiv);
+
+                const actions = document.createElement('div');
+                actions.className = 'task-actions';
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'task-action-btn';
+                editBtn.title = 'Edit';
+                editBtn.setAttribute('aria-label', 'Edit task');
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEditModal(task.id);
+                });
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'task-action-btn';
+                deleteBtn.title = 'Delete';
+                deleteBtn.setAttribute('aria-label', 'Delete task');
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteTaskFromList(task.id);
+                });
+
+                actions.appendChild(editBtn);
+                actions.appendChild(deleteBtn);
+
+                // clicking on item opens edit modal
+                taskItem.addEventListener('click', (e) => {
+                    // ignore clicks originated from inputs/buttons due to stopPropagation above
+                    openEditModal(task.id);
+                });
+
+                // dragstart for sidebar item
+                taskItem.addEventListener('dragstart', dragStart);
+
+                taskItem.appendChild(checkbox);
+                taskItem.appendChild(content);
+                taskItem.appendChild(actions);
+
                 taskItems.appendChild(taskItem);
             });
+
+            // Attach drag/drop handlers for schedule slots (they're created in renderSchedule)
+            // Also ensure existing schedule blocks get dragstart listeners (renderSchedule sets them)
         }
-        
-        // Toggle task completion status
+
+        // Toggle completion
         function toggleTaskCompletion(taskId, completed) {
-            const taskIndex = tasks.findIndex(t => t.id == taskId);
-            if (taskIndex !== -1) {
-                tasks[taskIndex].completed = completed;
+            const idx = tasks.findIndex(t => t.id == taskId);
+            if (idx !== -1) {
+                tasks[idx].completed = completed;
                 saveTasks();
                 renderCurrentView();
                 renderTaskList();
             }
         }
-        
+
         // Add new task
         function addTask() {
             const title = document.getElementById('task-title').value.trim();
             const description = document.getElementById('task-desc').value.trim();
             const start = document.getElementById('start-time').value;
             const end = document.getElementById('end-time').value;
-            
+
             if (!title || !start || !end) {
                 alert('Please fill in all required fields');
                 return;
             }
-            
             if (timeToMinutes(start) >= timeToMinutes(end)) {
                 alert('End time must be after start time');
                 return;
             }
-            
-            // Create task date based on selected day
+
+            // Determine date based on selectedDayIndex relative to currentDate
             const taskDate = new Date(currentDate);
             const currentDay = currentDate.getDay();
-            const daysDifference = selectedDayIndex - currentDay;
-            taskDate.setDate(currentDate.getDate() + daysDifference);
-            
+            const delta = selectedDayIndex - currentDay;
+            taskDate.setDate(currentDate.getDate() + delta);
+
             const newTask = {
                 id: Date.now(),
                 title,
@@ -1660,129 +1733,113 @@
                 color: dayColors[selectedDayIndex],
                 completed: false
             };
-            
+
             tasks.push(newTask);
             saveTasks();
-            
+
             // Reset form
             document.getElementById('task-title').value = '';
             document.getElementById('task-desc').value = '';
             document.getElementById('start-time').value = '09:00';
             document.getElementById('end-time').value = '10:00';
-            
+
             renderCurrentView();
             renderTaskList();
-            
+
             // Close sidebar on mobile after adding
             if (window.innerWidth <= 900) {
                 document.getElementById('sidebar').classList.add('hidden');
             }
         }
-        
-        // Open edit modal
+
+        // ---------- Edit / Delete ----------
         function openEditModal(taskId) {
             const task = tasks.find(t => t.id == taskId);
             if (!task) return;
-            
             currentEditTaskId = taskId;
-            
             document.getElementById('edit-task-title').value = task.title;
             document.getElementById('edit-task-desc').value = task.description || '';
             document.getElementById('edit-start-time').value = task.start;
             document.getElementById('edit-end-time').value = task.end;
-            
-            document.getElementById('edit-modal').classList.add('active');
-            
-            // Close sidebar on mobile
+            const modal = document.getElementById('edit-modal');
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+
             if (window.innerWidth <= 900) {
                 document.getElementById('sidebar').classList.add('hidden');
             }
         }
-        
-        // Close edit modal
+
         function closeModal() {
             document.getElementById('edit-modal').classList.remove('active');
+            document.getElementById('edit-modal').setAttribute('aria-hidden', 'true');
             currentEditTaskId = null;
         }
-        
-        // Save edited task
+
         function saveEditedTask() {
             if (currentEditTaskId === null) return;
-            
             const title = document.getElementById('edit-task-title').value.trim();
             const description = document.getElementById('edit-task-desc').value.trim();
             const start = document.getElementById('edit-start-time').value;
             const end = document.getElementById('edit-end-time').value;
-            
+
             if (!title || !start || !end) {
                 alert('Please fill in all required fields');
                 return;
             }
-            
             if (timeToMinutes(start) >= timeToMinutes(end)) {
                 alert('End time must be after start time');
                 return;
             }
-            
-            const taskIndex = tasks.findIndex(t => t.id == currentEditTaskId);
-            if (taskIndex !== -1) {
-                tasks[taskIndex].title = title;
-                tasks[taskIndex].description = description;
-                tasks[taskIndex].start = start;
-                tasks[taskIndex].end = end;
-            }
-            
-            saveTasks();
-            renderCurrentView();
-            renderTaskList();
-            closeModal();
-        }
-        
-        // Delete task
-        function deleteTask() {
-            if (currentEditTaskId === null) return;
-            
-            if (confirm('Are you sure you want to delete this task?')) {
-                tasks = tasks.filter(t => t.id != currentEditTaskId);
+
+            const idx = tasks.findIndex(t => t.id == currentEditTaskId);
+            if (idx !== -1) {
+                tasks[idx].title = title;
+                tasks[idx].description = description;
+                tasks[idx].start = start;
+                tasks[idx].end = end;
                 saveTasks();
                 renderCurrentView();
                 renderTaskList();
                 closeModal();
             }
         }
-        
-        // Delete task from list (direct delete button)
-        function deleteTaskFromList(taskId) {
-            if (confirm('Are you sure you want to delete this task?')) {
-                tasks = tasks.filter(t => t.id != taskId);
-                saveTasks();
-                renderCurrentView();
-                renderTaskList();
-            }
+
+        function deleteTask() {
+            if (currentEditTaskId === null) return;
+            if (!confirm('Are you sure you want to delete this task?')) return;
+            tasks = tasks.filter(t => t.id != currentEditTaskId);
+            saveTasks();
+            renderCurrentView();
+            renderTaskList();
+            closeModal();
         }
-        
-        // Export to calendar (ICS format) - only active tasks
+
+        function deleteTaskFromList(taskId) {
+            if (!confirm('Are you sure you want to delete this task?')) return;
+            tasks = tasks.filter(t => t.id != taskId);
+            saveTasks();
+            renderCurrentView();
+            renderTaskList();
+        }
+
+        // ---------- Export ICS ----------
         function exportToCalendar() {
-            // Filter out completed tasks for export
             const activeTasks = tasks.filter(task => !task.completed);
-            
             if (activeTasks.length === 0) {
                 alert('No active tasks to export');
                 return;
             }
-            
+
             let icsContent = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//TimeBlock Planner//EN\n';
-            
             activeTasks.forEach(task => {
                 const startDate = new Date(task.date);
-                const [startHours, startMinutes] = task.start.split(':').map(Number);
-                startDate.setHours(startHours, startMinutes, 0, 0);
-                
+                const [sh, sm] = task.start.split(':').map(Number);
+                startDate.setHours(sh, sm, 0, 0);
                 const endDate = new Date(task.date);
-                const [endHours, endMinutes] = task.end.split(':').map(Number);
-                endDate.setHours(endHours, endMinutes, 0, 0);
-                
-                // Format date for ICS (YYYYMMDDTHHMMSS)
+                const [eh, em] = task.end.split(':').map(Number);
+                endDate.setHours(eh, em, 0, 0);
+
                 const formatDate = (date) => {
                     const year = date.getFullYear();
                     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -1792,22 +1849,20 @@
                     const seconds = String(date.getSeconds()).padStart(2, '0');
                     return `${year}${month}${day}T${hours}${minutes}${seconds}`;
                 };
-                
+
                 icsContent += 'BEGIN:VEVENT\n';
                 icsContent += `UID:${task.id}@timeblock\n`;
                 icsContent += `DTSTAMP:${formatDate(new Date())}\n`;
                 icsContent += `DTSTART:${formatDate(startDate)}\n`;
                 icsContent += `DTEND:${formatDate(endDate)}\n`;
-                icsContent += `SUMMARY:${task.title}\n`;
+                icsContent += `SUMMARY:${escapeICSText(task.title)}\n`;
                 if (task.description) {
-                    icsContent += `DESCRIPTION:${task.description}\n`;
+                    icsContent += `DESCRIPTION:${escapeICSText(task.description)}\n`;
                 }
                 icsContent += 'END:VEVENT\n';
             });
-            
             icsContent += 'END:VCALENDAR';
-            
-            // Create download link
+
             const blob = new Blob([icsContent], { type: 'text/calendar' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1817,87 +1872,128 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
+
             alert('Calendar file downloaded! Completed tasks are excluded from export.');
         }
-        
-        // Setup drag and drop functionality (daily view only)
+
+        function escapeICSText(text) {
+            // Basic escaping for ICS: backslash, comma, semicolon, newline
+            return String(text).replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/;/g, '\\;').replace(/\n/g, '\\n');
+        }
+
+        // ---------- Drag & Drop ----------
         function setupDragAndDrop() {
-            if (currentView !== 'daily') return;
-            
-            const taskItems = document.querySelectorAll('.task-item');
-            const hourSlots = document.querySelectorAll('.hour-slot');
-            
-            taskItems.forEach(item => {
+            // Attach dragstart to sidebar items
+            document.querySelectorAll('.task-item').forEach(item => {
+                // ensure draggable attribute is present
+                item.setAttribute('draggable', 'true');
+                // remove duplicate listeners if any by cloning
+                item.removeEventListener('dragstart', dragStart);
                 item.addEventListener('dragstart', dragStart);
             });
-            
-            hourSlots.forEach(slot => {
+
+            // Attach dragstart to schedule task blocks
+            document.querySelectorAll('.task-block, .week-task-block, .month-task').forEach(block => {
+                block.setAttribute('draggable', 'true');
+                block.removeEventListener('dragstart', dragStart);
+                block.addEventListener('dragstart', dragStart);
+            });
+
+            // Attach dragover/drop to hour slots in daily view
+            document.querySelectorAll('.hour-slot').forEach(slot => {
+                slot.removeEventListener('dragover', dragOver);
+                slot.removeEventListener('drop', drop);
                 slot.addEventListener('dragover', dragOver);
                 slot.addEventListener('drop', drop);
             });
+
+            // For weekly/day slots we already add listeners during render
         }
-        
+
         function dragStart(e) {
-            e.dataTransfer.setData('text/plain', e.target.dataset.taskId);
+            // Find nearest ancestor with data-task-id
+            const el = e.target.closest('[data-task-id]');
+            if (!el) return;
+            const taskId = el.dataset.taskId;
+            e.dataTransfer.setData('text/plain', String(taskId));
+            e.dataTransfer.effectAllowed = 'move';
+            // small timeout to hide original if desired
             setTimeout(() => {
-                e.target.style.opacity = '0.5';
+                el.style.opacity = '0.5';
             }, 0);
         }
-        
+
         function dragOver(e) {
             e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
         }
-        
+
         function drop(e) {
             e.preventDefault();
             const taskId = e.dataTransfer.getData('text/plain');
-            const hour = parseInt(e.currentTarget.dataset.hour);
-            
-            // Find the task
-            const task = tasks.find(t => t.id == taskId);
-            if (task) {
-                // Update task date to current date
-                task.date = currentDate.toISOString();
-                
-                // Calculate new start and end times based on drop position
-                const rect = e.currentTarget.getBoundingClientRect();
-                const dropY = e.clientY - rect.top;
-                const percent = (dropY / rect.height) * 100;
-                
-                // Calculate minutes within the hour
-                const minutesInHour = Math.floor((percent / 100) * 60);
-                const newStartMinutes = hour * 60 + minutesInHour;
-                
-                // Keep the same duration
-                const duration = timeToMinutes(task.end) - timeToMinutes(task.start);
-                const newEndMinutes = newStartMinutes + duration;
-                
-                // Update task times
-                task.start = minutesToTime(newStartMinutes);
-                task.end = minutesToTime(newEndMinutes);
-                
-                // Update UI
-                saveTasks();
-                renderSchedule();
-                renderTaskList();
-                setupDragAndDrop();
+            if (!taskId) return;
+            const slot = e.currentTarget;
+            const hour = parseInt(slot.dataset.hour, 10);
+            if (isNaN(hour)) return;
+
+            // Find task
+            const task = tasks.find(t => String(t.id) === String(taskId));
+            if (!task) return;
+
+            // Determine drop position within the hour
+            const rect = slot.getBoundingClientRect();
+            const dropY = e.clientY - rect.top;
+            const percent = Math.max(0, Math.min(1, (dropY / rect.height)));
+            const minutesInHour = Math.floor(percent * 60);
+            const newStartMinutes = hour * 60 + minutesInHour;
+            const duration = timeToMinutes(task.end) - timeToMinutes(task.start);
+            let newEndMinutes = newStartMinutes + duration;
+
+            // Clamp within day bounds (0..24*60)
+            const dayStart = 0;
+            const dayEnd = 24 * 60;
+            if (newStartMinutes < dayStart) newStartMinutes = dayStart;
+            if (newEndMinutes > dayEnd - 1) {
+                newEndMinutes = dayEnd - 1;
             }
-            
-            // Reset opacity
-            const draggedItem = document.querySelector(`[data-task-id="${taskId}"]`);
-            if (draggedItem) {
-                draggedItem.style.opacity = '1';
-            }
+
+            // Optional: clamp visible to LABEL_START_HOUR..LABEL_END_HOUR range to keep inside visible area
+            const visibleStart = LABEL_START_HOUR * 60;
+            const visibleEnd = LABEL_END_HOUR * 60;
+            // If dragging outside visible area, we still allow but clamp so event doesn't exceed dayEnd
+            const clampedStart = Math.max(0, Math.min(newStartMinutes, dayEnd - 1));
+            const clampedEnd = Math.max(clampedStart + 1, Math.min(newEndMinutes, dayEnd));
+
+            // Update task date to currentDate
+            const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+            task.date = newDate.toISOString();
+
+            task.start = minutesToTime(clampedStart);
+            task.end = minutesToTime(clampedEnd);
+
+            // Restore opacity for dragged element
+            const draggedEl = document.querySelector(`[data-task-id="${taskId}"]`);
+            if (draggedEl) draggedEl.style.opacity = '1';
+
+            saveTasks();
+            renderSchedule();
+            renderTaskList();
+            setupDragAndDrop();
         }
-        
-        // Handle window resize for mobile
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 900) {
-                document.getElementById('sidebar').classList.remove('hidden');
-            }
-        });
+
+        // Ensure drag handlers active after each render
+        const originalRenderSchedule = renderSchedule;
+        // (Already call renderTaskList inside renderSchedule, so setupDragAndDrop is invoked)
+        // But for redundancy, call setupDragAndDrop at the end of main rendering functions
+        const oldRenderWeeklyView = renderWeeklyView;
+        const oldRenderMonthlyView = renderMonthlyView;
+
+        // Wrap to attach drag handlers after rendering
+        renderSchedule = function() { originalRenderSchedule(); setupDragAndDrop(); };
+        renderWeeklyView = function() { oldRenderWeeklyView(); setupDragAndDrop(); };
+        renderMonthlyView = function() { oldRenderMonthlyView(); setupDragAndDrop(); };
+
+        // ---------- End of script ----------
     </script>
 </body>
 </html>
-```
