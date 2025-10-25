@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spaced Repetition Planner</title>
+    <title>Spaced Repetition Planner v2</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -38,13 +38,15 @@
             color: #555;
         }
         input[type="text"],
-        input[type="date"] {
+        input[type="date"],
+        select {
             width: 100%;
             padding: 0.75rem;
             font-size: 1rem;
             border: 1px solid #ddd;
             border-radius: 8px;
-            box-sizing: border-box; /* Important for padding to work nicely */
+            box-sizing: border-box; /* Important for padding */
+            background-color: #fff; /* for select on dark mode */
         }
         button {
             width: 100%;
@@ -57,16 +59,10 @@
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.2s ease;
+            margin-top: 1rem;
         }
         button:hover {
             background-color: #0056b3;
-        }
-        .schedule-info {
-            font-size: 0.9rem;
-            color: #777;
-            text-align: center;
-            margin-top: 1.5rem;
-            line-height: 1.4;
         }
     </style>
 </head>
@@ -85,12 +81,18 @@
             <input type="date" id="startDate">
         </div>
 
+        <div class="form-group">
+            <label for="schedule">Repetition Schedule (Intervals in Days)</label>
+            <select id="schedule">
+                <option value="1,3,7,14,30">Aggressive (For Exams: 1, 3, 7, 14, 30)</option>
+                <option value="1,7,30,90">Long-Term (For Concepts: 1, 7, 30, 90)</option>
+                <option value="1,2,4,8,16,32">Rapid Growth (Ebbinghaus: 1, 2, 4, 8, 16)</option>
+                <option value="1,3,7,15" selected>Your Original (1, 3, 7, 15)</option>
+            </select>
+        </div>
+
         <button id="generateBtn">Generate .ics File</button>
 
-        <div class="schedule-info">
-            This will create a calendar file with 4 review sessions:<br>
-            +24 hours, +72 hours, +7 days, and +15 days.
-        </div>
     </div>
 
     <script>
@@ -101,57 +103,75 @@
         document.getElementById('generateBtn').addEventListener('click', generateICS);
 
         /**
+         * Formats a Date object into 'YYYYMMDDTHHMMSSZ' UTC format.
+         * This is required for DTSTAMP.
+         */
+        function formatUTC(date) {
+            return date.toISOString().replace(/[-:.]/g, '').substring(0, 15) + 'Z';
+        }
+
+        /**
+         * Formats a Date object into 'YYYYMMDD' for all-day events.
+         */
+        function formatDateAllDay(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}${month}${day}`;
+        }
+
+        /**
          * Main function to generate the ICS content and trigger download.
          */
         function generateICS() {
             const topic = document.getElementById('topic').value;
             const startDateValue = document.getElementById('startDate').value;
+            const scheduleValue = document.getElementById('schedule').value;
 
-            // Simple validation
+            // Validation
             if (!topic || !startDateValue) {
                 alert('Please fill in both the topic and the start date.');
                 return;
             }
 
-            // Your specified repetition schedule (in days)
-            // 24hr = 1 day, 72hr = 3 days, 7 days, 15 days
-            const intervals = [1, 3, 7, 15];
-
-            // The base date from the user input.
-            // new Date(dateString) creates a date at midnight in the *local* timezone, 
-            // but we add a day to get the correct start date.
+            const intervals = scheduleValue.split(',').map(Number);
             const startDate = new Date(startDateValue + 'T00:00:00');
-
-            // We need a unique ID for the whole series of events
+            
+            // We need one creation timestamp for all events, in UTC.
+            const nowStamp = formatUTC(new Date());
             const uniqueAppID = "spaced-rep-gen-" + Date.now();
-
             let icsEvents = [];
 
             intervals.forEach((days, index) => {
                 let reviewDate = new Date(startDate.getTime());
                 reviewDate.setDate(reviewDate.getDate() + days);
 
-                // For all-day events, DTEND is the day *after* DTSTART
+                // For all-day events, DTEND must be the day *after* DTSTART
                 let nextDay = new Date(reviewDate.getTime());
                 nextDay.setDate(nextDay.getDate() + 1);
 
                 const event = [
                     'BEGIN:VEVENT',
-                    'UID:' + uniqueAppID + '-' + index, // Unique ID for this specific event
-                    'DTSTAMP:' + formatDateICS(new Date()), // When this event was created (now)
-                    'DTSTART;VALUE=DATE:' + formatDateICS(reviewDate),
-                    'DTEND;VALUE=DATE:' + formatDateICS(nextDay),
+                    'UID:' + uniqueAppID + '-' + index + '@spaced-rep-gen.com', // More robust UID
+                    'DTSTAMP:' + nowStamp, // Universal creation time
+                    'DTSTART;VALUE=DATE:' + formatDateAllDay(reviewDate),
+                    'DTEND;VALUE=DATE:' + formatDateAllDay(nextDay),
                     'SUMMARY:Review #' + (index + 1) + ': ' + topic,
-                    'DESCRIPTION:Spaced repetition review for "' + topic + '".\\nThis is review #' + (index + 1) + ' of ' + intervals.length + '.\\nOriginal study date: ' + startDate.toLocaleDateString(),
-                    'TRANSP:TRANSPARENT', // Shows as "Free" not "Busy"
-                    // Add a reminder (alarm) for 9 AM on the day of the event
+                    'DESCRIPTION:Spaced repetition review for "' + topic + '".\\nThis is review #' + (index + 1) + ' of ' + intervals.length + ' (' + days + ' days).\\nOriginal study date: ' + startDate.toLocaleDateString(),
+                    'TRANSP:TRANSPARENT', // Shows as "Free"
+                    
+                    // --- THIS IS THE CRITICAL FIX FOR IPHONE ---
+                    // Alarms for all-day events must be relative to the START
+                    // This creates a reminder at 9:00 AM on the day of the event.
                     'BEGIN:VALARM',
                     'ACTION:DISPLAY',
                     'DESCRIPTION:Time to review ' + topic,
-                    'TRIGGER;VALUE=DATE-TIME:' + formatDateICS(reviewDate) + 'T090000',
+                    'TRIGGER;RELATED=START:PT9H', // 9 hours after 00:00 (i.e., 9:00 AM)
                     'END:VALARM',
+                    // --- END OF FIX ---
+
                     'END:VEVENT'
-                ].join('\r\n'); // \r\n is the required line ending for ICS
+                ].join('\r\n'); // \r\n is the required line ending
 
                 icsEvents.push(event);
             });
@@ -160,7 +180,7 @@
             const icsFileContent = [
                 'BEGIN:VCALENDAR',
                 'VERSION:2.0',
-                'PRODID:-//YourSpacedRepApp//EN',
+                'PRODID:-//SpacedRepApp/v2.0//EN',
                 ...icsEvents,
                 'END:VCALENDAR'
             ].join('\r\n');
@@ -168,35 +188,13 @@
             // Trigger the download
             download(topic.replace(/[^a-z0-9]/gi, '_') + '_schedule.ics', icsFileContent);
         }
-
-        /**
-         * Helper function to format a Date object into 'YYYYMMDD' for ICS all-day events.
-         * @param {Date} date - The date to format
-         * @returns {string} - The date in YYYYMMDD format
-         */
-        function formatDateICS(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-            const day = String(date.getDate()).padStart(2, '0');
-            
-            // If we're formatting a time, add that too
-            if(arguments.length > 1 || date.getHours() > 0 || date.getMinutes() > 0 || date.getSeconds() > 0) {
-                 const hours = String(date.getHours()).padStart(2, '0');
-                 const minutes = String(date.getMinutes()).padStart(2, '0');
-                 const seconds = String(date.getSeconds()).padStart(2, '0');
-                 return `${year}${month}${day}T${hours}${minutes}${seconds}`;
-            }
-
-            return `${year}${month}${day}`;
-        }
         
         /**
          * Triggers a browser download of a text file.
-         * @param {string} filename - The desired name of the file
-         * @param {string} text - The content of the file
          */
         function download(filename, text) {
             const element = document.createElement('a');
+            // Use 'text/calendar' for the MIME type
             element.setAttribute('href', 'data:text/calendar;charset=utf-8,' + encodeURIComponent(text));
             element.setAttribute('download', filename);
 
