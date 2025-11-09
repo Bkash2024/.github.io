@@ -2,15 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>A4 Random Dot Practice</title>
+    <title>A4 Random Dot Practice (Spaced)</title>
     <style>
-        /* Sets up the print environment */
         @media print {
             body { margin: 0; padding: 0; }
             .page { margin: 0; box-shadow: none; }
         }
-
-        /* Basic page setup */
         body {
             background-color: #f0f0f0;
             display: flex;
@@ -18,8 +15,6 @@
             align-items: center;
             padding: 20px;
         }
-
-        /* Creates the A4-sized "paper" */
         .page {
             width: 210mm;
             height: 297mm;
@@ -29,29 +24,20 @@
             box-sizing: border-box;
             overflow: hidden;
         }
-
-        /* A single blue dot */
         .dot {
             width: 1.5mm;
             height: 1.5mm;
-            background-color: #007bff; /* Blue color */
+            background-color: #007bff;
             border-radius: 50%;
             position: absolute;
         }
-
-        /* A container for a group of 4 dots */
         .dot-group {
             position: absolute;
         }
-
-        /* This places each of the 4 dots inside a group,
-           creating the 2x2 pattern.
-        */
         .dot-group .d1 { top: 0; left: 0; }
         .dot-group .d2 { top: 0; left: 4mm; }
         .dot-group .d3 { top: 4mm; left: 0; }
         .dot-group .d4 { top: 4mm; left: 4mm; }
-
     </style>
 </head>
 <body>
@@ -81,7 +67,6 @@
         <div class="dot" style="top: 80%; right: 10mm;"></div>
         <div class="dot" style="top: calc(80% + 5mm); right: 10mm;"></div>
 
-
         <div class="dot" style="top: 10mm; left: 33%;"></div>
         <div class="dot" style="top: 10mm; left: calc(33% + 5mm);"></div>
         <div class="dot" style="top: 10mm; left: 66%;"></div>
@@ -92,49 +77,76 @@
         <div class="dot" style="bottom: 10mm; left: 66%;"></div>
         <div class="dot" style="bottom: 10mm; left: calc(66% + 5mm);"></div>
         
-        </div>
+    </div>
 
     <script>
-        // This script runs when the page loads to create random dots
         (function generateRandomDots() {
-            // --- You can change this number ---
-            const numberOfGroups = 15;
-            // ----------------------------------
+            // --- You can customize these values ---
+            const numberOfGroups = 15; // How many 2x2 groups to place
+            const minDistance = 50;    // Minimum 50mm distance between group centers
+            // ---------------------------------------
 
             const page = document.querySelector('.page');
-            
-            // Define the "safe area" in mm to place dots
-            // (A4 is 210 x 297 mm)
+            const minDistanceSquared = minDistance * minDistance;
+            const placedGroups = []; // Stores {x, y} of placed groups
+
+            // Define the "safe area" in mm (A4 is 210 x 297)
             const minX = 30;  // 30mm from left edge
             const maxX = 180; // (210 - 30)
             const minY = 30;  // 30mm from top edge
             const maxY = 267; // (297 - 30)
-
             const rangeX = maxX - minX;
             const rangeY = maxY - minY;
 
-            for (let i = 0; i < numberOfGroups; i++) {
-                // Calculate random positions in mm
-                const randomTop = Math.random() * rangeY + minY;
-                const randomLeft = Math.random() * rangeX + minX;
+            // Safety break to prevent infinite loops if density is too high
+            let attempts = 0;
+            const maxAttempts = numberOfGroups * 100; // 100 tries per group
 
-                // Create the dot group element
-                const group = document.createElement('div');
-                group.className = 'dot-group';
-                
-                // Set its random position
-                group.style.top = randomTop + 'mm';
-                group.style.left = randomLeft + 'mm';
+            while (placedGroups.length < numberOfGroups && attempts < maxAttempts) {
+                attempts++; // Increment safety counter
 
-                // Add the 4 inner dots
-                group.innerHTML = `
-                    <div class="dot d1"></div><div class="dot d2"></div>
-                    <div class="dot d3"></div><div class="dot d4"></div>
-                `;
+                // 1. Generate a new random candidate position
+                const candidateX = Math.random() * rangeX + minX;
+                const candidateY = Math.random() * rangeY + minY;
                 
-                // Add the new group to the page
-                page.appendChild(group);
+                let isValid = true; // Assume it's valid
+
+                // 2. Check against all previously placed groups
+                for (const group of placedGroups) {
+                    const dx = candidateX - group.x;
+                    const dy = candidateY - group.y;
+                    const distanceSquared = (dx * dx) + (dy * dy);
+
+                    if (distanceSquared < minDistanceSquared) {
+                        isValid = false; // It's too close!
+                        break; // Stop checking
+                    }
+                }
+
+                // 3. If it's valid, place it
+                if (isValid) {
+                    // Add to our tracking list
+                    placedGroups.push({ x: candidateX, y: candidateY });
+                    
+                    // Create and add the DOM element
+                    const groupEl = document.createElement('div');
+                    groupEl.className = 'dot-group';
+                    groupEl.style.top = candidateY + 'mm';
+                    groupEl.style.left = candidateX + 'mm';
+                    groupEl.innerHTML = `
+                        <div class="dot d1"></div><div class="dot d2"></div>
+                        <div class="dot d3"></div><div class="dot d4"></div>
+                    `;
+                    page.appendChild(groupEl);
+                }
+                // If !isValid, the while loop continues and we try again
             }
+
+            if (attempts >= maxAttempts) {
+                // This message appears in the browser's console (F12) if it fails
+                console.warn(`Could not place all ${numberOfGroups} groups. Stopped at ${placedGroups.length}. Try lowering numberOfGroups or minDistance.`);
+            }
+
         })();
     </script>
 
