@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>A4 Dot Practice</title>
+    <style>
+        /* Sets up the print environment */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .page {
+                margin: 0;
+                box-shadow: none; /* Removes shadow when printing */
+            }
+        }
+
+        /* Basic page setup */
+        body {
+            background-color: #f0f0f0; /* Light grey background to see the white page */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Creates the A4-sized "paper" */
+        .page {
+            width: 210mm;
+            height: 297mm;
+            background-color: white;
+            position: relative; /* This is key for placing the dots */
+            box-shadow: 0 0 10px rgba(0,0,0,0.2); /* Shadow to see the page on-screen */
+            box-sizing: border-box;
+        }
+
+        /* A single blue dot */
+        .dot {
+            width: 1.5mm;
+            height: 1.5mm;
+            background-color: #007bff; /* Blue color */
+            border-radius: 50%;
+            position: absolute; /* Allows precise placement */
+        }
+
+        /* A container for a group of 4 dots */
+        .dot-group {
+            position: absolute; /* Allows placing the whole group */
+        }
+
+        /* This places each of the 4 dots inside a group,
+           creating the 2x2 pattern you see in your photo.
+        */
+        .dot-group .d1 { top: 0; left: 0; }
+        .dot-group .d2 { top: 0; left: 3mm; }
+        .dot-group .d3 { top: 3mm; left: 0; }
+        .dot-group .d4 { top: 3mm; left: 3mm; }
+
+    </style>
+</head>
+<body>
+
+    <div class="page">
+
+        <div class="dot-group" style="top: 8%; left: 15%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+        
+        <div class="dot-group" style="top: 10%; left: 80%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+
+        <div class="dot-group" style="top: 15%; left: 45%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+
+        <div class="dot-group" style="top: 25%; left: 20%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+
+        <div class="dot-group" style="top: 30%; left: 70%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+
+        <div class="dot-group" style="top: 38%; left: 50%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+
+        <div class="dot-group" style="top: 45%; left: 10%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+
+        <div class="dot-group" style="top: 50%; left: 85%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+
+        <div class="dot-group" style="top: 58%; left: 30%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+        
+        <div class="dot-group" style="top: 65%; left: 60%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+
+        <div class="dot-group" style="top: 75%; left: 15%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+
+        <div class="dot-group" style="top: 80%; left: 75%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+        
+        <div class="dot-group" style="top: 88%; left: 40%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+
+        <div class="dot-group" style="top: 92%; left: 90%;">
+            <div class="dot d1"></div><div class="dot d2"></div>
+            <div class="dot d3"></div><div class="dot d4"></div>
+        </div>
+
+    </div>
+
+</body>
+</html>
