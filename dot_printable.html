@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>A4 Dot Practice - Final Layout</title>
+    <title>A4 Random Dot Practice</title>
     <style>
         /* Sets up the print environment */
         @media print {
@@ -58,105 +58,85 @@
 
     <div class="page">
     
+        <div class="dot" style="top: 10mm; left: 10mm;"></div>
+        <div class="dot" style="top: 10mm; right: 10mm;"></div>
+        <div class="dot" style="bottom: 10mm; left: 10mm;"></div>
+        <div class="dot" style="bottom: 10mm; right: 10mm;"></div>
+
         <div class="dot" style="top: 20%; left: 10mm;"></div>
         <div class="dot" style="top: calc(20% + 5mm); left: 10mm;"></div>
-        
         <div class="dot" style="top: 40%; left: 10mm;"></div>
         <div class="dot" style="top: calc(40% + 5mm); left: 10mm;"></div>
-
         <div class="dot" style="top: 60%; left: 10mm;"></div>
         <div class="dot" style="top: calc(60% + 5mm); left: 10mm;"></div>
-
         <div class="dot" style="top: 80%; left: 10mm;"></div>
         <div class="dot" style="top: calc(80% + 5mm); left: 10mm;"></div>
         
         <div class="dot" style="top: 20%; right: 10mm;"></div>
         <div class="dot" style="top: calc(20% + 5mm); right: 10mm;"></div>
-        
         <div class="dot" style="top: 40%; right: 10mm;"></div>
         <div class="dot" style="top: calc(40% + 5mm); right: 10mm;"></div>
-
         <div class="dot" style="top: 60%; right: 10mm;"></div>
         <div class="dot" style="top: calc(60% + 5mm); right: 10mm;"></div>
-
         <div class="dot" style="top: 80%; right: 10mm;"></div>
         <div class="dot" style="top: calc(80% + 5mm); right: 10mm;"></div>
 
 
         <div class="dot" style="top: 10mm; left: 33%;"></div>
         <div class="dot" style="top: 10mm; left: calc(33% + 5mm);"></div>
-        
         <div class="dot" style="top: 10mm; left: 66%;"></div>
         <div class="dot" style="top: 10mm; left: calc(66% + 5mm);"></div>
         
         <div class="dot" style="bottom: 10mm; left: 33%;"></div>
         <div class="dot" style="bottom: 10mm; left: calc(33% + 5mm);"></div>
-        
         <div class="dot" style="bottom: 10mm; left: 66%;"></div>
         <div class="dot" style="bottom: 10mm; left: calc(66% + 5mm);"></div>
-
-
-        <div class="dot-group" style="top: 15%; left: 25%;">
-            <div class="dot d1"></div><div class="dot d2"></div>
-            <div class="dot d3"></div><div class="dot d4"></div>
-        </div>
         
-        <div class="dot-group" style="top: 18%; left: 70%;">
-            <div class="dot d1"></div><div class="dot d2"></div>
-            <div class="dot d3"></div><div class="dot d4"></div>
         </div>
 
-        <div class="dot-group" style="top: 28%; left: 50%;">
-            <div class="dot d1"></div><div class="dot d2"></div>
-            <div class="dot d3"></div><div class="dot d4"></div>
-        </div>
+    <script>
+        // This script runs when the page loads to create random dots
+        (function generateRandomDots() {
+            // --- You can change this number ---
+            const numberOfGroups = 15;
+            // ----------------------------------
 
-        <div class="dot-group" style="top: 35%; left: 20%;">
-            <div class="dot d1"></div><div class="dot d2"></div>
-            <div class="dot d3"></div><div class="dot d4"></div>
-        </div>
+            const page = document.querySelector('.page');
+            
+            // Define the "safe area" in mm to place dots
+            // (A4 is 210 x 297 mm)
+            const minX = 30;  // 30mm from left edge
+            const maxX = 180; // (210 - 30)
+            const minY = 30;  // 30mm from top edge
+            const maxY = 267; // (297 - 30)
 
-        <div class="dot-group" style="top: 40%; left: 80%;">
-            <div class="dot d1"></div><div class="dot d2"></div>
-            <div class="dot d3"></div><div class="dot d4"></div>
-        </div>
+            const rangeX = maxX - minX;
+            const rangeY = maxY - minY;
 
-        <div class="dot-group" style="top: 48%; left: 35%;">
-            <div class="dot d1"></div><div class="dot d2"></div>
-            <div class="dot d3"></div><div class="dot d4"></div>
-        </div>
+            for (let i = 0; i < numberOfGroups; i++) {
+                // Calculate random positions in mm
+                const randomTop = Math.random() * rangeY + minY;
+                const randomLeft = Math.random() * rangeX + minX;
 
-        <div class="dot-group" style="top: 55%; left: 65%;">
-            <div class="dot d1"></div><div class="dot d2"></div>
-            <div class="dot d3"></div><div class="dot d4"></div>
-        </div>
-        
-        <div class="dot-group" style="top: 62%; left: 15%;">
-            <div class="dot d1"></div><div class="dot d2"></div>
-            <div class="dot d3"></div><div class="dot d4"></div>
-        </div>
-        
-        <div class="dot-group" style="top: 68%; left: 45%;">
-            <div class="dot d1"></div><div class="dot d2"></div>
-            <div class="dot d3"></div><div class="dot d4"></div>
-        </div>
+                // Create the dot group element
+                const group = document.createElement('div');
+                group.className = 'dot-group';
+                
+                // Set its random position
+                group.style.top = randomTop + 'mm';
+                group.style.left = randomLeft + 'mm';
 
-        <div class="dot-group" style="top: 75%; left: 75%;">
-            <div class="dot d1"></div><div class="dot d2"></div>
-            <div class="dot d3"></div><div class="dot d4"></div>
-        </div>
-
-        <div class="dot-group" style="top: 85%; left: 25%;">
-            <div class="dot d1"></div><div class="dot d2"></div>
-            <div class="dot d3"></div><div class="dot d4"></div>
-        </div>
-        
-        <div class="dot-group" style="top: 88%; left: 60%;">
-            <div class="dot d1"></div><div class="dot d2"></div>
-            <div class="dot d3"></div><div class="dot d4"></div>
-        </div>
-
-    </div>
+                // Add the 4 inner dots
+                group.innerHTML = `
+                    <div class="dot d1"></div><div class="dot d2"></div>
+                    <div class="dot d3"></div><div class="dot d4"></div>
+                `;
+                
+                // Add the new group to the page
+                page.appendChild(group);
+            }
+        })();
+    </script>
 
 </body>
 </html>
