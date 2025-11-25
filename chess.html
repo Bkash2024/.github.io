@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Puzzles & AI Tutor</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Chess Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { background-color: #1a1a1a; color: #e5e5e5; }
+        .chessboard-container {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #262626; }
+        ::-webkit-scrollbar-thumb { background: #525252; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #737373; }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // ---------------------------------------------------------
+        // DATA: The User's Puzzle List (FEN Strings)
+        // ---------------------------------------------------------
+        const RAW_PUZZLES = `
+rnb1k2r/ppp1qp2/5p2/4p2p/4P3/PNpP1Q2/2P1NPPP/2KR1B1R b kq - 3 11
+6r1/p4k2/2p2p1p/2q5/p1P3QB/7P/PP4P1/4R2K w - - 2 26
+2k1r3/ppp2p1p/5Pp1/2bp2P1/5P2/P1P3Bq/2P1n2P/R2Q1R1K b - - 9 28
+2r1r1k1/p2q1pp1/1p3n2/nPp1b1Pp/P2pPB2/N1PP2P1/4B2P/R2QKR2 w Q - 0 18
+7k/p5B1/3p4/8/8/q5P1/1r3QKP/5R2 b - - 0 36
+r3kb1r/2p1qpp1/p2p1n1p/1p2n3/3BP3/1B3Q1P/PPPN1PP1/R3K2R b KQkq - 1 12
+3q1r1k/rp4pp/p2pQ3/P1N1nP1B/3p3b/3P2P1/1PP4P/R4RK1 w - - 1 23
+5r1k/rp4pp/p2Q4/P1N2PqB/3p2n1/3P4/1PP4P/R4R1K w - - 3 26
+r3r1k1/5pp1/8/P2BPp1p/1P3q2/P6P/6P1/R4QK1 b - - 0 26
+2k2r1r/pppb3p/3p4/3P3P/nP2Q2K/P2B4/1q5P/1N2R2R b - - 2 28
+rn2kb1r/ppq2p2/2p1p1p1/5b2/2PPp2p/1Q2PP2/PP1NB1PP/R1B2RK1 w kq - 0 12
+rn1q1rk1/5pbp/b1pp1np1/1p4B1/p2PP3/2NB1N2/PPQ2PPP/R4RK1 w - - 2 13
+1q1r2k1/3r1p2/3P1np1/1NQ1p3/4P1P1/pP5P/P2R3K/5R2 b - - 6 39
+5rk1/5p2/2q3p1/4Q3/6PP/pP1r1RK1/P7/8 b - - 4 47
+6k1/p4ppp/1p1R4/8/8/P4PR1/5P1P/1r3bK1 b - - 4 28
+r5k1/2q4p/2r3p1/p2R1p2/PpPQpP2/4P3/6PP/1R4K1 w - - 3 31
+6rq/p3p2k/1p1pN2n/2p1nPP1/2Pb4/2N5/PP3P2/R4RKQ w - - 1 27
+r2q2k1/1pp5/2n1bpp1/3p4/8/1pPPBp2/P1P4Q/2K4R w - - 0 25
+4R2r/1p1k2pp/2p2p2/2bp1P2/7q/3B4/4QP2/4R1K1 w - - 0 31
+3kr3/1R4pp/2R2p2/3p1P2/6q1/3B4/5P2/5K2 b - - 2 37
+r3kbnr/4n3/p2p2q1/2p1pR1p/4P2P/N1P3P1/P2N4/R1BQ2K1 w kq - 4 20
+1r3b2/4n3/p1k2n2/2p1pNR1/4P2r/N1P5/P7/R1B3K1 w - - 3 28
+1r6/4b3/p1k2n2/2p1R3/4P2r/N1P5/P7/R1B3K1 b - - 0 29
+8/5PK1/3k2P1/7P/8/5r2/8/4R3 w - - 3 71
+r3kr2/ppp1qp1p/4b3/8/3Q1b2/2P5/PP1NBPPP/R3K2R w KQq - 5 16
+r4r2/pp2q2p/2k1b3/2p2p1B/2N2Q2/2P5/PP3PPP/2KR1R w - - 4 20
+r1bqkb2/pppppp1Q/6pp/8/n1PP4/5NN3/PP3PPP/R1B1KB1R w KQq - 0 11
+r1bqk3/pppppp1Q/6pb/8/n1PP4/5NN3/PP3PPP/R3KB1R w KQq - 0 12
+r1bqk3/pppppp2/6pQ/8/2PP4/5NN3/Pn3PPP/R3KB1R w KQq - 0 13
+3q1rk1/4b2p/3p2p1/1b1Ppp2/1B1N4/8/r1PQ1PPP/3RR1K1 b - - 1 23
+6k1/4b2p/3pN1p1/3Ppp2/b7/8/5PPP/2r1BK1 b - - 2 36
+8/p1Q3kp/1pR3p1/5p2/8/4p3/PP1q1bPP/7K b - - 11 39
+r5k1/pp3p1p/2b2PpQ/8/2p5/8/PPP1r1PP/5RK1 b - - 3 28
+r5k1/pp3p1p/2b2PpQ/8/2p5/8/PPP3rP/5R1K b - - 5 31
+r5k1/pp3p1p/2b2PpQ/8/2p5/8/PPr4P/5R1K w - - 0 32
+r5k1/pp3p1p/2b2PpQ/8/2p5/8/PPr4P/5RK1 b - - 1 32
+r5k1/pp3p1p/2b2PpQ/8/2p5/8/Pr5P/5R1K w - - 0 34
+r5k1/pp3p1p/2b2PpQ/8/2p5/8/Pr5P/5RK1 b - - 1 34
+r5k1/pp3p1p/2b2PpQ/8/2p5/8/r6P/5R1K w - - 0 36
+r5k1/pp3p1p/2b2PpQ/8/2p5/8/r6P/5RK1 b - - 1 36
+r5k1/pp3p1p/2b2PpQ/8/2p5/8/6rP/5R1K b - - 7 39
+rn1qkb1r/pp1n1pp1/4p2p/3pN3/3P2P1/2P4P/PP3PB1/1RBQR1K1 w kq - 1 14
+r2qkb1r/1bp2pp1/p1np3p/1p1Q4/4P3/1B3N2/PP3PPP/R1B2RK1 w kq - 1 12
+r4r1k/pp3p1p/4bN2/q1n5/1b6/4PN2/PPQ1BPPP/R4RK1 w - - 1 15
+r3kb1r/1qp1ppp1/p1p2n1p/3pNb2/3P1BP1/1PN1P3/P1P2P1P/R2QK2R w KQkq - 1 11
+r4k1r/1qp1pPb1/p1p4p/4N2Q/3PpB2/1P2P3/P1P2P1P/R3K2R w KQ - 1 16
+5r2/4R2p/n4kp1/2p5/1p6/1P4P1/r2NR2P/2K5 w - - 3 29
+8/p1p3kp/1p6/4p3/3P3n/P1P4P/1P2nrPK/4R3 b - - 0 30
+r4rk1/pp3ppp/6q1/5b2/1P1QB3/P5P1/1B3P1P/2R4K w - - 3 22
+r7/pbpk4/1p1pp1p1/6q1/3PP1B1/2N2Q2/PPn3PP/5RK1 w - - 2 21
+6k1/2p3bp/2B3p1/1Q2Np2/4N3/4B2P/PP3PPK/3q4 w - - 0 22
+2r3k1/5ppp/4p3/4P3/P3Q3/2R2P1P/5KP1/1q6 b - - 0 36
+r2q1b1r/p1p4p/bpk2p2/3pnQ2/5B1P/P7/1PP1NPP1/RN2K2R b KQ - 5 14
+r5r1/pkp5/1p3b2/3p3K/7P/P5P1/R1PN1P2/7R b - - 0 26
+r3r1k1/5ppp/8/p7/3R4/2p1N3/P4pPP/3R3K b - - 1 32
+8/8/8/6p1/R4pk1/p7/r4p1P/5K2 b - - 1 49
+8/8/8/R7/5pp4/p6k/r4p1P/5K2 w - - 0 51
+8/8/8/8/R4pp4/p6k/r4p1P/5K2 b - - 1 51
+rn1qkbnr/3pp1p1/bpp2p2/p4Q1p/2BP4/2N1P3/PPP2PPP/R1B1K1NR w KQkq - 2 7
+r1bk2r1/ppqn3p/8/1Bb3Nn/5P2/2N4P/PPP2PP1/R1BQR1K1 w - - 1 14
+8/p1P2R2/1k1r4/1P6/8/8/P1K1N2r/8 b - - 0 50
+4r3/5R2/pk6/1P6/PK6/8/2r5/8 w - - 0 57
+8/2R5/pk1K4/r7/8/8/1r6/8 b - - 1 63
+8/7R/pk3K2/8/8/8/3r4/4r3 b - - 7 66
+3r1k2/p1p2pp1/8/1N2p1b1/3r4/1P1RR3/P1P2PPP/6K1 w - - 7 26
+2k5/7P/KP6/p7/P7/2b5/8/8 w - - 1 69
+r4rk1/1p1nppbp/p2p1np1/8/P2PP3/2N2N2/1q1B1PPP/R2Q1RK1 w - - 0 14
+r1q3k1/3Rp1bp/p3N1p1/8/4n3/1Q6/5PPP/6K1 b - - 0 27
+8/8/PNn6/4pk2/5p2/5P2/6K1/8 w - - 1 57
+4k3/1p3p2/3nb1pp/2Q5/8/P4N1P/2P2PP1/3R2K1 w - - 2 30
+2rr2k1/QB7pp/3b1n1p/8/8/P2P3N/2PB1K1P/8 b - - 0 23
+6k1/5pp1/8/6Kp/P2r1N2/3P4/2r4P/8 b - - 1 32
+3R1nk1/2q2ppp/p5r1/1p2P1Q1/2p2P1B/P1P5/6PP/6K1 w - - 5 29
+r2q3k/pp2b1p1/3p4/2p1rbPp/7P/PB2B3/1PP1QP2/2KR1R w - - 4 23
+3r3k/pp2b3/6p1/2pB2Pp/4QP1P/P3B3/1PP1q3/1K1R4 w - - 1 32
+1r3brk/2pq1pn1/b1p1pB1p/p2pP3/3P2Q1/2N3R1/PPP2PPP/R5K1 w - - 2 20
+r4rk1/ppp5/2n3qp/5p2/4N3/2PP2Q1/PP3KP1/R5NR b - - 1 19
+r1bqkb1r/p1pppp1p/np4pn/8/8/1P2PN2/PBPP1PPP/RN1QKB1R w KQkq - 0 5
+r7/pbpp1Q2/3k3p/2pP1Bp1/2P1P3/1P6/Pq1b1PPP/R4RK1 w - - 3 22
+r7/pbQ5/7p/2pP1Bp1/2PkP3/1P6/Pq1b1PPP/R4RK1 w - - 1 24
+r1bqk1nr/pppp1ppp/2n5/4p3/1PPbP3/P4N2/3P1PPP/RNBQKB1R b KQkq - 2 6
+r2q1rk1/pb3ppp/1p3n2/1Q1p1N2/2P5/P2B4/3P1PPP/1NB1K2R b K - 0 18
+1r1qkb1r/p1pn1ppp/2b2n2/3pp3/3P4/2Q1P3/PPP2PPP/RNB1KBNR w KQk - 3 8
+r1b2rk1/1pp2p2/1q4p1/4p1NP/p7/P2B3Q/1P3P1P/4RRK1 b - - 0 24
+r4rk1/1pp2p2/2q3pP/4R1N1/p7/P2B3b/1P3P1P/5RK1 b - - 0 26
+3r1k2/Q4ppp/8/8/4p1nq/4P3/PPP3PP/4NRK1 w - - 1 22
+r3kb1r/pp1Qqp2/2p2p1p/4p3/4P3/2N5/PP3PPP/2KRR3 b kq - 1 15
+8/5p2/5p1p/2k1p2P/1p1r4P1/1K3P2/8/8 b - - 1 31
+8/5p2/5p1p/2k1p2P/Kp4P1/3r1P2/8/8 b - - 3 32
+4k2r/1bqnp3/2p4b/ppQ1p1pp/4P3/PB4BP/1PP1NPP1/3R2K1 b k - 6 21
+6rk/pb1p2rp/1p2pP2/2p4q/2P3N1/1P5P/P4QP1/4RR1K b - - 0 30
+r4rk1/ppp1E7ppp/8/3Pn5/2B1N1b1/3Q2P3/PP3P1P/R4RK1 b - - 0 17
+6rk/4R1nq/3Q4/p1p5/2P3Pp/3P3R/P4P1P/6K1 w - - 0 34
+r1b2rk1/1p6/p3p1pp/2p1P2N/Pb1n2Q1/7P/1P3PP1/R4RK1 w - - 0 20
+7r/1ppkr7/p2p2pn/7p/P1P1NP1P/1P2P3/4K3/5R1R b - - 4 28
+8/k7/p7/P6R/8/3r3P/5PK1/4R3 w - - 5 42
+4rrk1/1QB1bpp1/2n4p/p7/3P4/2PB1q2/PPK1RP1P/4R3 b - - 0 23
+r5k1/ppqb1rp1/2p4p/4p3/PP6/4PQ2/2P3PP/3R1RK1 w - - 0 19
+6k1/pp3ppn/7p/1Np5/2P5/4B1qb/PPQ1B2N/7K w - - 2 25
+2r5/qp6/p2p1kpR/P5rR/b1P2p2/1nP2P2/2Q5/5K2 b - - 3 35
+r1bq1rk1/3nbppp/p3p3/1p1pN1B1/3Pn3/1BN5/PPP2PPP/R2Q1RK1 w - - 2 12
+3r1rk1/4qppp/p1b5/3p4/2B1p3/1Q6/PP3PPP/R3R1K1 b - - 1 19
+4r1k1/1b3pp1/p7/6qp/1P2p1P1/2Q4P/r4P1K/2R1R3 b - - 1 26
+Qn1q1rk1/p1p1nppp/3p4/2b1p3/8/4PNP1/PP1P1PBP/RNB2bK1 w - - 0 10
+r4r1k/ppp1R3/3p2QN/7p/2q5/8/P5PP/6K1 b - - 0 27
+r5k1/1pp3b1/p2p2pp/1P1Pprqn/P3Q3/2N5/2PB1PPP/R4RK1 w - - 2 19
+8/2p4k/p2p1r1b/3P2pH/P4p2/8/2P3PP/R4RK1 w - - 2 28
+6k1/2p2pq1/3b3p/1bpN1p2/1pP3P1/r3QN1P/3K1P2/r2RR3 b - - 2 34
+rnbq2n1/3p4/1p3bQ1/p1pNkB1p/4P3/8/PPP2PPP/RNB1K2R w KQ - 0 18
+r3kb1r/pppnp1p1/4Np2/8/4P3/2P1BP2/qP5P/1R1QK2R b Kkq - 1 17
+r3kb1r/ppp1p1p1/4Np2/4n3/4P3/2P1BP2/qP5P/1R1QK2R w Kkq - 2 18
+5bkr/pp2p3/4Np2/5Qp1/2n1P3/2P1BP2/qP5P/1R2K2R w K - 8 24
+2kr1b2/pp3B1p/3p4/3Np3/1Pp1P1r1/2P5/R4PPP/R5K1 w - - 1 25
+r7/4RBpk/p2R3p/1pp5/5PP1/2P5/P6P/7K w - - 1 27
+4B2k/6p1/p2R3p/2p5/1p3PP1/2P5/P6P/7K w - - 0 30
+r5k1/ppp5/3p3p/3Pp1q1/1QP1R3/6P1/PP4P1/5K2 b - - 1 25
+8/p1p4k/1p1p2qp/3Pp3/PP4r1/2Q4R/8/7K b - - 3 35
+2k4r/pppr1pp1/2b4p/2P5/2B5/P1q4Q/2P2PPP/4RRK1 w - - 2 22
+r1b1kbnr/1p3ppp/pq1pp3/2p1P3/2P2B2/2P3Q1/PP3PPP/RN2K1NR b KQkq - 2 9
+r1r3k1/3bnppp/1R2pq2/p2P4/2BP4/2Q1PN2/2P2PPP/4K2R b K - 2 17
+rnbqkbnr/pppp2pp/8/4p3/4P3/8/PPP2PPP/RNBQKBNR w KQkq - 0 4
+rnb1kbnQ/pppp3p/6p1/8/8/N3B3/PPq2PPP/R3KBNR b KQq - 1 8
+rnbq1rk1/pp2b1pp/2p1p3/1P1pN1B1/3Pp3/6P1/P1P1PPBP/R2Q1RK1 b - - 1 11
+rnbqkb1r/1p1ppp2/p4np1/2P3N1/2B1P2p/2N5/PPPB1PPP/R2QK2R w KQkq - 0 9
+1r3Q2/1bkpp7/p7/1pP5/4P3/P7/1PP2PPP/3R1RK1 w - - 1 30
+7r/1bkpQ3/p7/1pP5/4P3/P7/1PP2PPP/3R1RK1 w - - 1 31
+3k3r/1b1p4/p2Q4/1pP5/4P3/P7/1PP2PPP/3R1RK1 w - - 3 32
+r1b1k2r/p2p2pp/2p3q1/1pb1pN2/4n3/1QPB4/PP1P1PPP/R1B1R1K1 b kq - 0 15
+r1b1k2r/p2p2pp/2p5/1pb1pq2/4R3/1QPB4/PP1P1PPP/R1B3K1 b kq - 0 16
+r1b1k2r/1p3p2/p3pnp1/2p1p3/2B1P3/2PPbQNP/PP4P1/RN2qRK1 w kq - 5 17
+2k4r/1pp2B2/p4p2/4p1p1/4P3/2P2P1P/PP1r1nNK/R4R2 b - - 2 30
+8/8/1kpK4/1p6/4p3/3N4/8/R7 b - - 3 59
+3r2k1/p4pp1/6n1/2p1r1R1/8/1B6/PP4P1/1K5R w - - 3 29
+8/6k1/p6R/1b3pK1/1P2pP2/P3P3/7P/4n3 b - - 10 40
+r1b1kb1r/ppp1qppp/2np1n2/1B6/3NP3/2N5/PPP2PPP/R1BQK2R w KQkq - 2 7
+r1b2rk1/pp3p2/2npq2p/4p1p1/3P3N/2P4n/PPB2PPK/R1BQ1R2 w - - 0 16
+2r1r1k1/pp3p2/2np3B/3qp3/3P3p/2P4P/PP3P1K/R2Q1R2 w - - 1 20
+2r2r2/1b4kp/7p/p1p2p2/3p4/1B5P/PP3PP1/2R1R1K1 w - - 0 25
+r2qkbnr/1pp2ppp/p2p4/3Pp3/3nP1b1/5N2/PPP1BPPP/RNBQK2R w KQkq - 2 7
+2rq1rk1/1p3ppp/p7/8/4QP2/1P5R/3N2PP/b6K b - - 1 25
+3rr1k1/3p1pp1/3p2p1/1P1b1q2/P2P2Q1/7P/1p3PB1/1R3RK1 w - - 0 26
+8/4k3/4p3/NP1pP1pp/2n2P2/6P1/7P/6K1 b - - 0 34
+8/7R/1k6/6P1/1N6/2PP3P/r4P2/6K1 w - - 0 41
+6k1/5pp1/4b1qp/r1NQ5/8/1P5P/5PP1/5R1K w - - 5 31
+8/5ppk/8/Q6p/8/1q5P/5PP1/4R2K w - - 0 35
+r2q4/4bk2/p2p1p1Q/1ppPp3/3n1P2/3B4/PPP3PP/R4RK1 w - - 1 22
+2r2rk1/2P3pp/3B4/pp3R2/n7/2P5/N1K3PP/8 w - - 1 32
+r1bqkb1r/ppp4p/4p1N1/5p1Q/2PPp3/4P3/PP3PPP/n1BK1B1R w kq - 0 12
+r4r2/p1pb1ppk/2p2q2/2Pp2b1/3Q1B2/2N4R/PP3PPP/R5K1 b - - 4 18
+2r2rk1/pb1q1ppp/1p2p3/2ppP3/2P1n3/1P4P1/PB2PPBP/R2Q1RK1 w - - 0 15
+2r3k1/p4pp1/1p2n2p/3RP5/1qp4P/1PB1P1P1/P1Q4P/6K1 b - - 2 27
+Qb8k1/1Pqb1/5p1p/6p1/2NP4/8/P2NBPPP/n4RK1 b - - 1 27
+r1b3r1/ppk2p2/2nb1n2/2p1p1pp/4P3/2N1BP1P/PPP1B1PN/3R1RK1 w - - 2 15
+6r1/pp1k4/3P2r1/2p1b3/2P1N2n/1P2ppPP/P3R3/3R2K1 b - - 0 31
+8/2r1r1kp/p4bp1/5b2/8/1P4Q1/P1PR1P1P/2K5 b - - 5 27
+r1bqnrk1/ppp1bppp/2n4B/3p3B/4P3/3P2Q1/PPP2PPP/RN2K1NR b KQ - 3 8
+r1b1nrk1/ppp2ppp/3bq d6/3p2B1/3n4/3P2Q1/PPP3PP/RN1K2NR b - - 6 12
+`;
+
+        // Parse puzzles: filter out empty lines
+        const PUZZLES = RAW_PUZZLES.trim().split('\n').filter(fen => fen.trim().length > 0);
+
+        const Chess = window.Chess;
+        const Chessboard = window.ReactChessboard.Chessboard;
+
+        // ---------------------------------------------------------
+        // COMPONENT: AI Tutor / Explanation
+        // ---------------------------------------------------------
+        function AITutor({ fen, pgn, turn }) {
+            const [apiKey, setApiKey] = React.useState(localStorage.getItem('gemini_api_key') || '');
+            const [loading, setLoading] = React.useState(false);
+            const [explanation, setExplanation] = React.useState(null);
+            const [error, setError] = React.useState(null);
+            const [showConfig, setShowConfig] = React.useState(false);
+
+            const handleSaveKey = () => {
+                localStorage.setItem('gemini_api_key', apiKey);
+                setShowConfig(false);
+            };
+
+            const askGemini = async () => {
+                if (!apiKey) {
+                    setShowConfig(true);
+                    return;
+                }
+                setLoading(true);
+                setError(null);
+                setExplanation(null);
+
+                const prompt = `
+You are a chess grandmaster coach.
+Analyze this chess position.
+FEN: ${fen}
+PGN of moves so far: ${pgn}
+It is ${turn}'s turn.
+
+Explain the tactical motif here (e.g., Pin, Skewer, Fork, Mate in X).
+Explain why the best move is the best move in simple, educational terms.
+Do not just give engine lines, give the *reasoning*.
+`;
+
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }]
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error.message);
+                    
+                    const text = data.candidates[0].content.parts[0].text;
+                    setExplanation(text);
+                } catch (err) {
+                    setError("Failed to get explanation. Check your API Key.");
+                    console.error(err);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="bg-gray-800 p-4 rounded-lg mt-4 shadow-lg">
+                    <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-xl font-bold text-blue-400"><i className="fas fa-robot mr-2"></i>AI Coach</h3>
+                        <button onClick={() => setShowConfig(!showConfig)} className="text-gray-400 hover:text-white">
+                            <i className="fas fa-cog"></i>
+                        </button>
+                    </div>
+
+                    {showConfig && (
+                        <div className="mb-4 bg-gray-700 p-3 rounded">
+                            <label className="block text-sm text-gray-300 mb-1">Google Gemini API Key</label>
+                            <input 
+                                type="password" 
+                                value={apiKey} 
+                                onChange={(e) => setApiKey(e.target.value)}
+                                className="w-full bg-gray-900 border border-gray-600 rounded p-2 text-white mb-2"
+                                placeholder="AIzaSy..."
+                            />
+                            <button onClick={handleSaveKey} className="bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded text-sm">Save Key</button>
+                        </div>
+                    )}
+
+                    <div className="mb-4">
+                        <button 
+                            onClick={askGemini} 
+                            disabled={loading}
+                            className={`w-full py-2 rounded font-semibold ${loading ? 'bg-gray-600' : 'bg-blue-600 hover:bg-blue-500'} transition`}
+                        >
+                            {loading ? <div className="loader mx-auto"></div> : "Explain This Position"}
+                        </button>
+                    </div>
+
+                    {error && <div className="text-red-400 bg-red-900/30 p-2 rounded text-sm mb-2">{error}</div>}
+                    
+                    {explanation && (
+                        <div className="text-gray-200 text-sm leading-relaxed bg-gray-900 p-3 rounded h-64 overflow-y-auto whitespace-pre-wrap">
+                            {explanation}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // ---------------------------------------------------------
+        // COMPONENT: Main App
+        // ---------------------------------------------------------
+        function App() {
+            const [puzzleIndex, setPuzzleIndex] = React.useState(0);
+            const [game, setGame] = React.useState(new Chess());
+            const [fen, setFen] = React.useState("start");
+            const [orientation, setOrientation] = React.useState('white');
+            const [status, setStatus] = React.useState('playing'); // playing, solved, failed
+            const [engineReady, setEngineReady] = React.useState(false);
+            const [stockfish, setStockfish] = React.useState(null);
+            const [bestMove, setBestMove] = React.useState(null);
+            const [moveHistory, setMoveHistory] = React.useState([]);
+
+            // Initialize Stockfish
+            React.useEffect(() => {
+                const worker = new Worker('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.0/stockfish.js');
+                worker.onmessage = (event) => {
+                    const line = event.data;
+                    if (line === 'uciok') {
+                        setEngineReady(true);
+                    }
+                    if (line.startsWith('bestmove')) {
+                        const move = line.split(' ')[1];
+                        setBestMove(move);
+                    }
+                };
+                worker.postMessage('uci');
+                setStockfish(worker);
+                return () => worker.terminate();
+            }, []);
+
+            // Load Puzzle Logic
+            const loadPuzzle = (index) => {
+                const newFen = PUZZLES[index];
+                const newGame = new Chess(newFen);
+                setGame(newGame);
+                setFen(newFen);
+                setPuzzleIndex(index);
+                setStatus('playing');
+                setMoveHistory([]);
+                setBestMove(null);
+
+                // Determine orientation based on who's turn it is
+                const turn = newGame.turn(); // 'w' or 'b'
+                setOrientation(turn === 'w' ? 'white' : 'black');
+
+                // Ask engine for best move
+                if (stockfish) {
+                    stockfish.postMessage('position fen ' + newFen);
+                    stockfish.postMessage('go depth 15');
+                }
+            };
+
+            React.useEffect(() => {
+                if(engineReady) loadPuzzle(0);
+            }, [engineReady]);
+
+            // Handle Move
+            function onDrop(sourceSquare, targetSquare) {
+                if (status !== 'playing' || !bestMove) return false;
+
+                // 1. Try to make the move in game logic
+                const moveAttempt = {
+                    from: sourceSquare,
+                    to: targetSquare,
+                    promotion: 'q' // always promote to queen for simplicity
+                };
+                
+                // Get the move object from chess.js to verify it's legal and get UCI format
+                const legalMoves = game.moves({ verbose: true });
+                const foundMove = legalMoves.find(m => m.from === sourceSquare && m.to === targetSquare);
+
+                if (!foundMove) return false;
+
+                // 2. Compare with Engine Best Move
+                // Engine bestmove is 'e2e4' or 'a7a8q'
+                // chess.js from/to is 'e2', 'e4'
+                const uciMove = foundMove.from + foundMove.to + (foundMove.promotion || '');
+                
+                // Note: Stockfish sometimes returns promotions without the piece char if only one choice, but usually includes it.
+                // We do a loose check.
+                const isBestMove = uciMove === bestMove || (uciMove.startsWith(bestMove));
+
+                if (isBestMove) {
+                    // Correct Move
+                    game.move(foundMove);
+                    setFen(game.fen());
+                    setMoveHistory([...moveHistory, foundMove.san]);
+                    
+                    // Check if puzzle is done (simple heuristic: if mate or checkmate)
+                    if (game.game_over()) {
+                        setStatus('solved');
+                    } else {
+                        // Make the opponent's move automatically
+                        // We ask stockfish for the opponent's response
+                        // Small delay for visual effect
+                        setTimeout(() => {
+                            if (!stockfish) return;
+                            
+                            // Re-eval for opponent
+                            stockfish.postMessage('position fen ' + game.fen());
+                            stockfish.postMessage('go depth 10'); // Faster depth for response
+                            
+                            // We need a one-time listener for this specific response
+                            // Ideally we structure the worker better, but for single file:
+                            const tempListener = (e) => {
+                                if (e.data.startsWith('bestmove')) {
+                                    const respMoveUci = e.data.split(' ')[1];
+                                    if(respMoveUci && respMoveUci !== '(none)') {
+                                        const from = respMoveUci.substring(0,2);
+                                        const to = respMoveUci.substring(2,4);
+                                        const promotion = respMoveUci.length > 4 ? respMoveUci.substring(4,5) : undefined;
+                                        
+                                        game.move({ from, to, promotion });
+                                        setFen(game.fen());
+                                        
+                                        // Now it's player's turn again. Analyze NEW position for player.
+                                        stockfish.postMessage('position fen ' + game.fen());
+                                        stockfish.postMessage('go depth 15');
+                                    } else {
+                                        setStatus('solved'); // No more moves for opponent
+                                    }
+                                    stockfish.removeEventListener('message', tempListener);
+                                }
+                            };
+                            stockfish.addEventListener('message', tempListener);
+
+                        }, 300);
+                    }
+                } else {
+                    // Incorrect move
+                    setStatus('failed');
+                    // We reset the move visually by returning false
+                    return false;
+                }
+                
+                return true;
+            }
+
+            const nextPuzzle = () => {
+                if (puzzleIndex < PUZZLES.length - 1) loadPuzzle(puzzleIndex + 1);
+            };
+            
+            const prevPuzzle = () => {
+                if (puzzleIndex > 0) loadPuzzle(puzzleIndex - 1);
+            };
+
+            const retry = () => {
+                loadPuzzle(puzzleIndex);
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4">
+                    <header className="mb-6 text-center">
+                        <h1 className="text-3xl font-bold text-blue-500 mb-2">Grandmaster Tactics</h1>
+                        <p className="text-gray-400">Puzzle #{puzzleIndex + 1} of {PUZZLES.length}</p>
+                    </header>
+
+                    <div className="flex flex-col md:flex-row gap-8 w-full max-w-5xl">
+                        {/* Left: Board */}
+                        <div className="flex-1 flex justify-center">
+                            <div className="w-full max-w-[500px] aspect-square chessboard-container rounded-lg overflow-hidden">
+                                {engineReady ? (
+                                    <Chessboard 
+                                        position={fen} 
+                                        onPieceDrop={onDrop}
+                                        boardOrientation={orientation}
+                                        customDarkSquareStyle={{ backgroundColor: '#779556' }}
+                                        customLightSquareStyle={{ backgroundColor: '#ebecd0' }}
+                                        animationDuration={200}
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-gray-800 text-gray-400">
+                                        <div className="text-center">
+                                            <div className="loader mx-auto mb-2"></div>
+                                            Loading Engine...
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Right: Controls & Info */}
+                        <div className="flex-1 flex flex-col">
+                            {/* Status Card */}
+                            <div className={`p-4 rounded-lg mb-4 text-center font-bold text-xl transition-colors duration-300
+                                ${status === 'playing' ? 'bg-gray-800 text-blue-200' : ''}
+                                ${status === 'solved' ? 'bg-green-800 text-green-100' : ''}
+                                ${status === 'failed' ? 'bg-red-800 text-red-100' : ''}
+                            `}>
+                                {status === 'playing' && (
+                                    <span>
+                                        <i className="fas fa-chess-pawn mr-2"></i>
+                                        {orientation === 'white' ? "White to Move" : "Black to Move"}
+                                    </span>
+                                )}
+                                {status === 'solved' && <span><i className="fas fa-check-circle mr-2"></i>Solved! Good job.</span>}
+                                {status === 'failed' && <span><i className="fas fa-times-circle mr-2"></i>Incorrect. Try again!</span>}
+                            </div>
+
+                            {/* Controls */}
+                            <div className="grid grid-cols-3 gap-2 mb-4">
+                                <button onClick={prevPuzzle} className="bg-gray-700 hover:bg-gray-600 p-3 rounded"><i className="fas fa-arrow-left"></i> Prev</button>
+                                <button onClick={retry} className="bg-yellow-700 hover:bg-yellow-600 p-3 rounded"><i className="fas fa-sync-alt"></i> Retry</button>
+                                <button onClick={nextPuzzle} className="bg-gray-700 hover:bg-gray-600 p-3 rounded">Next <i className="fas fa-arrow-right"></i></button>
+                            </div>
+
+                            {/* Move History */}
+                            <div className="bg-gray-800 p-4 rounded-lg flex-grow max-h-40 overflow-y-auto mb-4">
+                                <h3 className="text-gray-400 text-sm uppercase font-bold mb-2">Moves played</h3>
+                                <div className="font-mono text-sm">
+                                    {moveHistory.length === 0 ? <span className="text-gray-600">Make a move to start...</span> : 
+                                        moveHistory.map((m, i) => (
+                                            <span key={i} className="inline-block mr-2 text-white">{i % 2 === 0 ? `${Math.floor(i/2) + 1}.` : ''} {m}</span>
+                                        ))
+                                    }
+                                </div>
+                            </div>
+
+                            {/* AI Tutor Integration */}
+                            <AITutor fen={game.fen()} pgn={game.pgn()} turn={orientation} />
+
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
+
