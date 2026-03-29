@@ -3,643 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Habit Tracker</title>
+    <title>Visual Habit Tracker Pro</title>
     <style>
         :root {
-            --bg-color: #f4f7f6;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
-            --primary-color: #4CAF50;
-            --primary-hover: #45a049;
-            --text-color: #333;
-            --text-secondary: #666;
-            --border-color: #ddd;
-            --today-highlight: #2196F3;
-            --delete-color: #ff4d4d;
-            --shadow: rgba(0,0,0,0.1);
-            --grid-gap: 8px;
+            --primary-color: #6366f1;
+            --text-color: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --today-highlight: #f59e0b;
+            --delete-color: #ef4444;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
         [data-theme="dark"] {
-            --bg-color: #1a1a2e;
-            --card-bg: #16213e;
-            --primary-color: #4CAF50;
-            --primary-hover: #45a049;
-            --text-color: #e6e6e6;
-            --text-secondary: #aaa;
-            --border-color: #3a3a5a;
-            --today-highlight: #0d47a1;
-            --delete-color: #d32f2f;
-            --shadow: rgba(0,0,0,0.3);
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-color); color: var(--text-color); padding: 20px; transition: 0.3s; }
+        .container { max-width: 900px; margin: 0 auto; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 16px;
-            transition: background-color 0.3s, color 0.3s;
-            -webkit-tap-highlight-color: transparent;
-        }
+        /* Header & Nav */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px; }
+        .nav-controls { display: flex; align-items: center; gap: 15px; background: var(--card-bg); padding: 8px 16px; border-radius: 12px; box-shadow: var(--shadow); }
+        .nav-btn { background: none; border: 1px solid var(--border-color); color: var(--text-color); padding: 5px 10px; border-radius: 6px; cursor: pointer; }
 
-        .container { max-width: 800px; width: 100%; }
+        /* Input Section */
+        .input-card { background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 30px; }
+        .input-row { display: flex; gap: 12px; }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-color); color: var(--text-color); }
+        input[type="color"] { width: 50px; height: 45px; border: none; background: none; cursor: pointer; }
 
-        header {
-            text-align: center;
-            margin-bottom: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        /* Habit Cards */
+        .habit-card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: var(--shadow); border: 1px solid var(--border-color); }
+        .habit-info { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .streak-badge { background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+        
+        /* The Grid */
+        .grid-container { overflow-x: auto; }
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; min-width: 300px; }
+        .day { aspect-ratio: 1; border: 2px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; transition: 0.2s; position: relative; }
+        .day:hover { transform: translateY(-2px); }
+        .day.today { border-color: var(--today-highlight); font-weight: 900; }
+        .day.empty { visibility: hidden; }
 
-        header h1 { font-size: 1.8rem; }
-        header p { color: var(--text-secondary); font-size: 0.95rem; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-danger { background: none; color: var(--delete-color); font-size: 0.8rem; }
 
-        .header-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .month-nav {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-        }
-
-        .month-nav button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.2s;
-        }
-
-        .month-nav button:hover { opacity: 0.9; }
-
-        .theme-toggle {
-            background: var(--border-color);
-            color: var(--text-color);
-            border: none;
-            border-radius: 20px;
-            padding: 6px 14px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        input[type="text"] {
-            flex-grow: 1;
-            padding: 12px 14px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--card-bg);
-            color: var(--text-color);
-            font-size: 1rem;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        .btn {
-            padding: 12px 20px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: opacity 0.2s, transform 0.1s;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .btn:hover { opacity: 0.92; }
-        .btn:active { transform: scale(0.98); }
-
-        .btn-secondary {
-            background: var(--border-color);
-            color: var(--text-color);
-        }
-
-        .btn-danger {
-            background: var(--delete-color);
-            font-size: 0.8rem;
-            padding: 6px 12px;
-        }
-
-        .action-bar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .habit-card {
-            background: var(--card-bg);
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 3px 8px var(--shadow);
-            margin-bottom: 16px;
-            transition: background-color 0.3s, box-shadow 0.3s;
-        }
-
-        .habit-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .habit-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .habit-title h3 { font-size: 1.1rem; }
-
-        .progress-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-grow: 1;
-            min-width: 120px;
-        }
-
-        .progress-bar {
-            flex-grow: 1;
-            height: 8px;
-            background: var(--border-color);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary-color);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        .progress-text {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            min-width: 45px;
-            text-align: right;
-        }
-
-        .weekday-header {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: var(--grid-gap);
-            margin-bottom: 8px;
-            padding: 0 4px;
-        }
-
-        .weekday-header span {
-            text-align: center;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: var(--grid-gap);
-        }
-
-        .day {
-            aspect-ratio: 1 / 1;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .day:hover {
-            border-color: var(--primary-color);
-            transform: scale(1.05);
-        }
-
-        .day.completed {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .day.today {
-            border-color: var(--today-highlight);
-            border-width: 3px;
-            position: relative;
-        }
-
-        .day.today::after {
-            content: "";
-            position: absolute;
-            bottom: -2px;
-            width: 6px;
-            height: 6px;
-            background: var(--today-highlight);
-            border-radius: 50%;
-        }
-
-        .day.today.completed::after {
-            background: white;
-        }
-
-        .day.empty {
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .delete-btn {
-            background: var(--delete-color);
-            font-size: 0.8rem;
-            padding: 6px 12px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-            font-style: italic;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--card-bg);
-            color: var(--text-color);
-            padding: 12px 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px var(--shadow);
-            z-index: 1000;
-            transition: transform 0.3s ease;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        @media (max-width: 480px) {
-            .input-group { flex-direction: column; }
-            .header-controls { flex-direction: column; align-items: stretch; }
-            .month-nav { justify-content: center; }
-            .action-bar { justify-content: center; }
-            .habit-header { flex-direction: column; align-items: flex-start; }
-            .progress-container { width: 100%; }
-        }
+        @media (max-width: 600px) { .input-row { flex-direction: column; } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>🎯 Habit Tracker</h1>
-        <p>Consistent progress is better than perfection.</p>
-        
-        <div class="header-controls">
-            <div class="month-nav">
-                <button onclick="changeMonth(-1)" aria-label="Previous month">◀</button>
-                <span id="monthYear"></span>
-                <button onclick="changeMonth(1)" aria-label="Next month">▶</button>
-            </div>
-            <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
-                🌙 Dark Mode
-            </button>
+        <div>
+            <h1>My Habits</h1>
+            <p style="color: var(--text-secondary)">Track your consistency</p>
+        </div>
+        <div class="nav-controls">
+            <button class="nav-btn" onclick="changeMonth(-1)">◀</button>
+            <span id="monthDisplay" style="min-width: 120px; text-align: center; font-weight: 600;"></span>
+            <button class="nav-btn" onclick="changeMonth(1)">▶</button>
+            <button class="nav-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
         </div>
     </header>
 
-    <div class="input-group">
-        <input type="text" id="habitInput" placeholder="Enter a new habit (e.g., Reading)..." onkeypress="handleKeyPress(event)">
-        <button class="btn" onclick="addHabit()">+ Add Habit</button>
-    </div>
-
-    <div class="action-bar">
-        <button class="btn btn-secondary" onclick="exportData()">📤 Export</button>
-        <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 Import</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <div class="input-card">
+        <div class="input-row">
+            <input type="text" id="habitInput" placeholder="Enter a new habit...">
+            <input type="color" id="colorInput" value="#6366f1">
+            <button class="btn btn-primary" onclick="addHabit()">Add Habit</button>
+        </div>
     </div>
 
     <div id="habitList"></div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-    // ===== State Management =====
-    const habitList = document.getElementById('habitList');
-    const habitInput = document.getElementById('habitInput');
-    const monthYearEl = document.getElementById('monthYear');
-    const themeBtn = document.getElementById('themeBtn');
-    
-    let habits = JSON.parse(localStorage.getItem('habits')) || [];
-    let currentDate = new Date();
-    let currentMonth = currentDate.getMonth();
-    let currentYear = currentDate.getFullYear();
-    
-    // ===== Initialization =====
-    document.addEventListener('DOMContentLoaded', () => {
-        loadTheme();
-        updateMonthYear();
-        renderHabits();
-    });
+    let habits = JSON.parse(localStorage.getItem('habits_v2')) || [];
+    let viewDate = new Date();
 
-    // ===== Theme Management =====
-    function loadTheme() {
+    function init() {
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
-        updateThemeButton(savedTheme);
+        render();
+    }
+
+    function addHabit() {
+        const name = document.getElementById('habitInput').value.trim();
+        const color = document.getElementById('colorInput').value;
+        if (!name) return;
+
+        habits.push({
+            id: Date.now(),
+            name,
+            color,
+            completions: {} // Format: "YYYY-MM-DD": true
+        });
+
+        document.getElementById('habitInput').value = '';
+        save();
+    }
+
+    function toggleDay(habitId, dateStr) {
+        const habit = habits.find(h => h.id === habitId);
+        if (habit.completions[dateStr]) {
+            delete habit.completions[dateStr];
+        } else {
+            habit.completions[dateStr] = true;
+        }
+        save();
+    }
+
+    function calculateStreak(completions) {
+        let streak = 0;
+        let checkDate = new Date();
+        checkDate.setHours(0,0,0,0);
+
+        // If today isn't done, check starting from yesterday
+        const todayStr = checkDate.toISOString().split('T')[0];
+        if (!completions[todayStr]) {
+            checkDate.setDate(checkDate.getDate() - 1);
+        }
+
+        while (true) {
+            const s = checkDate.toISOString().split('T')[0];
+            if (completions[s]) {
+                streak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+        return streak;
+    }
+
+    function render() {
+        const list = document.getElementById('habitList');
+        const monthDisplay = document.getElementById('monthDisplay');
+        list.innerHTML = '';
+
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
+        monthDisplay.innerText = viewDate.toLocaleDateString('default', { month: 'long', year: 'numeric' });
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        habits.forEach(habit => {
+            const currentStreak = calculateStreak(habit.completions);
+            const card = document.createElement('div');
+            card.className = 'habit-card';
+            
+            let gridHtml = '';
+            for (let i = 0; i < firstDay; i++) gridHtml += '<div class="day empty"></div>';
+            
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateObj = new Date(year, month, d);
+                const dStr = dateObj.toISOString().split('T')[0];
+                const isDone = habit.completions[dStr];
+                const isToday = dStr === todayStr;
+                
+                gridHtml += `
+                    <div class="day ${isDone ? 'done' : ''} ${isToday ? 'today' : ''}" 
+                         style="${isDone ? `background: ${habit.color}; color: white; border-color: ${habit.color}` : ''}"
+                         onclick="toggleDay(${habit.id}, '${dStr}')">
+                        ${d}
+                    </div>`;
+            }
+
+            card.innerHTML = `
+                <div class="habit-info">
+                    <div>
+                        <h3 style="color: ${habit.color}">${habit.name}</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary)">Consistency is key</p>
+                    </div>
+                    <div style="text-align: right">
+                        <div class="streak-badge">🔥 ${currentStreak} Day Streak</div>
+                        <button class="btn btn-danger" onclick="deleteHabit(${habit.id})">Delete</button>
+                    </div>
+                </div>
+                <div class="grid-container">
+                    <div class="grid">${gridHtml}</div>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function deleteHabit(id) {
+        if(confirm('Delete this habit?')) {
+            habits = habits.filter(h => h.id !== id);
+            save();
+        }
+    }
+
+    function changeMonth(dir) {
+        viewDate.setMonth(viewDate.getMonth() + dir);
+        render();
     }
 
     function toggleTheme() {
         const current = document.documentElement.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-        updateThemeButton(next);
-        showToast(`Switched to ${next} mode`);
+        const target = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', target);
+        localStorage.setItem('theme', target);
     }
 
-    function updateThemeButton(theme) {
-        themeBtn.innerHTML = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+    function save() {
+        localStorage.setItem('habits_v2', JSON.stringify(habits));
+        render();
     }
 
-    // ===== Month Navigation =====
-    function updateMonthYear() {
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                          'July', 'August', 'September', 'October', 'November', 'December'];
-        monthYearEl.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-    }
-
-    function changeMonth(delta) {
-        currentMonth += delta;
-        if (currentMonth > 11) {
-            currentMonth = 0;
-            currentYear++;
-        } else if (currentMonth < 0) {
-            currentMonth = 11;
-            currentYear--;
-        }
-        updateMonthYear();
-        renderHabits();
-    }
-
-    function getDaysInMonth(month, year) {
-        return new Date(year, month + 1, 0).getDate();
-    }
-
-    function getFirstDayOfMonth(month, year) {
-        return new Date(year, month, 1).getDay(); // 0 = Sunday
-    }
-
-    // ===== Habit Management =====
-    function addHabit() {
-        const text = habitInput.value.trim();
-        if (text === "") {
-            showToast("Please enter a habit name", true);
-            return;
-        }
-
-        const newHabit = {
-            id: Date.now(),
-            name: text,
-            completedDates: {} // Stores dates as "YYYY-MM-DD" keys
-        };
-
-        habits.push(newHabit);
-        saveAndRender();
-        habitInput.value = "";
-        showToast(`"${text}" added!`);
-    }
-
-    function handleKeyPress(event) {
-        if (event.key === 'Enter') {
-            addHabit();
-        }
-    }
-
-    function getDateKey(day) {
-        return `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    }
-
-    function toggleDay(habitId, day) {
-        const habit = habits.find(h => h.id === habitId);
-        if (!habit) return;
-        
-        const dateKey = getDateKey(day);
-        if (habit.completedDates[dateKey]) {
-            delete habit.completedDates[dateKey];
-        } else {
-            habit.completedDates[dateKey] = true;
-        }
-        saveAndRender();
-    }
-
-    function deleteHabit(habitId) {
-        if (!confirm("Are you sure you want to delete this habit? This cannot be undone.")) {
-            return;
-        }
-        const habit = habits.find(h => h.id === habitId);
-        habits = habits.filter(h => h.id !== habitId);
-        saveAndRender();
-        showToast(`"${habit.name}" deleted`);
-    }
-
-    function saveAndRender() {
-        localStorage.setItem('habits', JSON.stringify(habits));
-        renderHabits();
-    }
-
-    // ===== Rendering =====
-    function renderHabits() {
-        habitList.innerHTML = "";
-        
-        if (habits.length === 0) {
-            habitList.innerHTML = '<div class="empty-state">No habits yet. Add one above to get started! ✨</div>';
-            return;
-        }
-
-        const daysInMonth = getDaysInMonth(currentMonth, currentYear);
-        const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
-        const today = new Date();
-        const isCurrentMonth = today.getMonth() === currentMonth && today.getFullYear() === currentYear;
-        const todayDate = today.getDate();
-        
-        // Weekday labels (starting Sunday)
-        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-        habits.forEach(habit => {
-            const card = document.createElement('div');
-            card.className = 'habit-card';
-
-            // Calculate progress
-            const completedCount = Object.keys(habit.completedDates).filter(key => {
-                const [y, m, d] = key.split('-').map(Number);
-                return m === currentMonth + 1 && y === currentYear;
-            }).length;
-            const progressPercent = Math.round((completedCount / daysInMonth) * 100);
-
-            // Build grid HTML
-            let gridHTML = "";
-            
-            // Empty cells for days before the 1st
-            for (let i = 0; i < firstDay; i++) {
-                gridHTML += `<div class="day empty"></div>`;
-            }
-            
-            // Actual days
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateKey = getDateKey(day);
-                const isCompleted = habit.completedDates[dateKey];
-                const isToday = isCurrentMonth && day === todayDate;
-                
-                let classes = 'day';
-                if (isCompleted) classes += ' completed';
-                if (isToday) classes += ' today';
-                
-                gridHTML += `<div class="${classes}" onclick="toggleDay(${habit.id}, ${day})" role="button" tabindex="0">${day}</div>`;
-            }
-
-            card.innerHTML = `
-                <div class="habit-header">
-                    <div class="habit-title">
-                        <h3>${escapeHtml(habit.name)}</h3>
-                        <button class="delete-btn" onclick="deleteHabit(${habit.id})">✕ Remove</button>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${progressPercent}%"></div>
-                        </div>
-                        <span class="progress-text">${completedCount}/${daysInMonth}</span>
-                    </div>
-                </div>
-                <div class="weekday-header">
-                    ${weekdays.map(d => `<span>${d}</span>`).join('')}
-                </div>
-                <div class="grid">${gridHTML}</div>
-            `;
-            habitList.appendChild(card);
-        });
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // ===== Export/Import =====
-    function exportData() {
-        const data = {
-            habits: habits,
-            exportedAt: new Date().toISOString(),
-            version: '1.0'
-        };
-        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `habits-export-${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast("Data exported successfully!");
-    }
-
-    function importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (!data.habits || !Array.isArray(data.habits)) {
-                    throw new Error('Invalid file format');
-                }
-                
-                if (!confirm(`Import ${data.habits.length} habit(s)? This will merge with your current data.`)) {
-                    return;
-                }
-                
-                // Merge habits (avoid duplicate IDs)
-                const existingIds = new Set(habits.map(h => h.id));
-                const newHabits = data.habits.filter(h => !existingIds.has(h.id));
-                habits.push(...newHabits);
-                
-                saveAndRender();
-                showToast(`Imported ${newHabits.length} habit(s)!`);
-            } catch (err) {
-                showToast("Import failed: Invalid file", true);
-                console.error(err);
-            }
-        };
-        reader.readAsText(file);
-        event.target.value = ''; // Reset input
-    }
-
-    // ===== Toast Notifications =====
-    function showToast(message, isError = false) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.style.borderLeftColor = isError ? 'var(--delete-color)' : 'var(--primary-color)';
-        toast.classList.add('show');
-        
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 2500);
-    }
-
-    // ===== Accessibility Enhancements =====
-    document.addEventListener('keydown', (e) => {
-        if (e.target.classList.contains('day') && (e.key === 'Enter' || e.key === ' ')) {
-            e.preventDefault();
-            e.target.click();
-        }
-    });
+    init();
 </script>
-
 </body>
 </html>
-
