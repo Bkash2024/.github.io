@@ -1,197 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dynamic Number Practice</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #fcfcfc;
-    color: #333;
-  }
-  h1, h2 {
-    text-align: center;
-    color: #0056b3;
-  }
-  .controls {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  button {
-    background-color: #0056b3;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    font-size: 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-  button:hover { background-color: #004494; }
-  
-  .worksheet-card {
-    background: white;
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    margin-bottom: 30px;
-  }
-  .row {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 15px;
-  }
-  .box {
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    border: 2px solid #555;
-    background-color: #fff;
-    border-radius: 4px;
-    font-weight: bold;
-  }
-  .static-box { background-color: #f0f8ff; }
-  
-  input[type="number"] {
-    width: 100%;
-    height: 100%;
-    border: none;
-    text-align: center;
-    font-size: 22px;
-    font-weight: bold;
-    outline: none;
-    color: #333;
-    background-color: #fffaf0;
-  }
-  input[type=number]::-webkit-inner-spin-button, 
-  input[type=number]::-webkit-outer-spin-button { 
-    -webkit-appearance: none; margin: 0; 
-  }
-  input[type=number] { -moz-appearance: textfield; }
-  
-  .correct { color: #009900 !important; }
-  
-  .columns-container {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-  }
-  .vertical-chain {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  
-  /* Print styling ensures the button hides and the background clears */
-  @media print {
-    body { background-color: white; padding: 0; }
-    .controls { display: none; }
-    .worksheet-card { box-shadow: none; border: none; margin-bottom: 40px; }
-    input[type="number"] { background-color: white; }
-    .static-box { background-color: white; }
-  }
-</style>
-</head>
-<body>
+// Add to <head> or top of <script>
+let currentSeed = Date.now();
+let difficulty = 'medium'; // 'easy', 'medium', 'hard'
 
-  <div class="controls">
-    <button onclick="generateWorksheet()">Generate New Worksheet</button>
-  </div>
+function getDifficultySettings() {
+  const settings = {
+    easy: { range: 20, hidePercent: 0.3, length: 8 },
+    medium: { range: 50, hidePercent: 0.4, length: 10 },
+    hard: { range: 100, hidePercent: 0.6, length: 12 }
+  };
+  return settings[difficulty];
+}
 
-  <h1>Dynamic Number Practice</h1>
-
-  <div class="worksheet-card">
-    <h2>Exercise 1: Horizontal Sequences</h2>
-    <p style="text-align:center;">Fill in the missing numbers to complete the rows.</p>
-    <div id="horizontal-container"></div>
-  </div>
-
-  <div class="worksheet-card">
-    <h2>Exercise 2: Vertical Number Chains</h2>
-    <p style="text-align:center;">Count down the columns and type the missing numbers.</p>
-    <div class="columns-container" id="vertical-container"></div>
-  </div>
-
-  <script>
-    // Utility to create a single box (either static text or a text input)
-    function createBox(number, isHidden) {
-      const boxDiv = document.createElement('div');
-      boxDiv.className = isHidden ? 'box' : 'box static-box';
-      
-      if (isHidden) {
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.setAttribute('data-answer', number);
-        
-        // Add instant validation
-        input.addEventListener('input', function() {
-          if (parseInt(this.value) === parseInt(this.getAttribute('data-answer'))) {
-            this.classList.add('correct');
-          } else {
-            this.classList.remove('correct');
-          }
-        });
-        boxDiv.appendChild(input);
-      } else {
-        boxDiv.textContent = number;
-      }
-      return boxDiv;
+function generateWorksheet(seed = currentSeed) {
+  const rand = seededRandom(seed);
+  const { range, hidePercent, length } = getDifficultySettings();
+  
+  // ... rest of your generation logic, replacing Math.random() with rand()
+  // Example for horizontal rows:
+  for (let r = 0; r < 3; r++) {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'row';
+    let startNum = Math.floor(rand() * (90 - range + 1)) + 1;
+    
+    for (let i = 0; i < length; i++) {
+      const currentNum = startNum + i;
+      const isHidden = (i !== 0) && (rand() < hidePercent);
+      rowDiv.appendChild(createBox(currentNum, isHidden));
     }
+    document.getElementById('horizontal-container').appendChild(rowDiv);
+  }
+  // ... similar for vertical chains
+}
 
-    function generateWorksheet() {
-      const horizontalContainer = document.getElementById('horizontal-container');
-      const verticalContainer = document.getElementById('vertical-container');
-      
-      // Clear previous grids
-      horizontalContainer.innerHTML = '';
-      verticalContainer.innerHTML = '';
+// Add seed input to controls:
+// <input type="number" id="seed-input" placeholder="Optional seed">
+// <button onclick="currentSeed = document.getElementById('seed-input').value || Date.now(); generateWorksheet()">Generate</button>
 
-      // Generate 3 Horizontal Rows (Length 10)
-      for (let r = 0; r < 3; r++) {
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'row';
-        
-        // Pick a random starting number between 1 and 90
-        let startNum = Math.floor(Math.random() * 90) + 1;
-        
-        for (let i = 0; i < 10; i++) {
-          const currentNum = startNum + i;
-          // Randomly hide ~40% of the boxes, but always show the first box as an anchor
-          const isHidden = (i !== 0) && (Math.random() < 0.4);
-          rowDiv.appendChild(createBox(currentNum, isHidden));
-        }
-        horizontalContainer.appendChild(rowDiv);
-      }
-
-      // Generate 4 Vertical Chains (Length 9)
-      for (let c = 0; c < 4; c++) {
-        const chainDiv = document.createElement('div');
-        chainDiv.className = 'vertical-chain';
-        
-        // Pick a random starting number between 1 and 91
-        let startNum = Math.floor(Math.random() * 91) + 1;
-        
-        for (let i = 0; i < 9; i++) {
-          const currentNum = startNum + i;
-          const isHidden = (i !== 0) && (Math.random() < 0.4);
-          chainDiv.appendChild(createBox(currentNum, isHidden));
-        }
-        verticalContainer.appendChild(chainDiv);
-      }
-    }
-
-    // Generate the first worksheet on page load
-    window.onload = generateWorksheet;
-  </script>
-</body>
-</html>
