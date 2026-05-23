@@ -1,38 +1,960 @@
-// Add to <head> or top of <script>
-let currentSeed = Date.now();
-let difficulty = 'medium'; // 'easy', 'medium', 'hard'
-
-function getDifficultySettings() {
-  const settings = {
-    easy: { range: 20, hidePercent: 0.3, length: 8 },
-    medium: { range: 50, hidePercent: 0.4, length: 10 },
-    hard: { range: 100, hidePercent: 0.6, length: 12 }
-  };
-  return settings[difficulty];
-}
-
-function generateWorksheet(seed = currentSeed) {
-  const rand = seededRandom(seed);
-  const { range, hidePercent, length } = getDifficultySettings();
-  
-  // ... rest of your generation logic, replacing Math.random() with rand()
-  // Example for horizontal rows:
-  for (let r = 0; r < 3; r++) {
-    const rowDiv = document.createElement('div');
-    rowDiv.className = 'row';
-    let startNum = Math.floor(rand() * (90 - range + 1)) + 1;
-    
-    for (let i = 0; i < length; i++) {
-      const currentNum = startNum + i;
-      const isHidden = (i !== 0) && (rand() < hidePercent);
-      rowDiv.appendChild(createBox(currentNum, isHidden));
-    }
-    document.getElementById('horizontal-container').appendChild(rowDiv);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Practice Passport 🗺️</title>
+<style>
+  :root {
+    --primary: #4361ee;
+    --primary-dark: #3a56d4;
+    --success: #06d6a0;
+    --warning: #ffd166;
+    --danger: #ef476f;
+    --bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --text: #212529;
+    --border: #dee2e6;
   }
-  // ... similar for vertical chains
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  
+  header {
+    text-align: center;
+    padding: 20px 0;
+    margin-bottom: 16px;
+  }
+  
+  h1 {
+    color: var(--primary);
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+  }
+  
+  .subtitle {
+    color: #6c757d;
+    font-size: 1rem;
+  }
+  
+  .controls {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    align-items: end;
+  }
+  
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+  }
+  
+  select, input[type="number"], input[type="text"] {
+    padding: 10px 12px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fff;
+    transition: border-color 0.2s;
+  }
+  
+  select:focus, input:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  
+  input[type="number"], input[type="text"] {
+    text-align: center;
+    -moz-appearance: textfield;
+  }
+  
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  .btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .btn:hover { background: var(--primary-dark); }
+  .btn:active { transform: scale(0.98); }
+  .btn-secondary { background: #6c757d; }
+  .btn-secondary:hover { background: #5a6268; }
+  .btn-success { background: var(--success); color: #003; }
+  .btn-success:hover { background: #05c191; }
+  
+  .btn-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .worksheet-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .card-title {
+    font-size: 1.3rem;
+    color: var(--primary);
+    font-weight: 700;
+  }
+  
+  .card-instructions {
+    color: #6c757d;
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  
+  /* Horizontal rows */
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  
+  /* Vertical chains */
+  .columns-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .vertical-chain {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 60px;
+  }
+  
+  /* Skip counting & arithmetic rows */
+  .arith-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+  }
+  
+  .operator {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--primary);
+    min-width: 24px;
+    text-align: center;
+  }
+  
+  .equals {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #6c757d;
+  }
+  
+  /* Box styles */
+  .box {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    border: 2px solid #495057;
+    background: #fff;
+    border-radius: 8px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  
+  .static-box {
+    background: #eef7ff;
+    border-color: var(--primary);
+    color: var(--primary-dark);
+  }
+  
+  .box input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 600;
+    background: #fff9e6;
+    border-radius: 6px;
+    color: #333;
+  }
+  
+  .box input.correct {
+    background: #d4edda;
+    color: #155724;
+    border: 2px solid #28a745;
+  }
+  
+  .box input.incorrect {
+    animation: shake 0.3s;
+    border-color: var(--danger);
+    background: #ffe6e6;
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+  
+  /* Target practice (number bonds) */
+  .bond-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin: 12px 0;
+  }
+  
+  .bond-target {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary);
+    background: #eef7ff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 2px solid var(--primary);
+  }
+  
+  .bond-pair {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .bond-plus {
+    font-size: 1.4rem;
+    color: #6c757d;
+  }
+  
+  /* Progress & stamps */
+  .progress-bar {
+    background: #e9ecef;
+    border-radius: 10px;
+    height: 12px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: var(--success);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+  
+  .stamps {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 12px;
+  }
+  
+  .stamp {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    border: 3px solid #adb5bd;
+    opacity: 0.5;
+    transition: all 0.3s;
+  }
+  
+  .stamp.earned {
+    background: var(--warning);
+    border-color: #e6b400;
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  
+  /* Answer key toggle */
+  .answer-key {
+    display: none;
+    margin-top: 16px;
+    padding: 12px;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+  
+  .answer-key.visible {
+    display: block;
+  }
+  
+  .answer-key-item {
+    margin: 4px 0;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  /* Mobile optimizations */
+  @media (max-width: 600px) {
+    body { padding: 12px; }
+    .controls { grid-template-columns: 1fr; }
+    .box { width: 46px; height: 46px; font-size: 1.1rem; }
+    .box input { font-size: 1.1rem; }
+    .operator, .equals { font-size: 1.2rem; }
+    .bond-target { font-size: 1.3rem; padding: 6px 12px; }
+    h1 { font-size: 1.5rem; }
+    .card-title { font-size: 1.15rem; }
+  }
+  
+  /* Print styles */
+  @media print {
+    body { 
+      background: white; 
+      padding: 0; 
+      font-size: 14px;
+    }
+    .controls, .btn, .answer-key-toggle, .progress-section { 
+      display: none !important; 
+    }
+    .worksheet-card { 
+      box-shadow: none; 
+      border: 1px solid #ccc; 
+      margin-bottom: 25px; 
+      page-break-inside: avoid;
+    }
+    .box, .box input { 
+      background: white !important; 
+      border-color: #333 !important;
+      color: #000 !important;
+    }
+    .static-box { 
+      background: #f8f9fa !important; 
+    }
+    input { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @page { margin: 1.5cm; }
+  }
+  
+  /* Celebration animation */
+  .celebration {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 1000;
+    display: none;
+  }
+  
+  .confetti {
+    position: absolute;
+    width: 10px; height: 10px;
+    background: var(--warning);
+    animation: fall 3s linear forwards;
+  }
+  
+  @keyframes fall {
+    to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+  
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    z-index: 999;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗺️ Practice Passport</h1>
+  <p class="subtitle">Generate unique worksheets • Track progress • Print anytime</p>
+</header>
+
+<div class="controls">
+  <div class="control-group">
+    <label for="exercise-type">Exercise Type</label>
+    <select id="exercise-type">
+      <option value="sequence">🔢 Number Sequences</option>
+      <option value="skip">🔁 Skip Counting</option>
+      <option value="arithmetic">➕➖ Simple Arithmetic</option>
+      <option value="bonds">🎯 Number Bonds (Make 10/20)</option>
+      <option value="mixed">🔀 Mixed Practice</option>
+    </select>
+  </div>
+  
+  <div class="control-group">
+    <label for="difficulty">Difficulty</label>
+    <select id="difficulty">
+      <option value="easy">😊 Easy (1-20)</option>
+      <option value="medium" selected>🤓 Medium (1-50)</option>
+      <option value="hard">🧠 Hard (1-100)</option>
+    </select>
+  </div>
+  
+  <div class="control-group">
+    <label for="seed-input">Worksheet Seed</label>
+    <input type="text" id="seed-input" placeholder="Auto" maxlength="10">
+  </div>
+  
+  <div class="control-group">
+    <label>&nbsp;</label>
+    <div class="btn-group">
+      <button class="btn" onclick="generateAll()">
+        ✨ Generate
+      </button>
+      <button class="btn btn-secondary" onclick="toggleAnswerKey()">
+        🔑 Answers
+      </button>
+    </div>
+  </div>
+  
+  <div class="control-group">
+    <label>&nbsp;</label>
+    <button class="btn btn-success" onclick="window.print()">
+      🖨️ Print / PDF
+    </button>
+  </div>
+</div>
+
+<div class="progress-section" style="background:white; border-radius:12px; padding:16px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+    <strong>🏆 Your Progress</strong>
+    <span id="progress-text">0/5 stamps earned</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+  <div class="stamps" id="stamps-container">
+    <div class="stamp" title="Sequences Master">1️⃣</div>
+    <div class="stamp" title="Skip Counter">2️⃣</div>
+    <div class="stamp" title="Arithmetic Ace">3️⃣</div>
+    <div class="stamp" title="Bond Builder">4️⃣</div>
+    <div class="stamp" title="All-Star">⭐</div>
+  </div>
+</div>
+
+<div id="worksheet-area">
+  <!-- Worksheets generated here -->
+</div>
+
+<div class="answer-key" id="answer-key">
+  <strong>🔑 Answer Key</strong>
+  <div id="answer-key-content"></div>
+</div>
+
+<div class="celebration" id="celebration"></div>
+<div class="toast" id="toast">Worksheet generated! ✨</div>
+
+<script>
+// ============= UTILITIES =============
+// Seeded random number generator (mulberry32)
+function seededRandom(seed) {
+  return function() {
+    let t = (seed += 0x6D2B79F5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
-// Add seed input to controls:
-// <input type="number" id="seed-input" placeholder="Optional seed">
-// <button onclick="currentSeed = document.getElementById('seed-input').value || Date.now(); generateWorksheet()">Generate</button>
+// Hash string to number for seed
+function stringToSeed(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (Math.imul(31, hash) + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash) || Date.now();
+}
+
+// Show toast notification
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ============= DIFFICULTY SETTINGS =============
+function getSettings() {
+  const difficulty = document.getElementById('difficulty').value;
+  const exerciseType = document.getElementById('exercise-type').value;
+  
+  const base = {
+    easy: { min: 1, max: 20, hideRate: 0.35, length: 8 },
+    medium: { min: 1, max: 50, hideRate: 0.45, length: 10 },
+    hard: { min: 1, max: 100, hideRate: 0.6, length: 12 }
+  };
+  
+  const settings = { ...base[difficulty] };
+  
+  // Adjust for exercise type
+  if (exerciseType === 'skip') {
+    settings.skipOptions = [2, 5, 10];
+    settings.length = Math.min(settings.length, 10);
+  } else if (exerciseType === 'arithmetic') {
+    settings.max = Math.min(settings.max, 30); // Keep arithmetic manageable
+  } else if (exerciseType === 'bonds') {
+    settings.target = difficulty === 'easy' ? 10 : 20;
+    settings.length = 6;
+  }
+  
+  return settings;
+}
+
+// ============= BOX CREATION =============
+function createBox(value, isHidden, answerKey = [], index = -1) {
+  const box = document.createElement('div');
+  box.className = `box ${isHidden ? '' : 'static-box'}`;
+  
+  if (isHidden) {
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.inputMode = 'numeric';
+    input.dataset.answer = value;
+    input.dataset.index = index;
+    input.setAttribute('aria-label', 'Your answer');
+    
+    // Instant validation with feedback
+    input.addEventListener('input', function() {
+      const val = parseInt(this.value);
+      const ans = parseInt(this.dataset.answer);
+      if (!isNaN(val)) {
+        if (val === ans) {
+          this.classList.add('correct');
+          this.classList.remove('incorrect');
+          checkWorksheetComplete();
+        } else {
+          this.classList.remove('correct');
+          this.classList.add('incorrect');
+        }
+      } else {
+        this.classList.remove('correct', 'incorrect');
+      }
+    });
+    
+    // Prevent non-numeric input
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'e' || e.key === 'E' || e.key === '.') e.preventDefault();
+    });
+    
+    box.appendChild(input);
+    if (answerKey && index >= 0) answerKey[index] = value;
+  } else {
+    box.textContent = value;
+  }
+  return box;
+}
+
+// ============= EXERCISE GENERATORS =============
+
+// 1. Number Sequences (original + enhanced)
+function generateSequences(rand, settings, answerKey) {
+  const container = document.createElement('div');
+  const rows = 3;
+  
+  for (let r = 0; r < rows; r++) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const start = Math.floor(rand() * (settings.max - settings.min - settings.length + 1)) + settings.min;
+    
+    for (let i = 0; i < settings.length; i++) {
+      const num = start + i;
+      const isHidden = i > 0 && rand() < settings.hideRate;
+      row.appendChild(createBox(num, isHidden, answerKey, answerKey.length));
+    }
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 2. Skip Counting
+function generateSkipCounting(rand, settings, answerKey) {
+  const container = document.createElement('div');
+  const rows = 3;
+  const skip = settings.skipOptions[Math.floor(rand() * settings.skipOptions.length)];
+  
+  for (let r = 0; r < rows; r++) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const start = Math.floor(rand() * (settings.max - skip * settings.length + 1)) + settings.min;
+    
+    for (let i = 0; i < settings.length; i++) {
+      const num = start + i * skip;
+      const isHidden = i > 0 && rand() < settings.hideRate;
+      row.appendChild(createBox(num, isHidden, answerKey, answerKey.length));
+    }
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 3. Simple Arithmetic (+/-)
+function generateArithmetic(rand, settings, answerKey) {
+  const container = document.createElement('div');
+  const problems = 6;
+  
+  for (let p = 0; p < problems; p++) {
+    const row = document.createElement('div');
+    row.className = 'arith-row';
+    
+    const a = Math.floor(rand() * (settings.max / 2)) + 1;
+    const b = Math.floor(rand() * (settings.max / 2)) + 1;
+    const isAdd = rand() > 0.4; // 60% addition
+    const answer = isAdd ? a + b : Math.max(a, b) - Math.min(a, b);
+    
+    // Randomly hide one value
+    const hidePosition = Math.floor(rand() * 3); // 0=a, 1=b, 2=answer
+    
+    row.appendChild(createBox(hidePosition === 0 ? answer : a, hidePosition !== 0, answerKey, answerKey.length));
+    
+    const op = document.createElement('span');
+    op.className = 'operator';
+    op.textContent = isAdd ? '+' : '−';
+    row.appendChild(op);
+    
+    row.appendChild(createBox(hidePosition === 1 ? answer : b, hidePosition !== 1, answerKey, answerKey.length));
+    
+    const eq = document.createElement('span');
+    eq.className = 'equals';
+    eq.textContent = '=';
+    row.appendChild(eq);
+    
+    row.appendChild(createBox(hidePosition === 2 ? a : (isAdd ? a + b : Math.max(a,b) - Math.min(a,b)), 
+                           hidePosition === 2, answerKey, answerKey.length));
+    
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 4. Number Bonds (Make 10/20)
+function generateBonds(rand, settings, answerKey) {
+  const container = document.createElement('div');
+  const target = settings.target;
+  const pairs = 5;
+  
+  for (let p = 0; p < pairs; p++) {
+    const row = document.createElement('div');
+    row.className = 'bond-container';
+    
+    const a = Math.floor(rand() * (target + 1));
+    const b = target - a;
+    
+    // Randomly hide one
+    const hideA = rand() > 0.5;
+    
+    row.appendChild(createBox(hideA ? target : a, hideA, answerKey, answerKey.length));
+    
+    const plus = document.createElement('span');
+    plus.className = 'bond-plus';
+    plus.textContent = '+';
+    row.appendChild(plus);
+    
+    row.appendChild(createBox(hideA ? b : target, !hideA, answerKey, answerKey.length));
+    
+    const equals = document.createElement('span');
+    equals.className = 'equals';
+    equals.textContent = '=';
+    row.appendChild(equals);
+    
+    const targetBox = document.createElement('div');
+    targetBox.className = 'bond-target';
+    targetBox.textContent = target;
+    row.appendChild(targetBox);
+    
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 5. Mixed Practice (random selection)
+function generateMixed(rand, settings, answerKey) {
+  const container = document.createElement('div');
+  const exercises = [
+    () => generateSequences(rand, {...settings, length: 6}, answerKey),
+    () => generateSkipCounting(rand, {...settings, skipOptions: [2,5], length: 7}, answerKey),
+    () => generateArithmetic(rand, {...settings, max: 25}, answerKey)
+  ];
+  
+  // Pick 3 random exercise types
+  const selected = [];
+  while (selected.length < 3) {
+    const idx = Math.floor(rand() * exercises.length);
+    if (!selected.includes(idx)) selected.push(idx);
+  }
+  
+  selected.forEach(idx => {
+    const section = document.createElement('div');
+    section.style.marginBottom = '20px';
+    section.appendChild(exercises[idx]());
+    container.appendChild(section);
+  });
+  
+  return container;
+}
+
+// ============= MAIN GENERATOR =============
+let currentAnswers = [];
+
+function generateAll() {
+  const seedInput = document.getElementById('seed-input').value.trim();
+  const seed = seedInput ? stringToSeed(seedInput) : Date.now();
+  
+  if (!seedInput) {
+    document.getElementById('seed-input').placeholder = seed.toString().slice(0, 8);
+  }
+  
+  const rand = seededRandom(seed);
+  const settings = getSettings();
+  const exerciseType = document.getElementById('exercise-type').value;
+  const area = document.getElementById('worksheet-area');
+  const answerKeyContent = document.getElementById('answer-key-content');
+  
+  area.innerHTML = '';
+  currentAnswers = [];
+  answerKeyContent.innerHTML = '';
+  
+  // Generate worksheet based on type
+  let exerciseContainer, title, instructions;
+  
+  switch(exerciseType) {
+    case 'sequence':
+      title = '🔢 Number Sequences';
+      instructions = 'Fill in the missing numbers to complete each row.';
+      exerciseContainer = generateSequences(rand, settings, currentAnswers);
+      break;
+    case 'skip':
+      title = '🔁 Skip Counting';
+      instructions = `Count by ${settings.skipOptions?.[0] || 2}s, 5s, or 10s to fill the gaps.`;
+      exerciseContainer = generateSkipCounting(rand, settings, currentAnswers);
+      break;
+    case 'arithmetic':
+      title = '➕➖ Simple Arithmetic';
+      instructions = 'Solve the missing number in each equation.';
+      exerciseContainer = generateArithmetic(rand, settings, currentAnswers);
+      break;
+    case 'bonds':
+      title = `🎯 Number Bonds (Make ${settings.target})`;
+      instructions = `Find the missing number that adds up to ${settings.target}.`;
+      exerciseContainer = generateBonds(rand, settings, currentAnswers);
+      break;
+    case 'mixed':
+      title = '🔀 Mixed Practice';
+      instructions = 'Complete all exercises! Mix of sequences, counting, and arithmetic.';
+      exerciseContainer = generateMixed(rand, settings, currentAnswers);
+      break;
+  }
+  
+  // Build card
+  const card = document.createElement('div');
+  card.className = 'worksheet-card';
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-title">${title}</div>
+      <div style="font-size:0.9rem; color:#6c757d">Seed: ${seed.toString().slice(0,8)}</div>
+    </div>
+    <p class="card-instructions">${instructions}</p>
+  `;
+  card.appendChild(exerciseContainer);
+  area.appendChild(card);
+  
+  // Build answer key
+  if (currentAnswers.length > 0) {
+    currentAnswers.forEach((ans, i) => {
+      if (ans !== undefined) {
+        const item = document.createElement('div');
+        item.className = 'answer-key-item';
+        item.innerHTML = `<span>Question ${i+1}:</span> <strong>${ans}</strong>`;
+        answerKeyContent.appendChild(item);
+      }
+    });
+  }
+  
+  // Update progress if completed before
+  updateProgressDisplay();
+  
+  showToast('✨ New worksheet ready!');
+  
+  // Auto-focus first input for quick start
+  setTimeout(() => {
+    const firstInput = area.querySelector('input');
+    if (firstInput) firstInput.focus();
+  }, 100);
+}
+
+// ============= ANSWER KEY TOGGLE =============
+function toggleAnswerKey() {
+  const key = document.getElementById('answer-key');
+  key.classList.toggle('visible');
+  if (key.classList.contains('visible')) {
+    showToast('🔑 Answers revealed');
+  } else {
+    showToast('🙈 Answers hidden');
+  }
+}
+
+// ============= PROGRESS & STAMPS =============
+function updateProgressDisplay() {
+  const earned = JSON.parse(localStorage.getItem('passport_stamps') || '[]');
+  const count = earned.length;
+  
+  document.getElementById('progress-text').textContent = `${count}/5 stamps earned`;
+  document.getElementById('progress-fill').style.width = `${(count/5)*100}%`;
+  
+  // Update stamp visuals
+  document.querySelectorAll('.stamp').forEach((stamp, i) => {
+    if (earned.includes(i)) {
+      stamp.classList.add('earned');
+    } else {
+      stamp.classList.remove('earned');
+    }
+  });
+}
+
+function awardStamp(typeIndex) {
+  const earned = JSON.parse(localStorage.getItem('passport_stamps') || '[]');
+  if (!earned.includes(typeIndex)) {
+    earned.push(typeIndex);
+    localStorage.setItem('passport_stamps', JSON.stringify(earned));
+    updateProgressDisplay();
+    showCelebration();
+    showToast('🏆 Stamp earned!');
+  }
+}
+
+function checkWorksheetComplete() {
+  const inputs = document.querySelectorAll('#worksheet-area input');
+  if (inputs.length === 0) return;
+  
+  let allCorrect = true;
+  inputs.forEach(input => {
+    if (parseInt(input.value) !== parseInt(input.dataset.answer)) {
+      allCorrect = false;
+    }
+  });
+  
+  if (allCorrect) {
+    const exerciseType = document.getElementById('exercise-type').value;
+    const stampMap = {
+      'sequence': 0, 'skip': 1, 'arithmetic': 2, 'bonds': 3, 'mixed': 4
+    };
+    awardStamp(stampMap[exerciseType] || 4);
+  }
+}
+
+function showCelebration() {
+  const celeb = document.getElementById('celebration');
+  celeb.style.display = 'block';
+  celeb.innerHTML = '';
+  
+  // Create confetti
+  for (let i = 0; i < 50; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti';
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = ['#4361ee', '#06d6a0', '#ffd166', '#ef476f'][Math.floor(Math.random()*4)];
+    piece.style.animationDelay = `${Math.random() * 2}s`;
+    piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+    celeb.appendChild(piece);
+  }
+  
+  setTimeout(() => { celeb.style.display = 'none'; }, 3000);
+}
+
+// ============= INIT =============
+window.addEventListener('load', () => {
+  // Load saved progress
+  updateProgressDisplay();
+  
+  // Generate first worksheet
+  generateAll();
+  
+  // Keyboard shortcut: Ctrl+Enter to generate new
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      generateAll();
+    }
+  });
+});
+
+// Prevent iOS zoom on input focus
+document.addEventListener('focusin', (e) => {
+  if (e.target.tagName === 'INPUT') {
+    document.body.style.zoom = '1.0';
+  }
+});
+</script>
+
+</body>
+</html>
 
