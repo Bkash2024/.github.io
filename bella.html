@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>🎈 Practice Playground – Print Fixed</title>
+<title>🎈 Practice Playground – A4 Print Optimized</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -59,7 +59,7 @@
   .stamp { width: 32px; height: 32px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary); opacity: 0.4; font-size: 0.8rem; }
   .stamp.earned { background: var(--accent); opacity: 1; }
 
-  .worksheet-card { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
+  .worksheet-card { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); transition: all 0.2s; }
   .card-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; border-bottom: 1px dashed var(--border); padding-bottom: 8px; margin-bottom: 16px; }
   .card-title { font-size: 1.3rem; font-weight: 700; color: var(--primary); }
   .instructions { color: var(--muted); text-align: center; margin-bottom: 20px; font-size: 0.9rem; }
@@ -96,24 +96,52 @@
   .answer-key.visible { display: block; }
   .answer-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #ffe08a; }
 
-  /* PRINT MODE styles */
+  /* 🖨️ PRINT-DENSE LAYOUT (fills A4 page tightly) */
+  .worksheet-card.print-dense {
+    padding: 10px 12px !important;
+    border: 1px solid #999 !important;
+    background: #fff !important;
+  }
+  .worksheet-card.print-dense .card-header {
+    padding-bottom: 4px; margin-bottom: 8px; border-bottom: 1px solid #666;
+  }
+  .worksheet-card.print-dense .card-title { font-size: 1.1rem; }
+  .worksheet-card.print-dense .instructions { margin-bottom: 8px; font-size: 0.8rem; }
+  .worksheet-card.print-dense .row,
+  .worksheet-card.print-dense .arith-row,
+  .worksheet-card.print-dense .compare-row,
+  .worksheet-card.print-dense .bond-container,
+  .worksheet-card.print-dense .pattern-row {
+    gap: 6px; margin: 5px 0;
+  }
+  .worksheet-card.print-dense .box {
+    width: 36px !important; height: 36px !important; font-size: 0.95rem !important;
+    border-radius: 6px !important; border-width: 1.5px !important;
+  }
+  .worksheet-card.print-dense .operator,
+  .worksheet-card.print-dense .equals { font-size: 1.1rem !important; min-width: 22px !important; }
+  .worksheet-card.print-dense .pattern-item { width: 34px !important; height: 34px !important; font-size: 1rem !important; border-radius: 8px !important; }
+  .worksheet-card.print-dense .compare-select { width: 36px !important; height: 36px !important; font-size: 1.1rem !important; }
+  .worksheet-card.print-dense .box input { font-size: 0.9rem !important; background: transparent !important; }
+  .worksheet-card.print-dense .static-box { background: #f8f9fa !important; }
+
+  /* PRINT MODE overrides */
   @media print {
-    body { background: white; padding: 0; margin: 0; }
-    .controls-panel, .settings-toggle, .progress-bar, .btn, .answer-key, .toggle-group { display: none !important; }
-    .worksheet-card { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; margin-bottom: 20px; padding: 12px; }
-    .box, .box input { border-color: black !important; background: white !important; color: black !important; }
+    body { background: white; padding: 0; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .controls-panel, .settings-toggle, .progress-bar, .btn, .answer-key, .toggle-group, .toast, .celebration { display: none !important; }
+    .worksheet-card { box-shadow: none; page-break-inside: avoid; margin: 0 !important; border: none !important; }
+    .worksheet-card.print-dense { border: 1px solid #ccc !important; padding: 10px !important; }
+    .box, .box input { border-color: #333 !important; color: black !important; }
     .static-box { background: #f5f5f5 !important; }
     .compare-select {
       appearance: none; -webkit-appearance: none;
       border: none; border-bottom: 2px solid #000;
-      background: transparent; width: 60px; text-align: center;
-      font-size: 1.2rem; color: transparent;
+      background: transparent; width: 40px; text-align: center;
+      font-size: 1.1rem; color: transparent;
     }
     .compare-select option { display: none; }
-    .compare-select:before { content: "______"; display: block; color: black; }
-    .box input[type="text"] { width: 120px; border-bottom: 2px solid #000; background: transparent; }
-    .box { min-width: 60px; }
-    @page { margin: 1.2cm; }
+    .box input[type="text"] { width: 80px; border-bottom: 2px solid #000; background: transparent; }
+    @page { size: A4; margin: 1.5cm 1.8cm; }
   }
 
   @media (max-width: 600px) {
@@ -130,31 +158,31 @@
   
   /* Preview modal styles */
   .preview-modal {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
     display: none; align-items: center; justify-content: center;
-    z-index: 2000; padding: 20px;
+    z-index: 2000; padding: 16px;
   }
   .preview-modal.active { display: flex; }
   .preview-content {
-    background: white; border-radius: 12px; width: 100%; max-width: 900px;
-    max-height: 90vh; overflow: auto; padding: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    background: white; border-radius: 10px; width: 100%; max-width: 850px;
+    max-height: 90vh; overflow: auto; padding: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
   }
   .preview-header {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--border);
+    margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid var(--border);
   }
   .preview-close {
     background: var(--primary); color: white; border: none;
-    padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;
+    padding: 7px 14px; border-radius: 6px; cursor: pointer; font-weight: 600;
   }
   .preview-actions { display: flex; gap: 8px; }
   .preview-btn {
     background: var(--secondary); color: white; border: none;
-    padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600;
+    padding: 7px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;
   }
   .preview-note {
-    font-size: 0.8rem; color: var(--muted); margin-top: 8px; text-align: center;
+    font-size: 0.75rem; color: var(--muted); margin-top: 6px; text-align: center;
   }
 </style>
 </head>
@@ -192,14 +220,14 @@
 <div class="preview-modal" id="previewModal">
   <div class="preview-content">
     <div class="preview-header">
-      <strong>🖨️ Print Preview</strong>
+      <strong>🖨️ A4 Print Preview</strong>
       <div class="preview-actions">
         <button class="preview-btn" id="previewPrintBtn">🖨️ Print This</button>
         <button class="preview-close" id="previewCloseBtn">✕ Close</button>
       </div>
     </div>
     <div id="previewContent"></div>
-    <div class="preview-note">💡 Tip: Use your browser's print dialog (Ctrl+P) for best results</div>
+    <div class="preview-note">💡 Optimized for A4 • Dense layout • Ctrl+P for best results</div>
   </div>
 </div>
 
@@ -241,7 +269,7 @@
   let currentSeed = Date.now();
   let currentTopicId = 'arithmetic';
   let rng = seededRandom(currentSeed);
-  let printMultiplier = 1;      // Reduced: was 3, now 2 for fewer examples
+  let printMultiplier = 1;
 
   // Helper functions
   function seededRandom(seed) {
@@ -275,8 +303,7 @@
     const diff = diffSelect.value;
     const rates = { easy: 0.3, medium: 0.45, hard: 0.65 };
     let multiplier = printMultiplier;
-    // For compare and words, use 3x instead of 4x (reduced from before)
-    if (multiplier > 1 && (currentTopicId === 'compare' || currentTopicId === 'words')) multiplier = 3;
+    if (multiplier > 1 && (currentTopicId === 'compare' || currentTopicId === 'words')) multiplier = 5;
     let skipVal = parseInt(skipSelect.value);
     if (skipSelect.value === 'custom') {
       skipVal = parseInt(customSkipInput.value) || 2;
@@ -294,9 +321,9 @@
       if (options.type === 'compare' && isPrintMode()) {
         const blank = document.createElement('span');
         blank.textContent = '______';
-        blank.style.fontSize = '1.2rem';
+        blank.style.fontSize = '1rem';
         blank.style.fontWeight = 'bold';
-        blank.style.minWidth = '60px';
+        blank.style.minWidth = '40px';
         blank.style.textAlign = 'center';
         box.appendChild(blank);
         if (answerArray && idx >= 0) answerArray[idx] = value;
@@ -317,7 +344,7 @@
         inp.type = 'text';
         inp.dataset.answer = value.toString().toLowerCase();
         inp.placeholder = '______';
-        if (isPrintMode()) inp.style.width = '120px';
+        if (isPrintMode()) inp.style.width = '90px';
         inp.addEventListener('input', () => {
           if (inp.value.trim().toLowerCase() === inp.dataset.answer) inp.classList.add('correct');
           else inp.classList.remove('correct');
@@ -368,13 +395,11 @@
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
       const length = 7;
-      const rows = 3 * settings.multiplier;
+      const rows = 4 * settings.multiplier;
       const usedStarts = new Set();
       for (let r = 0; r < rows; r++) {
         let start;
-        do {
-          start = Math.floor(rand() * (settings.max - settings.min - length + 1)) + settings.min;
-        } while (usedStarts.has(start));
+        do { start = Math.floor(rand() * (settings.max - settings.min - length + 1)) + settings.min; } while (usedStarts.has(start));
         usedStarts.add(start);
         const rowDiv = document.createElement('div'); rowDiv.className = 'row';
         for (let i = 0; i < length; i++) {
@@ -395,13 +420,11 @@
       const container = document.createElement('div');
       const skip = settings.skipVal;
       const length = 7;
-      const rows = 3 * settings.multiplier;
+      const rows = 4 * settings.multiplier;
       const usedStarts = new Set();
       for (let r = 0; r < rows; r++) {
         let start;
-        do {
-          start = Math.floor(rand() * (settings.max - skip * length + 1)) + settings.min;
-        } while (usedStarts.has(start));
+        do { start = Math.floor(rand() * (settings.max - skip * length + 1)) + settings.min; } while (usedStarts.has(start));
         usedStarts.add(start);
         const rowDiv = document.createElement('div'); rowDiv.className = 'row';
         for (let i = 0; i < length; i++) {
@@ -421,7 +444,7 @@
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
       const ops = ['+', '-'];
-      const problemCount = 6 * settings.multiplier;
+      const problemCount = 8 * settings.multiplier;
       for (let i = 0; i < problemCount; i++) {
         const row = document.createElement('div'); row.className = 'arith-row';
         const op = ops[Math.floor(rand() * ops.length)];
@@ -459,7 +482,7 @@
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
       const target = settings.max <= 15 ? 10 : 20;
-      const problemCount = 5 * settings.multiplier;
+      const problemCount = 6 * settings.multiplier;
       for (let i = 0; i < problemCount; i++) {
         const row = document.createElement('div'); row.className = 'bond-container';
         const a = Math.floor(rand() * (target + 1));
@@ -488,7 +511,7 @@
     instructions: 'Write <, >, or = in the blank.',
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
-      const problemCount = 8 * settings.multiplier;
+      const problemCount = 10 * settings.multiplier;
       for (let i = 0; i < problemCount; i++) {
         const row = document.createElement('div'); row.className = 'compare-row';
         const a = Math.floor(rand() * (settings.max - settings.min + 1)) + settings.min;
@@ -509,7 +532,7 @@
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
       const patterns = [['A','B','A','B','?'], ['A','A','B','B','?'], ['A','B','C','A','B','?']];
-      const problemCount = 4 * settings.multiplier;
+      const problemCount = 6 * settings.multiplier;
       for (let p = 0; p < problemCount; p++) {
         const row = document.createElement('div'); row.className = 'pattern-row';
         const pat = patterns[Math.floor(rand() * patterns.length)].slice();
@@ -543,7 +566,7 @@
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
       const words = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
-      const problemCount = 8 * settings.multiplier;
+      const problemCount = 10 * settings.multiplier;
       for (let i = 0; i < problemCount; i++) {
         const row = document.createElement('div'); row.className = 'arith-row';
         const num = Math.floor(rand() * Math.min(21, settings.max - settings.min + 1)) + settings.min;
@@ -597,7 +620,6 @@
   currentTopicId = 'arithmetic';
   topicSelect.value = currentTopicId;
 
-  // Handle custom skip input
   function updateSkipInput() {
     customSkipInput.style.display = skipSelect.value === 'custom' ? 'inline-block' : 'none';
   }
@@ -605,24 +627,20 @@
   customSkipInput.addEventListener('input', updateSkipInput);
   updateSkipInput();
 
-  // Generate worksheet content as HTML string (for preview)
-  function generateWorksheetHTML(seed, settings, topicId) {
+  // Generate worksheet HTML string
+  function generateWorksheetHTML(seed, settings, topicId, isDense = false) {
     const rand = seededRandom(seed);
     const ex = exercises[topicId];
     if (!ex) return '';
     
     let instructions = ex.instructions;
-    if (topicId === 'skip') {
-      const skipVal = settings.skipVal;
-      instructions = `Count by ${skipVal}.`;
-    }
+    if (topicId === 'skip') instructions = `Count by ${settings.skipVal}.`;
     
     const answers = [];
     const content = ex.generate(rand, settings, answers);
     
-    // Create a temporary container to get HTML
     const temp = document.createElement('div');
-    temp.className = 'worksheet-card';
+    temp.className = `worksheet-card ${isDense ? 'print-dense' : ''}`;
     temp.innerHTML = `<div class="card-header"><div class="card-title">${ex.title}</div><div class="seed-hint">🔑 ${seed.toString().slice(0,8)}</div></div><div class="instructions">${instructions}</div>`;
     temp.appendChild(content);
     
@@ -630,7 +648,7 @@
   }
 
   // Core generate function
-  function generate() {
+  function generate(isDense = false) {
     const seedRaw = seedInput.value.trim();
     currentSeed = seedRaw ? stringToSeed(seedRaw) : Date.now();
     if (!seedRaw) seedInput.placeholder = currentSeed.toString().slice(0,8);
@@ -644,12 +662,10 @@
     worksheetArea.innerHTML = '';
     answerContentDiv.innerHTML = '';
 
-    const card = document.createElement('div'); card.className = 'worksheet-card';
+    const card = document.createElement('div'); 
+    card.className = `worksheet-card ${isDense ? 'print-dense' : ''}`;
     let instructions = ex.instructions;
-    if (topicId === 'skip') {
-      const skipVal = settings.skipVal;
-      instructions = `Count by ${skipVal}.`;
-    }
+    if (topicId === 'skip') instructions = `Count by ${settings.skipVal}.`;
     card.innerHTML = `<div class="card-header"><div class="card-title">${ex.title}</div><div class="seed-hint">🔑 ${currentSeed.toString().slice(0,8)}</div></div><div class="instructions">${instructions}</div>`;
     const content = ex.generate(rng, settings, currentAnswers);
     card.appendChild(content);
@@ -662,69 +678,48 @@
         answerContentDiv.appendChild(item);
       }
     });
-    const modeMsg = printMultiplier > 1 ? ' (Print mode: 2x exercises)' : '';
+    const modeMsg = isDense ? ' (A4 dense mode)' : '';
     showToast(`✨ New worksheet ready${modeMsg}!`);
   }
 
-  // ✅ FIXED: Reduced print multiplier to 2 (was 3)
+  // Print & Preview functions
   function preparePrintContent() {
     const originalMultiplier = printMultiplier;
-    printMultiplier = 2;   // ✅ FEWER examples: reduced from 3 to 2
-    generate();
+    printMultiplier = 4; // High multiplier for A4 fill
+    generate(true); // true = dense layout
     return originalMultiplier;
   }
 
   function restoreAfterPrint(originalMultiplier) {
     printMultiplier = originalMultiplier;
-    generate();
+    generate(false);
   }
 
-  // Print function with afterprint event
   function printWorksheet() {
     const originalMultiplier = preparePrintContent();
-    
     const handleAfterPrint = () => {
       restoreAfterPrint(originalMultiplier);
       window.removeEventListener('afterprint', handleAfterPrint);
     };
-    
     window.addEventListener('afterprint', handleAfterPrint);
-    setTimeout(() => window.print(), 50);
+    setTimeout(() => window.print(), 80);
   }
 
-  // 👁️ NEW: Print Preview function
   function showPrintPreview() {
     const originalMultiplier = printMultiplier;
-    printMultiplier = 2;   // Same reduced multiplier for preview
+    printMultiplier = 4;
     
     const seedRaw = seedInput.value.trim();
     const seed = seedRaw ? stringToSeed(seedRaw) : Date.now();
     const settings = getSettings();
     const topicId = topicSelect.value;
     
-    // Generate preview HTML with print styles applied
-    const previewHTML = `
-      <!DOCTYPE html>
-      <html><head><meta charset="UTF-8"><title>Print Preview</title>
-      <style>
-        ${document.querySelector('style').innerHTML}
-        body { padding: 20px; background: white; }
-        .preview-watermark { position: fixed; bottom: 10px; right: 20px; 
-          font-size: 0.8rem; color: #999; opacity: 0.7; }
-      </style></head><body>
-      ${generateWorksheetHTML(seed, settings, topicId)}
-      <div class="preview-watermark">Preview • ${new Date().toLocaleDateString()}</div>
-      </body></html>
-    `;
-    
-    // Populate modal preview (simpler than new window, more reliable)
-    previewContent.innerHTML = generateWorksheetHTML(seed, settings, topicId);
+    previewContent.innerHTML = generateWorksheetHTML(seed, settings, topicId, true);
     previewModal.classList.add('active');
     
-    // Restore normal view after showing preview
-    restoreAfterPrint(originalMultiplier);
-    
-    showToast('👁️ Preview ready');
+    printMultiplier = originalMultiplier;
+    generate(false);
+    showToast('👁️ A4 Preview ready');
   }
 
   function closePreview() {
@@ -733,26 +728,25 @@
   }
 
   function printFromPreview() {
-    // Create a new window with print-ready content
     const seedRaw = seedInput.value.trim();
     const seed = seedRaw ? stringToSeed(seedRaw) : Date.now();
     const settings = getSettings();
     const topicId = topicSelect.value;
     
-    const printWindow = window.open('', '_blank', 'width=900,height=700');
+    const printWindow = window.open('', '_blank', 'width=800,height=900');
     printWindow.document.write(`
       <!DOCTYPE html>
-      <html><head><meta charset="UTF-8"><title>Print</title>
+      <html><head><meta charset="UTF-8"><title>Print Worksheet</title>
       <style>${document.querySelector('style').innerHTML}</style></head>
       <body onload="setTimeout(()=>window.print(),100);setTimeout(()=>window.close(),5000);">
-      ${generateWorksheetHTML(seed, { ...settings, multiplier: 2 }, topicId)}
+      ${generateWorksheetHTML(seed, { ...settings, multiplier: 4 }, topicId, true)}
       </body></html>
     `);
     printWindow.document.close();
     closePreview();
   }
 
-  window.addEventListener('beforeprint', () => showToast('🖨️ Print mode active'));
+  window.addEventListener('beforeprint', () => showToast('🖨️ Preparing A4 layout...'));
 
   function checkComplete() {
     if (worksheetCompleted) return;
@@ -818,7 +812,6 @@
   function toggleCompact() { document.body.classList.toggle('compact'); compactBtn.classList.toggle('active'); localStorage.setItem('pp_compact', document.body.classList.contains('compact')); }
   function toggleSettingsPanel() { controlsPanel.classList.toggle('collapsed'); }
 
-  // Theme and settings persistence
   function applyTheme(theme) { document.body.className = `theme-${theme}`; localStorage.setItem('pp_theme', theme); }
   function loadUserSettings() {
     const savedTheme = localStorage.getItem('pp_theme') || 'space';
@@ -842,34 +835,23 @@
   }
 
   // Event binding
-  generateBtn.onclick = () => { 
-    printMultiplier = 1;
-    generate(); 
-    saveUISettings(); 
-  };
+  generateBtn.onclick = () => { printMultiplier = 1; generate(false); saveUISettings(); };
   answersBtn.onclick = toggleAnswers;
   compactBtn.onclick = toggleCompact;
-  
-  // 👁️ Preview button handler
   previewBtn.onclick = () => showPrintPreview();
   previewCloseBtn.onclick = () => closePreview();
   previewPrintBtn.onclick = () => printFromPreview();
-  
-  // Close preview when clicking outside
   previewModal.onclick = (e) => { if (e.target === previewModal) closePreview(); };
-  
-  // 🖨️ Print button handler
   printBtn.onclick = () => printWorksheet();
-  
   resetStampsBtn.onclick = resetStamps;
   settingsToggle.onclick = toggleSettingsPanel;
   themeSelect.onchange = (e) => applyTheme(e.target.value);
-  topicSelect.onchange = () => { saveUISettings(); generate(); };
-  minInput.onchange = () => { saveUISettings(); generate(); };
-  maxInput.onchange = () => { saveUISettings(); generate(); };
-  diffSelect.onchange = () => { saveUISettings(); generate(); };
-  skipSelect.onchange = () => { saveUISettings(); updateSkipInput(); generate(); };
-  customSkipInput.onchange = () => { saveUISettings(); generate(); };
+  topicSelect.onchange = () => { saveUISettings(); generate(false); };
+  minInput.onchange = () => { saveUISettings(); generate(false); };
+  maxInput.onchange = () => { saveUISettings(); generate(false); };
+  diffSelect.onchange = () => { saveUISettings(); generate(false); };
+  skipSelect.onchange = () => { saveUISettings(); updateSkipInput(); generate(false); };
+  customSkipInput.onchange = () => { saveUISettings(); generate(false); };
 
   // Create stamp UI
   for (let i = 0; i < 5; i++) {
@@ -880,18 +862,12 @@
   loadUserSettings();
   updateStampsUI();
   printMultiplier = 1;
-  generate();
+  generate(false);
   document.addEventListener('keydown', (e) => { 
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { 
-      e.preventDefault(); 
-      printMultiplier = 1; 
-      generate(); 
-      saveUISettings(); 
+      e.preventDefault(); printMultiplier = 1; generate(false); saveUISettings(); 
     } 
-    // Escape to close preview
-    if (e.key === 'Escape' && previewModal.classList.contains('active')) {
-      closePreview();
-    }
+    if (e.key === 'Escape' && previewModal.classList.contains('active')) closePreview();
   });
 })();
 </script>
