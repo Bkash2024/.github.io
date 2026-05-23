@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>🎈 Practice Playground – Print Multiplier Fixed</title>
+<title>🎈 Practice Playground – Print Fixed</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -127,6 +127,35 @@
   .celebration { position: fixed; inset: 0; pointer-events: none; z-index: 1000; display: none; }
   .confetti { position: absolute; width: 8px; height: 8px; background: gold; animation: fall 2s linear forwards; }
   @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+  
+  /* Preview modal styles */
+  .preview-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 2000; padding: 20px;
+  }
+  .preview-modal.active { display: flex; }
+  .preview-content {
+    background: white; border-radius: 12px; width: 100%; max-width: 900px;
+    max-height: 90vh; overflow: auto; padding: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+  .preview-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--border);
+  }
+  .preview-close {
+    background: var(--primary); color: white; border: none;
+    padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;
+  }
+  .preview-actions { display: flex; gap: 8px; }
+  .preview-btn {
+    background: var(--secondary); color: white; border: none;
+    padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600;
+  }
+  .preview-note {
+    font-size: 0.8rem; color: var(--muted); margin-top: 8px; text-align: center;
+  }
 </style>
 </head>
 <body>
@@ -144,7 +173,7 @@
   <div class="control-group"><label>🎨 Theme</label><select id="themeSelect"><option value="space">Space</option><option value="jungle">Jungle</option><option value="ocean">Ocean</option><option value="candy">Candy</option></select></div>
   <div class="control-group"><label>🔑 Seed</label><input type="text" id="seedInput" placeholder="Auto" maxlength="12"></div>
   <div class="control-group"><label>⚡ Actions</label><div class="control-row"><button class="btn" id="generateBtn">✨ Generate</button><button class="btn btn-outline" id="answersBtn">🔑 Answers</button></div></div>
-  <div class="control-group"><label>🖨️ View</label><div class="toggle-group"><button class="toggle-btn" id="compactBtn">📱 Compact</button><button class="toggle-btn" id="printBtn">🖨️ Print</button></div></div>
+  <div class="control-group"><label>🖨️ View</label><div class="toggle-group"><button class="toggle-btn" id="compactBtn">📱 Compact</button><button class="toggle-btn" id="previewBtn">👁️ Preview</button><button class="toggle-btn" id="printBtn">🖨️ Print</button></div></div>
 </div>
 
 <div class="progress-bar">
@@ -158,6 +187,21 @@
 <div class="answer-key" id="answerKey"><strong>🔑 Answer Key</strong><div id="answerContent"></div></div>
 <div class="celebration" id="celebration"></div>
 <div class="toast" id="toastMsg">Ready! 🎈</div>
+
+<!-- Print Preview Modal -->
+<div class="preview-modal" id="previewModal">
+  <div class="preview-content">
+    <div class="preview-header">
+      <strong>🖨️ Print Preview</strong>
+      <div class="preview-actions">
+        <button class="preview-btn" id="previewPrintBtn">🖨️ Print This</button>
+        <button class="preview-close" id="previewCloseBtn">✕ Close</button>
+      </div>
+    </div>
+    <div id="previewContent"></div>
+    <div class="preview-note">💡 Tip: Use your browser's print dialog (Ctrl+P) for best results</div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -173,6 +217,7 @@
   const generateBtn = document.getElementById('generateBtn');
   const answersBtn = document.getElementById('answersBtn');
   const compactBtn = document.getElementById('compactBtn');
+  const previewBtn = document.getElementById('previewBtn');
   const printBtn = document.getElementById('printBtn');
   const resetStampsBtn = document.getElementById('resetStampsBtn');
   const settingsToggle = document.getElementById('settingsToggle');
@@ -183,6 +228,12 @@
   const stampsContainer = document.getElementById('stampsContainer');
   const progressSpan = document.getElementById('progressCount');
   const toastDiv = document.getElementById('toastMsg');
+  
+  // Preview modal elements
+  const previewModal = document.getElementById('previewModal');
+  const previewContent = document.getElementById('previewContent');
+  const previewCloseBtn = document.getElementById('previewCloseBtn');
+  const previewPrintBtn = document.getElementById('previewPrintBtn');
 
   // State
   let currentAnswers = [];
@@ -190,7 +241,7 @@
   let currentSeed = Date.now();
   let currentTopicId = 'arithmetic';
   let rng = seededRandom(currentSeed);
-  let printMultiplier = 1;      // will be set to 3 (or 4) when printing
+  let printMultiplier = 1;      // Reduced: was 3, now 2 for fewer examples
 
   // Helper functions
   function seededRandom(seed) {
@@ -223,11 +274,9 @@
     if (min > max) { [min, max] = [max, min]; minInput.value = min; maxInput.value = max; showToast('Range adjusted'); }
     const diff = diffSelect.value;
     const rates = { easy: 0.3, medium: 0.45, hard: 0.65 };
-    // use the global printMultiplier
     let multiplier = printMultiplier;
-    // For compare and words, make even more to fill A4
-    if (multiplier > 1 && (currentTopicId === 'compare' || currentTopicId === 'words')) multiplier = 4;
-    // Get skip value
+    // For compare and words, use 3x instead of 4x (reduced from before)
+    if (multiplier > 1 && (currentTopicId === 'compare' || currentTopicId === 'words')) multiplier = 3;
     let skipVal = parseInt(skipSelect.value);
     if (skipSelect.value === 'custom') {
       skipVal = parseInt(customSkipInput.value) || 2;
@@ -236,7 +285,6 @@
     return { min, max, hideRate: rates[diff], multiplier, skipVal };
   }
 
-  // Box creation (print mode detected by printMultiplier > 1)
   function isPrintMode() { return printMultiplier > 1; }
 
   function createBox(value, isHidden, answerArray, idx, options = {}) {
@@ -311,7 +359,7 @@
     return box;
   }
 
-  // ---------- EXERCISE REGISTRY (each generator respects multiplier and creates distinct rows) ----------
+  // ---------- EXERCISE REGISTRY ----------
   const exercises = {};
 
   exercises.sequence = {
@@ -321,7 +369,6 @@
       const container = document.createElement('div');
       const length = 7;
       const rows = 3 * settings.multiplier;
-      // Store used start values to ensure uniqueness
       const usedStarts = new Set();
       for (let r = 0; r < rows; r++) {
         let start;
@@ -558,7 +605,31 @@
   customSkipInput.addEventListener('input', updateSkipInput);
   updateSkipInput();
 
-  // Core generate function (uses current printMultiplier)
+  // Generate worksheet content as HTML string (for preview)
+  function generateWorksheetHTML(seed, settings, topicId) {
+    const rand = seededRandom(seed);
+    const ex = exercises[topicId];
+    if (!ex) return '';
+    
+    let instructions = ex.instructions;
+    if (topicId === 'skip') {
+      const skipVal = settings.skipVal;
+      instructions = `Count by ${skipVal}.`;
+    }
+    
+    const answers = [];
+    const content = ex.generate(rand, settings, answers);
+    
+    // Create a temporary container to get HTML
+    const temp = document.createElement('div');
+    temp.className = 'worksheet-card';
+    temp.innerHTML = `<div class="card-header"><div class="card-title">${ex.title}</div><div class="seed-hint">🔑 ${seed.toString().slice(0,8)}</div></div><div class="instructions">${instructions}</div>`;
+    temp.appendChild(content);
+    
+    return temp.outerHTML;
+  }
+
+  // Core generate function
   function generate() {
     const seedRaw = seedInput.value.trim();
     currentSeed = seedRaw ? stringToSeed(seedRaw) : Date.now();
@@ -591,26 +662,97 @@
         answerContentDiv.appendChild(item);
       }
     });
-    const modeMsg = printMultiplier > 1 ? ' (Print mode: more exercises)' : '';
+    const modeMsg = printMultiplier > 1 ? ' (Print mode: 2x exercises)' : '';
     showToast(`✨ New worksheet ready${modeMsg}!`);
   }
 
-  // Print function: set multiplier to 3, generate, print, then restore
-  async function printWorksheet() {
-    // Save current multiplier and topic
+  // ✅ FIXED: Reduced print multiplier to 2 (was 3)
+  function preparePrintContent() {
     const originalMultiplier = printMultiplier;
-    printMultiplier = 3;   // enough to fill A4
-    generate();            // regenerate with multiplier
-    // Wait a moment for DOM to fully render
-    setTimeout(() => {
-      window.print();
-      // After print dialog closes, restore normal multiplier and regenerate
-      setTimeout(() => {
-        printMultiplier = 1;
-        generate();
-      }, 100);
-    }, 100);
+    printMultiplier = 2;   // ✅ FEWER examples: reduced from 3 to 2
+    generate();
+    return originalMultiplier;
   }
+
+  function restoreAfterPrint(originalMultiplier) {
+    printMultiplier = originalMultiplier;
+    generate();
+  }
+
+  // Print function with afterprint event
+  function printWorksheet() {
+    const originalMultiplier = preparePrintContent();
+    
+    const handleAfterPrint = () => {
+      restoreAfterPrint(originalMultiplier);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+    
+    window.addEventListener('afterprint', handleAfterPrint);
+    setTimeout(() => window.print(), 50);
+  }
+
+  // 👁️ NEW: Print Preview function
+  function showPrintPreview() {
+    const originalMultiplier = printMultiplier;
+    printMultiplier = 2;   // Same reduced multiplier for preview
+    
+    const seedRaw = seedInput.value.trim();
+    const seed = seedRaw ? stringToSeed(seedRaw) : Date.now();
+    const settings = getSettings();
+    const topicId = topicSelect.value;
+    
+    // Generate preview HTML with print styles applied
+    const previewHTML = `
+      <!DOCTYPE html>
+      <html><head><meta charset="UTF-8"><title>Print Preview</title>
+      <style>
+        ${document.querySelector('style').innerHTML}
+        body { padding: 20px; background: white; }
+        .preview-watermark { position: fixed; bottom: 10px; right: 20px; 
+          font-size: 0.8rem; color: #999; opacity: 0.7; }
+      </style></head><body>
+      ${generateWorksheetHTML(seed, settings, topicId)}
+      <div class="preview-watermark">Preview • ${new Date().toLocaleDateString()}</div>
+      </body></html>
+    `;
+    
+    // Populate modal preview (simpler than new window, more reliable)
+    previewContent.innerHTML = generateWorksheetHTML(seed, settings, topicId);
+    previewModal.classList.add('active');
+    
+    // Restore normal view after showing preview
+    restoreAfterPrint(originalMultiplier);
+    
+    showToast('👁️ Preview ready');
+  }
+
+  function closePreview() {
+    previewModal.classList.remove('active');
+    previewContent.innerHTML = '';
+  }
+
+  function printFromPreview() {
+    // Create a new window with print-ready content
+    const seedRaw = seedInput.value.trim();
+    const seed = seedRaw ? stringToSeed(seedRaw) : Date.now();
+    const settings = getSettings();
+    const topicId = topicSelect.value;
+    
+    const printWindow = window.open('', '_blank', 'width=900,height=700');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html><head><meta charset="UTF-8"><title>Print</title>
+      <style>${document.querySelector('style').innerHTML}</style></head>
+      <body onload="setTimeout(()=>window.print(),100);setTimeout(()=>window.close(),5000);">
+      ${generateWorksheetHTML(seed, { ...settings, multiplier: 2 }, topicId)}
+      </body></html>
+    `);
+    printWindow.document.close();
+    closePreview();
+  }
+
+  window.addEventListener('beforeprint', () => showToast('🖨️ Print mode active'));
 
   function checkComplete() {
     if (worksheetCompleted) return;
@@ -700,10 +842,25 @@
   }
 
   // Event binding
-  generateBtn.onclick = () => { printMultiplier = 1; generate(); saveUISettings(); };
+  generateBtn.onclick = () => { 
+    printMultiplier = 1;
+    generate(); 
+    saveUISettings(); 
+  };
   answersBtn.onclick = toggleAnswers;
   compactBtn.onclick = toggleCompact;
+  
+  // 👁️ Preview button handler
+  previewBtn.onclick = () => showPrintPreview();
+  previewCloseBtn.onclick = () => closePreview();
+  previewPrintBtn.onclick = () => printFromPreview();
+  
+  // Close preview when clicking outside
+  previewModal.onclick = (e) => { if (e.target === previewModal) closePreview(); };
+  
+  // 🖨️ Print button handler
   printBtn.onclick = () => printWorksheet();
+  
   resetStampsBtn.onclick = resetStamps;
   settingsToggle.onclick = toggleSettingsPanel;
   themeSelect.onchange = (e) => applyTheme(e.target.value);
@@ -722,10 +879,22 @@
 
   loadUserSettings();
   updateStampsUI();
-  printMultiplier = 1; // ensure normal mode
+  printMultiplier = 1;
   generate();
-  document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); printMultiplier = 1; generate(); saveUISettings(); } });
+  document.addEventListener('keydown', (e) => { 
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { 
+      e.preventDefault(); 
+      printMultiplier = 1; 
+      generate(); 
+      saveUISettings(); 
+    } 
+    // Escape to close preview
+    if (e.key === 'Escape' && previewModal.classList.contains('active')) {
+      closePreview();
+    }
+  });
 })();
 </script>
 </body>
 </html>
+
