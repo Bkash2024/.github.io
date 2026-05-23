@@ -2,212 +2,1331 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Number Practice 71 - 100</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎈 Practice Playground</title>
 <style>
+  :root {
+    /* Theme defaults (Space) */
+    --primary: #6c5ce7;
+    --primary-light: #a29bfe;
+    --secondary: #00cec9;
+    --accent: #fdcb6e;
+    --bg: #f7f9fc;
+    --card: #ffffff;
+    --text: #2d3436;
+    --muted: #636e72;
+    --success: #00b894;
+    --border: #dfe6e9;
+    --shadow: 0 3px 10px rgba(0,0,0,0.08);
+    --radius: 12px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  /* Theme: Jungle */
+  body.theme-jungle {
+    --primary: #27ae60; --primary-light: #58d68d; --secondary: #f39c12;
+    --accent: #ff9ff3; --bg: #f0fff4; --card: #ffffff;
+  }
+  
+  /* Theme: Ocean */
+  body.theme-ocean {
+    --primary: #0984e3; --primary-light: #74b9ff; --secondary: #00cec9;
+    --accent: #ffeaa7; --bg: #f0f8ff; --card: #ffffff;
+  }
+  
+  /* Theme: Candy */
+  body.theme-candy {
+    --primary: #e84393; --primary-light: #fd79a8; --secondary: #fdcb6e;
+    --accent: #a29bfe; --bg: #fff0f5; --card: #ffffff;
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
   body {
-    font-family: Arial, sans-serif;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #fcfcfc;
-    color: #333;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.4;
+    padding: 8px;
+    transition: background 0.3s;
   }
-  h1, h2 {
+  
+  /* Compact mode */
+  body.compact {
+    font-size: 0.95rem;
+  }
+  body.compact .worksheet-card { padding: 12px; margin-bottom: 12px; }
+  body.compact .box { width: 44px; height: 44px; font-size: 1.1rem; }
+  body.compact .controls { padding: 10px; gap: 8px; }
+  body.compact .btn { padding: 8px 14px; font-size: 0.9rem; }
+  
+  /* Header */
+  header {
     text-align: center;
-    color: #0056b3;
+    padding: 8px 4px 12px;
+    margin-bottom: 4px;
+    position: relative;
   }
+  
+  .logo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .mascot {
+    font-size: 1.8rem;
+    animation: bounce 2s infinite;
+    cursor: pointer;
+  }
+  
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  
+  /* Controls - Collapsible on mobile */
+  .controls {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    align-items: end;
+  }
+  
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .control-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  select, input[type="number"] {
+    padding: 8px 10px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fff;
+    color: var(--text);
+    min-width: 0;
+  }
+  
+  input[type="number"] {
+    text-align: center;
+    -moz-appearance: textfield;
+    width: 70px;
+  }
+  
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  .btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  
+  .btn:hover { 
+    background: var(--primary-light); 
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  
+  .btn:active { transform: translateY(0); }
+  .btn-secondary { background: var(--secondary); color: #003; }
+  .btn-secondary:hover { background: var(--primary-light); }
+  .btn-outline { 
+    background: transparent; 
+    border: 2px solid var(--primary); 
+    color: var(--primary); 
+  }
+  .btn-outline:hover { background: var(--primary); color: white; }
+  
+  .btn-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  
+  /* Toggle buttons for compact/theme */
+  .toggle-group {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    padding: 4px;
+    border-radius: 8px;
+  }
+  
+  .toggle-btn {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  
+  .toggle-btn.active {
+    background: var(--primary);
+    color: white;
+  }
+  
+  /* Worksheet Cards */
   .worksheet-card {
-    background: white;
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    margin-bottom: 30px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
   }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .card-instructions {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    text-align: center;
+    line-height: 1.4;
+  }
+  
+  /* Exercise Containers */
   .row {
     display: flex;
     justify-content: center;
-    gap: 8px;
-    margin-bottom: 15px;
+    gap: 5px;
+    margin: 8px 0;
+    flex-wrap: wrap;
   }
+  
+  .columns-container {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .vertical-chain {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 52px;
+  }
+  
+  .arith-row, .bond-container, .compare-row, .pattern-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  
+  /* Boxes & Inputs */
   .box {
     width: 50px;
     height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
-    border: 2px solid #555;
-    background-color: #fff;
-    border-radius: 4px;
-    font-weight: bold;
+    font-size: 1.25rem;
+    border: 2px solid var(--border);
+    background: #fff;
+    border-radius: 10px;
+    font-weight: 600;
+    flex-shrink: 0;
+    transition: all 0.2s;
   }
+  
   .static-box {
-    background-color: #f0f8ff;
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: white;
+    opacity: 0.95;
   }
-  input[type="number"] {
+  
+  .box input {
     width: 100%;
     height: 100%;
     border: none;
     text-align: center;
-    font-size: 22px;
-    font-weight: bold;
+    font-size: 1.25rem;
+    font-weight: 600;
+    background: #fff9e6;
+    border-radius: 8px;
+    color: var(--text);
     outline: none;
-    color: #333;
-    background-color: #fffaf0; /* slight yellow tint to indicate it needs filling */
-  }
-  /* Hide the spinner arrows on number inputs */
-  input[type=number]::-webkit-inner-spin-button, 
-  input[type=number]::-webkit-outer-spin-button { 
-    -webkit-appearance: none; 
-    margin: 0; 
-  }
-  input[type=number] {
-    -moz-appearance: textfield;
-  }
-  .correct {
-    color: #009900 !important;
   }
   
-  .columns-container {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-  }
-  .vertical-chain {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  .box input.correct {
+    background: #d4edda;
+    color: #155724;
+    border: 2px solid var(--success);
+    animation: pop 0.3s;
   }
   
+  .box input.incorrect {
+    animation: shake 0.3s;
+    border-color: #e84393;
+    background: #ffe6f2;
+  }
+  
+  @keyframes pop {
+    50% { transform: scale(1.1); }
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+  }
+  
+  /* Operators & Symbols */
+  .operator, .equals, .compare-op {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--primary);
+    min-width: 24px;
+    text-align: center;
+  }
+  
+  .equals { color: var(--muted); }
+  
+  /* Number Bonds */
+  .bond-target {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--primary);
+    background: var(--primary-light);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 2px solid var(--primary);
+  }
+  
+  /* Comparing Numbers */
+  .compare-select {
+    width: 48px;
+    height: 48px;
+    font-size: 1.4rem;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    text-align: center;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+  }
+  
+  /* Patterns */
+  .pattern-item {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  
+  .pattern-a { background: #74b9ff; color: white; }
+  .pattern-b { background: #55efc4; color: #003; }
+  .pattern-c { background: #ffeaa7; color: #333; }
+  
+  /* Place Value */
+  .place-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px 20px;
+    align-items: center;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  .place-label {
+    font-weight: 600;
+    color: var(--muted);
+    text-align: right;
+  }
+  
+  /* Coin Counting */
+  .coin-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0;
+    justify-content: center;
+  }
+  
+  .coin {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border: 2px solid var(--border);
+  }
+  
+  .coin.penny { background: #cd7f32; color: white; }
+  .coin.nickel { background: #c0c0c0; color: #333; }
+  .coin.dime { background: #e5e4e2; width: 32px; height: 32px; font-size: 0.8rem; }
+  .coin.quarter { background: #b8b8b8; width: 48px; height: 48px; }
+  
+  /* Progress & Stamps - Minimal */
+  .progress-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 8px 0;
+  }
+  
+  .stamps-mini {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .stamp-mini {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    border: 2px solid var(--primary);
+    opacity: 0.4;
+  }
+  
+  .stamp-mini.earned {
+    background: var(--accent);
+    opacity: 1;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  
+  /* Answer Key - Compact */
+  .answer-key {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    background: #fff8e1;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+  }
+  
+  .answer-key.visible { display: block; }
+  .answer-key-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px dashed #ffe08a;
+  }
+  .answer-key-item:last-child { border-bottom: none; }
+  
+  /* Mobile Optimizations */
+  @media (max-width: 500px) {
+    body { padding: 4px; }
+    .controls { 
+      grid-template-columns: 1fr; 
+      padding: 10px;
+    }
+    .control-row { flex-direction: column; align-items: stretch; }
+    input[type="number"] { width: 100%; }
+    .btn-group { width: 100%; justify-content: center; }
+    .box { width: 44px; height: 44px; font-size: 1.1rem; }
+    .box input { font-size: 1.1rem; }
+    .operator, .equals { font-size: 1.15rem; }
+    .card-title { font-size: 1.1rem; }
+    .logo { font-size: 1.4rem; }
+    .mascot { font-size: 1.5rem; }
+  }
+  
+  /* Print Styles */
   @media print {
-    body { background-color: white; padding: 0; }
-    .worksheet-card { box-shadow: none; border: none; margin-bottom: 40px; }
-    input[type="number"] { background-color: white; }
-    .static-box { background-color: white; }
+    body { 
+      background: white; 
+      padding: 0; 
+      font-size: 13px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    header, .controls, .progress-mini, .btn, .answer-key-toggle { 
+      display: none !important; 
+    }
+    .worksheet-card { 
+      box-shadow: none; 
+      border: 1px solid #999; 
+      margin-bottom: 15px; 
+      page-break-inside: avoid;
+      padding: 12px;
+    }
+    .box, .box input { 
+      background: white !important; 
+      border-color: #333 !important;
+      color: #000 !important;
+    }
+    .static-box { background: #f5f5f5 !important; }
+    @page { margin: 1.2cm; }
+  }
+  
+  /* Toast & Celebration */
+  .toast {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #2d3436;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    z-index: 999;
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  
+  .celebration {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1000;
+    display: none;
+  }
+  
+  .confetti {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    animation: fall 2.5s linear forwards;
+  }
+  
+  @keyframes fall {
+    to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+  
+  /* Collapsible Controls */
+  .controls-toggle {
+    display: none;
+    width: 100%;
+    padding: 8px;
+    background: var(--card);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 8px;
+    box-shadow: var(--shadow);
+  }
+  
+  @media (max-width: 600px) {
+    .controls { display: none; }
+    .controls.show { display: grid; }
+    .controls-toggle { display: flex; align-items: center; justify-content: center; gap: 6px; }
   }
 </style>
 </head>
-<body>
+<body class="theme-space">
 
-  <h1>Numbers up to 100 Practice</h1>
+<header>
+  <div class="logo">
+    <span class="mascot" onclick="mascotCheer()">🚀</span>
+    <span>Practice Playground</span>
+  </div>
+  <p class="subtitle">Fun math practice • Any device • Print ready</p>
+</header>
 
-  <div class="worksheet-card">
-    <h2>Exercise 1: Horizontal Sequences</h2>
-    <p style="text-align:center;">Fill in the missing numbers to complete the rows.</p>
-    
-    <div class="row">
-      <div class="box static-box">71</div>
-      <div class="box"><input type="number" data-answer="72"></div>
-      <div class="box static-box">73</div>
-      <div class="box"><input type="number" data-answer="74"></div>
-      <div class="box static-box">75</div>
-      <div class="box"><input type="number" data-answer="76"></div>
-      <div class="box static-box">77</div>
-      <div class="box static-box">78</div>
-      <div class="box"><input type="number" data-answer="79"></div>
-      <div class="box static-box">80</div>
-    </div>
+<button class="controls-toggle" onclick="toggleControls()">
+  ⚙️ Settings <span id="toggle-icon">▼</span>
+</button>
 
-    <div class="row">
-      <div class="box static-box">81</div>
-      <div class="box static-box">82</div>
-      <div class="box"><input type="number" data-answer="83"></div>
-      <div class="box static-box">84</div>
-      <div class="box"><input type="number" data-answer="85"></div>
-      <div class="box static-box">86</div>
-      <div class="box"><input type="number" data-answer="87"></div>
-      <div class="box static-box">88</div>
-      <div class="box"><input type="number" data-answer="89"></div>
-      <div class="box static-box">90</div>
-    </div>
-    
-    <div class="row">
-      <div class="box static-box">91</div>
-      <div class="box"><input type="number" data-answer="92"></div>
-      <div class="box static-box">93</div>
-      <div class="box static-box">94</div>
-      <div class="box"><input type="number" data-answer="95"></div>
-      <div class="box static-box">96</div>
-      <div class="box"><input type="number" data-answer="97"></div>
-      <div class="box"><input type="number" data-answer="98"></div>
-      <div class="box static-box">99</div>
-      <div class="box static-box">100</div>
+<div class="controls" id="controls-panel">
+  <div class="control-group">
+    <label>🎯 Topic</label>
+    <select id="topic">
+      <option value="sequence">🔢 Sequences</option>
+      <option value="skip">🔁 Skip Counting</option>
+      <option value="arithmetic">➕➖ Arithmetic</option>
+      <option value="bonds">🎯 Number Bonds</option>
+      <option value="compare">⚖️ Compare Numbers</option>
+      <option value="place">📊 Place Value</option>
+      <option value="pattern">🧩 Patterns</option>
+      <option value="coins">💰 Coin Counting</option>
+      <option value="words">🔤 Number Words</option>
+      <option value="time">⏰ Simple Time</option>
+      <option value="mixed">🔀 Mixed Practice</option>
+    </select>
+  </div>
+  
+  <div class="control-group">
+    <label>🔢 Number Range</label>
+    <div class="control-row">
+      <input type="number" id="min-num" value="1" min="0" max="999" placeholder="Min">
+      <span style="align-self:center">to</span>
+      <input type="number" id="max-num" value="20" min="1" max="1000" placeholder="Max">
     </div>
   </div>
-
-  <div class="worksheet-card">
-    <h2>Exercise 2: Vertical Number Chains</h2>
-    <p style="text-align:center;">Count down the columns and type the missing numbers.</p>
-    
-    <div class="columns-container">
-      
-      <div class="vertical-chain">
-        <div class="box static-box">78</div>
-        <div class="box static-box">79</div>
-        <div class="box static-box">80</div>
-        <div class="box static-box">81</div>
-        <div class="box"><input type="number" data-answer="82"></div>
-        <div class="box static-box">83</div>
-        <div class="box"><input type="number" data-answer="84"></div>
-        <div class="box static-box">85</div>
-        <div class="box static-box">86</div>
-      </div>
-
-      <div class="vertical-chain">
-        <div class="box static-box">81</div>
-        <div class="box static-box">82</div>
-        <div class="box"><input type="number" data-answer="83"></div>
-        <div class="box static-box">84</div>
-        <div class="box"><input type="number" data-answer="85"></div>
-        <div class="box static-box">86</div>
-        <div class="box static-box">87</div>
-        <div class="box"><input type="number" data-answer="88"></div>
-        <div class="box static-box">89</div>
-      </div>
-
-      <div class="vertical-chain">
-        <div class="box static-box">85</div>
-        <div class="box"><input type="number" data-answer="86"></div>
-        <div class="box static-box">87</div>
-        <div class="box static-box">88</div>
-        <div class="box"><input type="number" data-answer="89"></div>
-        <div class="box static-box">90</div>
-        <div class="box"><input type="number" data-answer="91"></div>
-        <div class="box static-box">92</div>
-        <div class="box"><input type="number" data-answer="93"></div>
-      </div>
-
-      <div class="vertical-chain">
-        <div class="box static-box">92</div>
-        <div class="box static-box">93</div>
-        <div class="box"><input type="number" data-answer="94"></div>
-        <div class="box static-box">95</div>
-        <div class="box"><input type="number" data-answer="96"></div>
-        <div class="box static-box">97</div>
-        <div class="box"><input type="number" data-answer="98"></div>
-        <div class="box static-box">99</div>
-        <div class="box static-box">100</div>
-      </div>
-
+  
+  <div class="control-group">
+    <label>👻 Difficulty</label>
+    <select id="difficulty">
+      <option value="easy">😊 Easy (30% hidden)</option>
+      <option value="medium" selected>🤓 Medium (45%)</option>
+      <option value="hard">🧠 Hard (65%)</option>
+    </select>
+  </div>
+  
+  <div class="control-group">
+    <label>🎨 Theme</label>
+    <select id="theme">
+      <option value="space">🚀 Space</option>
+      <option value="jungle">🦁 Jungle</option>
+      <option value="ocean">🐠 Ocean</option>
+      <option value="candy">🍭 Candy</option>
+    </select>
+  </div>
+  
+  <div class="control-group">
+    <label>&nbsp;</label>
+    <div class="btn-group">
+      <button class="btn" onclick="generate()">✨ Generate</button>
+      <button class="btn btn-outline" onclick="toggleAnswers()">🔑</button>
     </div>
   </div>
+  
+  <div class="control-group">
+    <label>&nbsp;</label>
+    <div class="toggle-group">
+      <button class="toggle-btn active" id="compact-toggle" onclick="toggleCompact()">📱 Compact</button>
+      <button class="toggle-btn" onclick="window.print()">🖨️ Print</button>
+    </div>
+  </div>
+  
+  <div class="control-group">
+    <label>🔑 Seed (optional)</label>
+    <input type="text" id="seed-input" placeholder="Auto" maxlength="12" style="width:100%">
+  </div>
+</div>
 
-  <script>
-    // This simple script checks if the typed number matches the data-answer attribute.
-    // If it is correct, the text turns green.
-    const inputs = document.querySelectorAll('input[type="number"]');
-    
-    inputs.forEach(input => {
-      input.addEventListener('input', function() {
-        if (this.value === this.getAttribute('data-answer')) {
+<div class="progress-mini">
+  <strong>🏆 Progress:</strong>
+  <div class="stamps-mini" id="stamps">
+    <div class="stamp-mini" title="Sequences">1</div>
+    <div class="stamp-mini" title="Arithmetic">2</div>
+    <div class="stamp-mini" title="Patterns">3</div>
+    <div class="stamp-mini" title="Coins">4</div>
+    <div class="stamp-mini" title="All-Star">⭐</div>
+  </div>
+  <span id="progress-count" style="margin-left:auto">0/5</span>
+</div>
+
+<div id="worksheet-area"></div>
+
+<div class="answer-key" id="answer-key">
+  <strong>🔑 Answers</strong>
+  <div id="answer-content"></div>
+</div>
+
+<div class="celebration" id="celebration"></div>
+<div class="toast" id="toast">Ready to play! 🎈</div>
+
+<script>
+// ============= UTILITIES =============
+function seededRandom(seed) {
+  return function() {
+    let t = (seed += 0x6D2B79F5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function stringToSeed(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (Math.imul(31, hash) + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash) || Date.now();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function mascotCheer() {
+  const mascots = ['🚀', '🦁', '🐠', '🍭', '🎈', '⭐', '🎯', '🧠'];
+  const m = document.querySelector('.mascot');
+  m.textContent = mascots[Math.floor(Math.random() * mascots.length)];
+  showToast('You got this! 💪');
+}
+
+// ============= SETTINGS =============
+function getSettings() {
+  const min = parseInt(document.getElementById('min-num').value) || 1;
+  const max = parseInt(document.getElementById('max-num').value) || 20;
+  const diff = document.getElementById('difficulty').value;
+  const hideRates = { easy: 0.3, medium: 0.45, hard: 0.65 };
+  
+  return {
+    min: Math.max(0, min),
+    max: Math.min(1000, max),
+    hideRate: hideRates[diff],
+    length: diff === 'easy' ? 7 : diff === 'medium' ? 9 : 11
+  };
+}
+
+// ============= BOX CREATION =============
+function createBox(value, isHidden, answerKey = [], idx = -1, opts = {}) {
+  const box = document.createElement('div');
+  box.className = `box ${isHidden ? '' : 'static-box'}`;
+  
+  if (isHidden) {
+    if (opts.type === 'compare') {
+      const sel = document.createElement('select');
+      sel.className = 'compare-select';
+      sel.innerHTML = '<option>?</option><option>&lt;</option><option>&gt;</option><option>=</option>';
+      sel.dataset.answer = value;
+      sel.addEventListener('change', function() {
+        if (this.value === this.dataset.answer) {
+          this.style.background = '#d4edda';
+          this.style.borderColor = '#28a745';
+          checkComplete();
+        } else {
+          this.style.background = '#ffe6f2';
+          this.style.borderColor = '#e84393';
+        }
+      });
+      box.appendChild(sel);
+    } else if (opts.type === 'words') {
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.dataset.answer = value.toLowerCase();
+      inp.placeholder = '?';
+      inp.style.fontSize = '0.95rem';
+      inp.addEventListener('input', function() {
+        if (this.value.trim().toLowerCase() === this.dataset.answer) {
           this.classList.add('correct');
+          checkComplete();
         } else {
           this.classList.remove('correct');
         }
       });
+      box.appendChild(inp);
+    } else if (opts.type === 'time') {
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.dataset.answer = value;
+      inp.placeholder = '?';
+      inp.addEventListener('input', function() {
+        const clean = this.value.trim().toLowerCase().replace(/\s+/g, '');
+        const ans = this.dataset.answer.toLowerCase().replace(/\s+/g, '');
+        if (clean === ans || clean === this.dataset.answer) {
+          this.classList.add('correct');
+          checkComplete();
+        }
+      });
+      box.appendChild(inp);
+    } else {
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.inputMode = 'numeric';
+      inp.dataset.answer = value;
+      inp.addEventListener('input', function() {
+        const v = parseInt(this.value);
+        const a = parseInt(this.dataset.answer);
+        if (!isNaN(v)) {
+          if (v === a) {
+            this.classList.add('correct');
+            this.classList.remove('incorrect');
+            checkComplete();
+          } else {
+            this.classList.remove('correct');
+            this.classList.add('incorrect');
+          }
+        } else {
+          this.classList.remove('correct', 'incorrect');
+        }
+      });
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'e' || e.key === 'E' || e.key === '.') e.preventDefault();
+      });
+      box.appendChild(inp);
+    }
+    if (answerKey && idx >= 0) answerKey[idx] = value;
+  } else {
+    box.textContent = opts.display || value;
+  }
+  return box;
+}
+
+// ============= EXERCISE GENERATORS =============
+
+// 1. Sequences
+function genSequence(rand, s, ans) {
+  const container = document.createElement('div');
+  for (let r = 0; r < 3; r++) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const start = Math.floor(rand() * (s.max - s.min - s.length + 1)) + s.min;
+    for (let i = 0; i < s.length; i++) {
+      const num = start + i;
+      const hide = i > 0 && rand() < s.hideRate;
+      row.appendChild(createBox(num, hide, ans, ans.length));
+    }
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 2. Skip Counting
+function genSkip(rand, s, ans) {
+  const container = document.createElement('div');
+  const skips = [2, 5, 10];
+  for (let r = 0; r < 3; r++) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const skip = skips[Math.floor(rand() * skips.length)];
+    const start = Math.floor(rand() * (s.max - skip * s.length + 1)) + s.min;
+    for (let i = 0; i < s.length; i++) {
+      const num = start + i * skip;
+      const hide = i > 0 && rand() < s.hideRate;
+      row.appendChild(createBox(num, hide, ans, ans.length));
+    }
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 3. Arithmetic
+function genArithmetic(rand, s, ans) {
+  const container = document.createElement('div');
+  for (let p = 0; p < 6; p++) {
+    const row = document.createElement('div');
+    row.className = 'arith-row';
+    const a = Math.floor(rand() * (s.max/2)) + 1;
+    const b = Math.floor(rand() * (s.max/2)) + 1;
+    const isAdd = rand() > 0.4;
+    const result = isAdd ? a + b : Math.abs(a - b);
+    const hide = Math.floor(rand() * 3);
+    
+    row.appendChild(createBox(hide === 0 ? result : a, hide !== 0, ans, ans.length));
+    
+    const op = document.createElement('span');
+    op.className = 'operator';
+    op.textContent = isAdd ? '+' : '−';
+    row.appendChild(op);
+    
+    row.appendChild(createBox(hide === 1 ? result : b, hide !== 1, ans, ans.length));
+    
+    const eq = document.createElement('span');
+    eq.className = 'equals';
+    eq.textContent = '=';
+    row.appendChild(eq);
+    
+    row.appendChild(createBox(hide === 2 ? (isAdd ? a+b : Math.abs(a-b)) : result, hide === 2, ans, ans.length));
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 4. Number Bonds
+function genBonds(rand, s, ans) {
+  const container = document.createElement('div');
+  const target = s.max <= 15 ? 10 : 20;
+  for (let p = 0; p < 5; p++) {
+    const row = document.createElement('div');
+    row.className = 'bond-container';
+    const a = Math.floor(rand() * (target + 1));
+    const b = target - a;
+    const hideA = rand() > 0.5;
+    
+    row.appendChild(createBox(hideA ? target : a, hideA, ans, ans.length));
+    
+    const plus = document.createElement('span');
+    plus.className = 'operator';
+    plus.textContent = '+';
+    row.appendChild(plus);
+    
+    row.appendChild(createBox(hideA ? b : target, !hideA, ans, ans.length));
+    
+    const eq = document.createElement('span');
+    eq.className = 'equals';
+    eq.textContent = '=';
+    row.appendChild(eq);
+    
+    const tgt = document.createElement('div');
+    tgt.className = 'bond-target';
+    tgt.textContent = target;
+    row.appendChild(tgt);
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 5. Compare Numbers
+function genCompare(rand, s, ans) {
+  const container = document.createElement('div');
+  for (let p = 0; p < 6; p++) {
+    const row = document.createElement('div');
+    row.className = 'compare-row';
+    const a = Math.floor(rand() * (s.max - s.min + 1)) + s.min;
+    const b = Math.floor(rand() * (s.max - s.min + 1)) + s.min;
+    const correct = a === b ? '=' : a > b ? '>' : '<';
+    
+    row.appendChild(createBox(a, false));
+    
+    const sel = createBox(correct, true, ans, ans.length, { type: 'compare' });
+    row.appendChild(sel);
+    
+    row.appendChild(createBox(b, false));
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 6. Place Value
+function genPlace(rand, s, ans) {
+  const container = document.createElement('div');
+  container.style.maxWidth = '400px';
+  container.style.margin = '0 auto';
+  
+  for (let p = 0; p < 4; p++) {
+    const num = Math.floor(rand() * (s.max - s.min + 1)) + s.min;
+    const tens = Math.floor(num / 10);
+    const ones = num % 10;
+    
+    const grid = document.createElement('div');
+    grid.className = 'place-grid';
+    
+    grid.appendChild(Object.assign(document.createElement('div'), { 
+      className: 'place-label', textContent: 'Number:' 
+    }));
+    grid.appendChild(createBox(num, false));
+    
+    grid.appendChild(Object.assign(document.createElement('div'), { 
+      className: 'place-label', textContent: 'Tens:' 
+    }));
+    grid.appendChild(createBox(tens, rand() > 0.5, ans, ans.length));
+    
+    grid.appendChild(Object.assign(document.createElement('div'), { 
+      className: 'place-label', textContent: 'Ones:' 
+    }));
+    grid.appendChild(createBox(ones, rand() > 0.5, ans, ans.length));
+    
+    container.appendChild(grid);
+    if (p < 3) container.appendChild(document.createElement('hr'));
+  }
+  return container;
+}
+
+// 7. Patterns
+function genPattern(rand, s, ans) {
+  const container = document.createElement('div');
+  const patterns = [
+    ['A','B','A','B','?'], ['A','A','B','B','?'], 
+    ['A','B','C','A','B','?'], ['1','2','1','2','?']
+  ];
+  
+  for (let p = 0; p < 4; p++) {
+    const row = document.createElement('div');
+    row.className = 'pattern-row';
+    const pat = patterns[Math.floor(rand() * patterns.length)];
+    
+    pat.forEach((item, i) => {
+      if (item === '?') {
+        const answers = { 'A': '🔵', 'B': '🟡', 'C': '🔴', '1': '3', '2': '4' };
+        const correct = answers[pat[i-2]] || 'X';
+        row.appendChild(createBox(correct, true, ans, ans.length));
+      } else {
+        const display = { 'A': '🔵', 'B': '🟡', 'C': '🔴' }[item] || item;
+        const box = document.createElement('div');
+        box.className = `pattern-item pattern-${item.toLowerCase()}`;
+        box.textContent = display;
+        row.appendChild(box);
+      }
     });
-  </script>
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 8. Coin Counting
+function genCoins(rand, s, ans) {
+  const container = document.createElement('div');
+  const coins = [
+    { name: 'penny', value: 1, symbol: '1¢' },
+    { name: 'nickel', value: 5, symbol: '5¢' },
+    { name: 'dime', value: 10, symbol: '10¢' },
+    { name: 'quarter', value: 25, symbol: '25¢' }
+  ];
+  
+  for (let p = 0; p < 4; p++) {
+    const row = document.createElement('div');
+    row.className = 'coin-row';
+    
+    // Generate random coins totaling <= 50¢
+    let total = 0, coinList = [];
+    while (total < 15 || rand() > 0.3) {
+      const coin = coins[Math.floor(rand() * coins.length)];
+      if (total + coin.value <= 50) {
+        total += coin.value;
+        coinList.push(coin);
+      }
+    }
+    
+    coinList.forEach(coin => {
+      const c = document.createElement('div');
+      c.className = `coin ${coin.name}`;
+      c.textContent = coin.symbol;
+      row.appendChild(c);
+    });
+    
+    const eq = document.createElement('span');
+    eq.className = 'equals';
+    eq.textContent = '=';
+    row.appendChild(eq);
+    
+    row.appendChild(createBox(total + '¢', rand() > 0.4, ans, ans.length));
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 9. Number Words
+function genWords(rand, s, ans) {
+  const container = document.createElement('div');
+  const words = ['zero','one','two','three','four','five','six','seven','eight','nine','ten',
+    'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
+  
+  for (let p = 0; p < 6; p++) {
+    const row = document.createElement('div');
+    row.className = 'arith-row';
+    const num = Math.floor(rand() * Math.min(21, s.max - s.min + 1)) + s.min;
+    const word = words[num] || num.toString();
+    const hideWord = rand() > 0.5;
+    
+    if (hideWord) {
+      row.appendChild(createBox(num, false));
+      const eq = document.createElement('span');
+      eq.className = 'equals';
+      eq.textContent = '→';
+      row.appendChild(eq);
+      row.appendChild(createBox(word, true, ans, ans.length, { type: 'words' }));
+    } else {
+      row.appendChild(createBox(word, true, ans, ans.length, { type: 'words', display: word }));
+      const eq = document.createElement('span');
+      eq.className = 'equals';
+      eq.textContent = '→';
+      row.appendChild(eq);
+      row.appendChild(createBox(num, false));
+    }
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 10. Simple Time
+function genTime(rand, s, ans) {
+  const container = document.createElement('div');
+  const hours = [1,2,3,4,5,6,7,8,9,10,11,12];
+  
+  for (let p = 0; p < 5; p++) {
+    const row = document.createElement('div');
+    row.className = 'arith-row';
+    const hour = hours[Math.floor(rand() * hours.length)];
+    const isOclock = rand() > 0.4;
+    const display = isOclock ? `${hour}:00` : `${hour}:30`;
+    const answer = isOclock ? `${hour} o'clock` : `half past ${hour}`;
+    
+    // Simple clock face representation
+    const clock = document.createElement('div');
+    clock.className = 'static-box';
+    clock.style.width = '60px';
+    clock.style.fontSize = '0.9rem';
+    clock.textContent = display;
+    row.appendChild(clock);
+    
+    const eq = document.createElement('span');
+    eq.className = 'equals';
+    eq.textContent = '→';
+    row.appendChild(eq);
+    
+    row.appendChild(createBox(answer, true, ans, ans.length, { type: 'time' }));
+    container.appendChild(row);
+  }
+  return container;
+}
+
+// 11. Mixed Practice
+function genMixed(rand, s, ans) {
+  const container = document.createElement('div');
+  const generators = [
+    () => genSequence(rand, {...s, length: 6}, ans),
+    () => genArithmetic(rand, {...s, max: Math.min(30, s.max)}, ans),
+    () => genPattern(rand, s, ans)
+  ];
+  
+  generators.sort(() => rand() - 0.5).slice(0, 3).forEach(gen => {
+    const section = document.createElement('div');
+    section.style.marginBottom = '16px';
+    section.appendChild(gen());
+    container.appendChild(section);
+  });
+  return container;
+}
+
+// ============= MAIN GENERATOR =============
+let currentAnswers = [];
+
+function generate() {
+  const seedInput = document.getElementById('seed-input').value.trim();
+  const seed = seedInput ? stringToSeed(seedInput) : Date.now();
+  if (!seedInput) document.getElementById('seed-input').placeholder = seed.toString().slice(0,8);
+  
+  const rand = seededRandom(seed);
+  const s = getSettings();
+  const topic = document.getElementById('topic').value;
+  const area = document.getElementById('worksheet-area');
+  const answerContent = document.getElementById('answer-content');
+  
+  area.innerHTML = '';
+  currentAnswers = [];
+  answerContent.innerHTML = '';
+  
+  const topics = {
+    sequence: { title: '🔢 Number Sequences', inst: 'Fill in the missing numbers.', gen: genSequence },
+    skip: { title: '🔁 Skip Counting', inst: 'Count by 2s, 5s, or 10s.', gen: genSkip },
+    arithmetic: { title: '➕➖ Arithmetic', inst: 'Solve the missing number.', gen: genArithmetic },
+    bonds: { title: '🎯 Number Bonds', inst: 'Find the pair that makes the target.', gen: genBonds },
+    compare: { title: '⚖️ Compare Numbers', inst: 'Choose <, >, or =.', gen: genCompare },
+    place: { title: '📊 Place Value', inst: 'Fill in tens and ones.', gen: genPlace },
+    pattern: { title: '🧩 Patterns', inst: 'What comes next?', gen: genPattern },
+    coins: { title: '💰 Coin Counting', inst: 'Add up the coins.', gen: genCoins },
+    words: { title: '🔤 Number Words', inst: 'Match numbers and words.', gen: genWords },
+    time: { title: '⏰ Simple Time', inst: 'Write the time in words.', gen: genTime },
+    mixed: { title: '🔀 Mixed Practice', inst: 'A little of everything!', gen: genMixed }
+  };
+  
+  const t = topics[topic];
+  const card = document.createElement('div');
+  card.className = 'worksheet-card';
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-title">${t.title}</div>
+      <div style="font-size:0.85rem;color:var(--muted)">🔑 ${seed.toString().slice(0,8)}</div>
+    </div>
+    <p class="card-instructions">${t.inst}</p>
+  `;
+  card.appendChild(t.gen(rand, s, currentAnswers));
+  area.appendChild(card);
+  
+  // Build answer key
+  currentAnswers.forEach((ans, i) => {
+    if (ans !== undefined) {
+      const item = document.createElement('div');
+      item.className = 'answer-key-item';
+      item.innerHTML = `<span>#${i+1}</span><strong>${ans}</strong>`;
+      answerContent.appendChild(item);
+    }
+  });
+  
+  updateProgress();
+  showToast('✨ New worksheet ready!');
+  setTimeout(() => area.querySelector('input,select')?.focus(), 100);
+}
+
+// ============= UI FUNCTIONS =============
+function toggleAnswers() {
+  const key = document.getElementById('answer-key');
+  key.classList.toggle('visible');
+  showToast(key.classList.contains('visible') ? '🔑 Answers shown' : '🙈 Answers hidden');
+}
+
+function toggleCompact() {
+  document.body.classList.toggle('compact');
+  document.getElementById('compact-toggle').classList.toggle('active');
+  showToast(document.body.classList.contains('compact') ? '📱 Compact mode ON' : '📐 Normal mode');
+}
+
+function toggleControls() {
+  const panel = document.getElementById('controls-panel');
+  const icon = document.getElementById('toggle-icon');
+  panel.classList.toggle('show');
+  icon.textContent = panel.classList.contains('show') ? '▲' : '▼';
+}
+
+function updateProgress() {
+  const earned = JSON.parse(localStorage.getItem('pp_stamps') || '[]');
+  document.getElementById('progress-count').textContent = `${earned.length}/5`;
+  document.querySelectorAll('.stamp-mini').forEach((s, i) => {
+    s.classList.toggle('earned', earned.includes(i));
+  });
+}
+
+function awardStamp(idx) {
+  const earned = JSON.parse(localStorage.getItem('pp_stamps') || '[]');
+  if (!earned.includes(idx)) {
+    earned.push(idx);
+    localStorage.setItem('pp_stamps', JSON.stringify(earned));
+    updateProgress();
+    showCelebration();
+    showToast('🏆 Stamp earned!');
+  }
+}
+
+function checkComplete() {
+  const inputs = document.querySelectorAll('#worksheet-area input, #worksheet-area select');
+  if (!inputs.length) return;
+  
+  let allCorrect = true;
+  inputs.forEach(el => {
+    const ans = el.dataset.answer;
+    const val = el.value?.trim().toLowerCase().replace(/\s+/g, '') || '';
+    const cleanAns = ans?.toLowerCase().replace(/\s+/g, '');
+    if (val && val !== cleanAns && val !== ans) allCorrect = false;
+  });
+  
+  if (allCorrect) {
+    const topic = document.getElementById('topic').value;
+    const map = { sequence:0, arithmetic:1, pattern:2, coins:3, mixed:4 };
+    awardStamp(map[topic] || 4);
+  }
+}
+
+function showCelebration() {
+  const c = document.getElementById('celebration');
+  c.style.display = 'block';
+  c.innerHTML = '';
+  const colors = ['#6c5ce7','#00cec9','#fdcb6e','#e84393','#00b894'];
+  
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti';
+    piece.style.left = `${Math.random()*100}%`;
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    piece.style.animationDelay = `${Math.random()*1.5}s`;
+    piece.style.width = piece.style.height = `${Math.random()*6+6}px`;
+    c.appendChild(piece);
+  }
+  setTimeout(() => c.style.display = 'none', 2500);
+}
+
+// ============= INIT =============
+window.addEventListener('load', () => {
+  // Load theme
+  const savedTheme = localStorage.getItem('pp_theme') || 'space';
+  document.body.className = `theme-${savedTheme}`;
+  document.getElementById('theme').value = savedTheme;
+  
+  // Load compact mode
+  if (localStorage.getItem('pp_compact') === 'true') {
+    document.body.classList.add('compact');
+    document.getElementById('compact-toggle').classList.add('active');
+  }
+  
+  // Event listeners
+  document.getElementById('theme').addEventListener('change', (e) => {
+    document.body.className = `theme-${e.target.value}`;
+    localStorage.setItem('pp_theme', e.target.value);
+  });
+  
+  document.getElementById('compact-toggle').addEventListener('click', () => {
+    localStorage.setItem('pp_compact', document.body.classList.contains('compact'));
+  });
+  
+  // Generate first worksheet
+  updateProgress();
+  generate();
+  
+  // Keyboard shortcut
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      generate();
+    }
+  });
+});
+
+// Prevent iOS zoom
+document.addEventListener('focusin', (e) => {
+  if (e.target.tagName === 'INPUT') document.body.style.zoom = '1.0';
+});
+</script>
 </body>
 </html>
+
