@@ -3,118 +3,211 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Singapore Math Bar Model Explorer</title>
+<title>Number Practice 71 - 100</title>
 <style>
-  body { 
-    font-family: system-ui, -apple-system, sans-serif; 
-    padding: 2rem; 
-    max-width: 600px; 
-    margin: 0 auto; 
-    background-color: #f8f9fa;
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fcfcfc;
+    color: #333;
   }
-  .card {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
-  h2 { margin-top: 0; color: #333; }
-  .bar-container { 
-    display: flex; 
-    margin: 20px 0; 
-    height: 60px; 
-    border-radius: 6px; 
-    overflow: hidden; 
-    background: #e9ecef;
-  }
-  .part { 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    color: white; 
-    font-size: 1.2rem;
-    font-weight: bold; 
-    transition: width 0.3s ease; 
-  }
-  .part-a { background-color: #3b82f6; } /* Blue */
-  .part-b { background-color: #10b981; } /* Green */
-  .equation {
+  h1, h2 {
     text-align: center;
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin: 20px 0;
-    color: #4b5563;
+    color: #0056b3;
   }
-  .controls { display: flex; flex-direction: column; gap: 15px; }
-  .control-group { display: flex; flex-direction: column; gap: 5px; }
-  label { font-weight: 600; color: #4b5563; }
-  input[type=range] { width: 100%; cursor: pointer; }
+  .worksheet-card {
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+  }
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+  .box {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    border: 2px solid #555;
+    background-color: #fff;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  .static-box {
+    background-color: #f0f8ff;
+  }
+  input[type="number"] {
+    width: 100%;
+    height: 100%;
+    border: none;
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    outline: none;
+    color: #333;
+    background-color: #fffaf0; /* slight yellow tint to indicate it needs filling */
+  }
+  /* Hide the spinner arrows on number inputs */
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+  }
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+  .correct {
+    color: #009900 !important;
+  }
+  
+  .columns-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+  }
+  .vertical-chain {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  @media print {
+    body { background-color: white; padding: 0; }
+    .worksheet-card { box-shadow: none; border: none; margin-bottom: 40px; }
+    input[type="number"] { background-color: white; }
+    .static-box { background-color: white; }
+  }
 </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Bar Model Explorer</h2>
-    <p>Adjust the sliders to see how Part A and Part B combine to form the total value. This bridges abstract numbers to proportional visual blocks.</p>
+
+  <h1>Numbers up to 100 Practice</h1>
+
+  <div class="worksheet-card">
+    <h2>Exercise 1: Horizontal Sequences</h2>
+    <p style="text-align:center;">Fill in the missing numbers to complete the rows.</p>
     
-    <div class="bar-container">
-      <div class="part part-a" id="barA">40</div>
-      <div class="part part-b" id="barB">60</div>
+    <div class="row">
+      <div class="box static-box">71</div>
+      <div class="box"><input type="number" data-answer="72"></div>
+      <div class="box static-box">73</div>
+      <div class="box"><input type="number" data-answer="74"></div>
+      <div class="box static-box">75</div>
+      <div class="box"><input type="number" data-answer="76"></div>
+      <div class="box static-box">77</div>
+      <div class="box static-box">78</div>
+      <div class="box"><input type="number" data-answer="79"></div>
+      <div class="box static-box">80</div>
+    </div>
+
+    <div class="row">
+      <div class="box static-box">81</div>
+      <div class="box static-box">82</div>
+      <div class="box"><input type="number" data-answer="83"></div>
+      <div class="box static-box">84</div>
+      <div class="box"><input type="number" data-answer="85"></div>
+      <div class="box static-box">86</div>
+      <div class="box"><input type="number" data-answer="87"></div>
+      <div class="box static-box">88</div>
+      <div class="box"><input type="number" data-answer="89"></div>
+      <div class="box static-box">90</div>
     </div>
     
-    <div class="equation" id="equation">40 + 60 = 100</div>
+    <div class="row">
+      <div class="box static-box">91</div>
+      <div class="box"><input type="number" data-answer="92"></div>
+      <div class="box static-box">93</div>
+      <div class="box static-box">94</div>
+      <div class="box"><input type="number" data-answer="95"></div>
+      <div class="box static-box">96</div>
+      <div class="box"><input type="number" data-answer="97"></div>
+      <div class="box"><input type="number" data-answer="98"></div>
+      <div class="box static-box">99</div>
+      <div class="box static-box">100</div>
+    </div>
+  </div>
+
+  <div class="worksheet-card">
+    <h2>Exercise 2: Vertical Number Chains</h2>
+    <p style="text-align:center;">Count down the columns and type the missing numbers.</p>
     
-    <div class="controls">
-      <div class="control-group">
-        <label>Part A (Blue): <span id="valA">40</span></label>
-        <input type="range" id="inputA" min="0" max="100" value="40">
+    <div class="columns-container">
+      
+      <div class="vertical-chain">
+        <div class="box static-box">78</div>
+        <div class="box static-box">79</div>
+        <div class="box static-box">80</div>
+        <div class="box static-box">81</div>
+        <div class="box"><input type="number" data-answer="82"></div>
+        <div class="box static-box">83</div>
+        <div class="box"><input type="number" data-answer="84"></div>
+        <div class="box static-box">85</div>
+        <div class="box static-box">86</div>
       </div>
-      <div class="control-group">
-        <label>Part B (Green): <span id="valB">60</span></label>
-        <input type="range" id="inputB" min="0" max="100" value="60">
+
+      <div class="vertical-chain">
+        <div class="box static-box">81</div>
+        <div class="box static-box">82</div>
+        <div class="box"><input type="number" data-answer="83"></div>
+        <div class="box static-box">84</div>
+        <div class="box"><input type="number" data-answer="85"></div>
+        <div class="box static-box">86</div>
+        <div class="box static-box">87</div>
+        <div class="box"><input type="number" data-answer="88"></div>
+        <div class="box static-box">89</div>
       </div>
+
+      <div class="vertical-chain">
+        <div class="box static-box">85</div>
+        <div class="box"><input type="number" data-answer="86"></div>
+        <div class="box static-box">87</div>
+        <div class="box static-box">88</div>
+        <div class="box"><input type="number" data-answer="89"></div>
+        <div class="box static-box">90</div>
+        <div class="box"><input type="number" data-answer="91"></div>
+        <div class="box static-box">92</div>
+        <div class="box"><input type="number" data-answer="93"></div>
+      </div>
+
+      <div class="vertical-chain">
+        <div class="box static-box">92</div>
+        <div class="box static-box">93</div>
+        <div class="box"><input type="number" data-answer="94"></div>
+        <div class="box static-box">95</div>
+        <div class="box"><input type="number" data-answer="96"></div>
+        <div class="box static-box">97</div>
+        <div class="box"><input type="number" data-answer="98"></div>
+        <div class="box static-box">99</div>
+        <div class="box static-box">100</div>
+      </div>
+
     </div>
   </div>
 
   <script>
-    // Grab elements from the DOM
-    const inputA = document.getElementById('inputA');
-    const inputB = document.getElementById('inputB');
-    const barA = document.getElementById('barA');
-    const barB = document.getElementById('barB');
-    const valA = document.getElementById('valA');
-    const valB = document.getElementById('valB');
-    const equation = document.getElementById('equation');
-
-    // Update the visual blocks whenever a slider changes
-    function updateVisualization() {
-      const a = parseInt(inputA.value);
-      const b = parseInt(inputB.value);
-      const total = a + b;
-      
-      // Calculate proportional widths
-      const widthA = total === 0 ? 0 : (a / total) * 100;
-      const widthB = total === 0 ? 0 : (b / total) * 100;
-      
-      // Apply widths to the visual bars
-      barA.style.width = widthA + '%';
-      barB.style.width = widthB + '%';
-      
-      // Update text inside the bars (hide if 0 to prevent crowding)
-      barA.textContent = a > 0 ? a : '';
-      barB.textContent = b > 0 ? b : '';
-      
-      // Update the control labels and the math equation
-      valA.textContent = a;
-      valB.textContent = b;
-      equation.textContent = `${a} + ${b} = ${total}`;
-    }
-
-    // Listen for slider movements
-    inputA.addEventListener('input', updateVisualization);
-    inputB.addEventListener('input', updateVisualization);
+    // This simple script checks if the typed number matches the data-answer attribute.
+    // If it is correct, the text turns green.
+    const inputs = document.querySelectorAll('input[type="number"]');
     
-    // Run once on load to set initial state
-    updateVisualization();
+    inputs.forEach(input => {
+      input.addEventListener('input', function() {
+        if (this.value === this.getAttribute('data-answer')) {
+          this.classList.add('correct');
+        } else {
+          this.classList.remove('correct');
+        }
+      });
+    });
   </script>
 </body>
 </html>
