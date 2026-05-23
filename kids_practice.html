@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎈 Practice Playground</title>
+<style>
+  :root {
+    /* Theme defaults (Space) */
+    --primary: #6c5ce7;
+    --primary-light: #a29bfe;
+    --secondary: #00cec9;
+    --accent: #fdcb6e;
+    --bg: #f7f9fc;
+    --card: #ffffff;
+    --text: #2d3436;
+    --muted: #636e72;
+    --success: #00b894;
+    --border: #dfe6e9;
+    --shadow: 0 3px 10px rgba(0,0,0,0.08);
+    --radius: 12px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  /* Theme: Jungle */
+  body.theme-jungle {
+    --primary: #27ae60; --primary-light: #58d68d; --secondary: #f39c12;
+    --accent: #ff9ff3; --bg: #f0fff4; --card: #ffffff;
+  }
+  
+  /* Theme: Ocean */
+  body.theme-ocean {
+    --primary: #0984e3; --primary-light: #74b9ff; --secondary: #00cec9;
+    --accent: #ffeaa7; --bg: #f0f8ff; --card: #ffffff;
+  }
+  
+  /* Theme: Candy */
+  body.theme-candy {
+    --primary: #e84393; --primary-light: #fd79a8; --secondary: #fdcb6e;
+    --accent: #a29bfe; --bg: #fff0f5; --card: #ffffff;
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.4;
+    padding: 8px;
+    transition: background 0.3s;
+  }
+  
+  /* Compact mode */
+  body.compact {
+    font-size: 0.95rem;
+  }
+  body.compact .worksheet-card { padding: 12px; margin-bottom: 12px; }
+  body.compact .box { width: 44px; height: 44px; font-size: 1.1rem; }
+  body.compact .controls { padding: 10px; gap: 8px; }
+  body.compact .btn { padding: 8px 14px; font-size: 0.9rem; }
+  
+  /* Header */
+  header {
+    text-align: center;
+    padding: 8px 4px 12px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  
+  .logo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .mascot {
+    font-size: 1.8rem;
+    animation: bounce 2s infinite;
+    cursor: pointer;
+  }
+  
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  
+  /* Controls - Collapsible on mobile */
+  .controls {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    align-items: end;
+  }
+  
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .control-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  select, input[type="number"] {
+    padding: 8px 10px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fff;
+    color: var(--text);
+    min-width: 0;
+  }
+  
+  input[type="number"] {
+    text-align: center;
+    -moz-appearance: textfield;
+    width: 70px;
+  }
+  
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  .btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  
+  .btn:hover { 
+    background: var(--primary-light); 
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  
+  .btn:active { transform: translateY(0); }
+  .btn-secondary { background: var(--secondary); color: #003; }
+  .btn-secondary:hover { background: var(--primary-light); }
+  .btn-outline { 
+    background: transparent; 
+    border: 2px solid var(--primary); 
+    color: var(--primary); 
+  }
+  .btn-outline:hover { background: var(--primary); color: white; }
+  
+  .btn-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  
+  /* Toggle buttons for compact/theme */
+  .toggle-group {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    padding: 4px;
+    border-radius: 8px;
+  }
+  
+  .toggle-btn {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  
+  .toggle-btn.active {
+    background: var(--primary);
+    color: white;
+  }
+  
+  /* Worksheet Cards */
+  .worksheet-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .card-instructions {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    text-align: center;
+    line-height: 1.4;
+  }
+  
+  /* Exercise Containers */
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  
+  .columns-container {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .vertical-chain {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 52px;
+  }
+  
+  .arith-row, .bond-container, .compare-row, .pattern-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  
+  /* Boxes & Inputs */
+  .box {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    border: 2px solid var(--border);
+    background: #fff;
+    border-radius: 10px;
+    font-weight: 600;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  
+  .static-box {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: white;
+    opacity: 0.95;
+  }
+  
+  .box input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    background: #fff9e6;
+    border-radius: 8px;
+    color: var(--text);
+    outline: none;
+  }
+  
+  .box input.correct {
+    background: #d4edda;
+    color: #155724;
+    border: 2px solid var(--success);
+    animation: pop 0.3s;
+  }
+  
+  .box input.incorrect {
+    animation: shake 0.3s;
+    border-color: #e84393;
+    background: #ffe6f2;
+  }
+  
+  @keyframes pop {
+    50% { transform: scale(1.1); }
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+  }
+  
+  /* Operators & Symbols */
+  .operator, .equals, .compare-op {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--primary);
+    min-width: 24px;
+    text-align: center;
+  }
+  
+  .equals { color: var(--muted); }
+  
+  /* Number Bonds */
+  .bond-target {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--primary);
+    background: var(--primary-light);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 2px solid var(--primary);
+  }
+  
+  /* Comparing Numbers */
+  .compare-select {
+    width: 48px;
+    height: 48px;
+    font-size: 1.4rem;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    text-align: center;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+  }
+  
+  /* Patterns */
+  .pattern-item {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  
+  .pattern-a { background: #74b9ff; color: white; }
+  .pattern-b { background: #55efc4; color: #003; }
+  .pattern-c { background: #ffeaa7; color: #333; }
+  
+  /* Place Value */
+  .place-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px 20px;
+    align-items: center;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  .place-label {
+    font-weight: 600;
+    color: var(--muted);
+    text-align: right;
+  }
+  
+  /* Coin Counting */
+  .coin-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0;
+    justify-content: center;
+  }
+  
+  .coin {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border: 2px solid var(--border);
+  }
+  
+  .coin.penny { background: #cd7f32; color: white; }
+  .coin.nickel { background: #c0c0c0; color: #333; }
+  .coin.dime { background: #e5e4e2; width: 32px; height: 32px; font-size: 0.8rem; }
+  .coin.quarter { background: #b8b8b8; width: 48px; height: 48px; }
+  
+  /* Progress & Stamps - Minimal */
+  .progress-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 8px 0;
+  }
+  
+  .stamps-mini {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .stamp-mini {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    border: 2px solid var(--primary);
+    opacity: 0.4;
+  }
+  
+  .stamp-mini.earned {
+    background: var(--accent);
+    opacity: 1;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  
+  /* Answer Key - Compact */
+  .answer-key {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    background: #fff8e1;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+  }
+  
+  .answer-key.visible { display: block; }
+  .answer-key-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px dashed #ffe08a;
+  }
+  .answer-key-item:last-child { border-bottom: none; }
+  
+  /* Mobile Optimizations */
+  @media (max-width: 500px) {
+    body { padding: 4px; }
+    .controls { 
+      grid-template-columns: 1fr; 
+      padding: 10px;
+    }
+    .control-row { flex-direction: column; align-items: stretch; }
+    input[type="number"] { width: 100%; }
+    .btn-group { width: 100%; justify-content: center; }
+    .box { width: 44px; height: 44px; font-size: 1.1rem; }
+    .box input { font-size: 1.1rem; }
+    .operator, .equals { font-size: 1.15rem; }
+    .card-title { font-size: 1.1rem; }
+    .logo { font-size: 1.4rem; }
+    .mascot { font-size: 1.5rem; }
+  }
+  
+  /* Print Styles */
+  @media print {
+    body { 
+      background: white; 
+      padding: 0; 
+      font-size: 13px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    header, .controls, .progress-mini, .btn, .answer-key-toggle { 
+      display: none !important; 
+    }
+    .worksheet-card { 
+      box-shadow: none; 
+      border: 1px solid #999; 
+      margin-bottom: 15px; 
+      page-break-inside: avoid;
+      padding: 12px;
+    }
+    .box, .box input { 
+      background: white !important; 
+      border-color: #333 !important;
+      color: #000 !important;
+    }
+    .static-box { background: #f5f5f5 !important; }
+    @page { margin: 1.2cm; }
+  }
+  
+  /* Toast & Celebration */
+  .toast {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #2d3436;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    z-index: 999;
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  
+  .celebration {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1000;
+    display: none;
+  }
+  
+  .confetti {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    animation: fall 2.5s linear forwards;
+  }
+  
+  @keyframes fall {
+    to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+  
+  /* Collapsible Controls */
+  .controls-toggle {
+    display: none;
+    width: 100%;
+    padding: 8px;
+    background: var(--card);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 8px;
