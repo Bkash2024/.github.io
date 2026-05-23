@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>🎈 Practice Playground – A4 Print Optimized</title>
+<title>🎈 Practice Playground – A4 Full Page</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -59,12 +59,12 @@
   .stamp { width: 32px; height: 32px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary); opacity: 0.4; font-size: 0.8rem; }
   .stamp.earned { background: var(--accent); opacity: 1; }
 
-  .worksheet-card { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); transition: all 0.2s; }
+  .worksheet-card { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
   .card-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; border-bottom: 1px dashed var(--border); padding-bottom: 8px; margin-bottom: 16px; }
   .card-title { font-size: 1.3rem; font-weight: 700; color: var(--primary); }
   .instructions { color: var(--muted); text-align: center; margin-bottom: 20px; font-size: 0.9rem; }
 
-  .row, .arith-row, .bond-container, .compare-row, .pattern-row, .coin-row {
+  .row, .arith-row, .bond-container, .compare-row, .pattern-row {
     display: flex; justify-content: center; align-items: center; gap: 10px;
     margin: 12px 0; flex-wrap: wrap;
   }
@@ -88,60 +88,101 @@
   .compare-select { width: 52px; height: 52px; font-size: 1.3rem; text-align: center; border-radius: 12px; }
   .pattern-item { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
   .pattern-a { background: #74b9ff; } .pattern-b { background: #55efc4; } .pattern-c { background: #ffeaa7; }
-  .place-grid { display: grid; grid-template-columns: auto 1fr; gap: 12px 20px; max-width: 400px; margin: 0 auto; }
-  .coin { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #f1c40f; border: 2px solid var(--border); }
-  .coin.penny { background: #cd7f32; } .coin.nickel { background: #c0c0c0; } .coin.dime { width: 38px; height: 38px; background: #e5e4e2; } .coin.quarter { width: 52px; height: 52px; background: #b8b8b8; }
 
   .answer-key { display: none; margin-top: 20px; padding: 12px; background: #fff8e1; border-left: 5px solid var(--accent); border-radius: 0 12px 12px 0; }
   .answer-key.visible { display: block; }
   .answer-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #ffe08a; }
 
-  /* 🖨️ PRINT-DENSE LAYOUT (fills A4 page tightly) */
-  .worksheet-card.print-dense {
-    padding: 10px 12px !important;
-    border: 1px solid #999 !important;
-    background: #fff !important;
-  }
-  .worksheet-card.print-dense .card-header {
-    padding-bottom: 4px; margin-bottom: 8px; border-bottom: 1px solid #666;
-  }
-  .worksheet-card.print-dense .card-title { font-size: 1.1rem; }
-  .worksheet-card.print-dense .instructions { margin-bottom: 8px; font-size: 0.8rem; }
-  .worksheet-card.print-dense .row,
-  .worksheet-card.print-dense .arith-row,
-  .worksheet-card.print-dense .compare-row,
-  .worksheet-card.print-dense .bond-container,
-  .worksheet-card.print-dense .pattern-row {
-    gap: 6px; margin: 5px 0;
-  }
-  .worksheet-card.print-dense .box {
-    width: 36px !important; height: 36px !important; font-size: 0.95rem !important;
-    border-radius: 6px !important; border-width: 1.5px !important;
-  }
-  .worksheet-card.print-dense .operator,
-  .worksheet-card.print-dense .equals { font-size: 1.1rem !important; min-width: 22px !important; }
-  .worksheet-card.print-dense .pattern-item { width: 34px !important; height: 34px !important; font-size: 1rem !important; border-radius: 8px !important; }
-  .worksheet-card.print-dense .compare-select { width: 36px !important; height: 36px !important; font-size: 1.1rem !important; }
-  .worksheet-card.print-dense .box input { font-size: 0.9rem !important; background: transparent !important; }
-  .worksheet-card.print-dense .static-box { background: #f8f9fa !important; }
-
-  /* PRINT MODE overrides */
+  /* 🖨️ A4 DENSE PRINT LAYOUT - Multi-column to fill page */
   @media print {
-    body { background: white; padding: 0; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .controls-panel, .settings-toggle, .progress-bar, .btn, .answer-key, .toggle-group, .toast, .celebration { display: none !important; }
-    .worksheet-card { box-shadow: none; page-break-inside: avoid; margin: 0 !important; border: none !important; }
-    .worksheet-card.print-dense { border: 1px solid #ccc !important; padding: 10px !important; }
-    .box, .box input { border-color: #333 !important; color: black !important; }
-    .static-box { background: #f5f5f5 !important; }
-    .compare-select {
-      appearance: none; -webkit-appearance: none;
-      border: none; border-bottom: 2px solid #000;
-      background: transparent; width: 40px; text-align: center;
-      font-size: 1.1rem; color: transparent;
+    @page { size: A4 portrait; margin: 8mm; }
+    body { 
+      background: white; 
+      padding: 0; 
+      margin: 0;
+      -webkit-print-color-adjust: exact; 
+      print-color-adjust: exact;
     }
-    .compare-select option { display: none; }
-    .box input[type="text"] { width: 80px; border-bottom: 2px solid #000; background: transparent; }
-    @page { size: A4; margin: 1.5cm 1.8cm; }
+    .controls-panel, .settings-toggle, .progress-bar, .btn, .answer-key, .toggle-group, .toast, .celebration { 
+      display: none !important; 
+    }
+    .worksheet-card { 
+      box-shadow: none; 
+      border: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      background: white !important;
+    }
+    .worksheet-card.print-dense {
+      column-count: 2;
+      column-gap: 15mm;
+      column-fill: balance;
+      height: 270mm;
+    }
+    .worksheet-card.print-dense .card-header {
+      column-span: all;
+      border-bottom: 2px solid #333;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+    }
+    .worksheet-card.print-dense .card-title { 
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .worksheet-card.print-dense .instructions { 
+      column-span: all;
+      margin-bottom: 6px; 
+      font-size: 0.8rem;
+      font-style: italic;
+    }
+    .worksheet-card.print-dense .row,
+    .worksheet-card.print-dense .arith-row,
+    .worksheet-card.print-dense .compare-row,
+    .worksheet-card.print-dense .bond-container,
+    .worksheet-card.print-dense .pattern-row {
+      gap: 4px !important; 
+      margin: 3px 0 !important;
+      break-inside: avoid;
+    }
+    .worksheet-card.print-dense .box {
+      width: 32px !important; 
+      height: 32px !important; 
+      font-size: 0.85rem !important;
+      border-radius: 4px !important; 
+      border-width: 1px !important;
+      margin: 1px !important;
+    }
+    .worksheet-card.print-dense .operator,
+    .worksheet-card.print-dense .equals { 
+      font-size: 0.9rem !important; 
+      min-width: 18px !important;
+      margin: 0 2px !important;
+    }
+    .worksheet-card.print-dense .pattern-item { 
+      width: 30px !important; 
+      height: 30px !important; 
+      font-size: 0.85rem !important; 
+      border-radius: 6px !important;
+      margin: 1px !important;
+    }
+    .worksheet-card.print-dense .compare-select { 
+      width: 32px !important; 
+      height: 32px !important; 
+      font-size: 0.9rem !important;
+    }
+    .worksheet-card.print-dense .box input { 
+      font-size: 0.8rem !important; 
+      background: transparent !important;
+    }
+    .worksheet-card.print-dense .static-box { 
+      background: #e8e8e8 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .worksheet-card.print-dense .bond-target {
+      padding: 3px 8px;
+      font-size: 0.85rem;
+    }
   }
 
   @media (max-width: 600px) {
@@ -156,7 +197,7 @@
   .confetti { position: absolute; width: 8px; height: 8px; background: gold; animation: fall 2s linear forwards; }
   @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
   
-  /* Preview modal styles */
+  /* Preview modal */
   .preview-modal {
     position: fixed; inset: 0; background: rgba(0,0,0,0.6);
     display: none; align-items: center; justify-content: center;
@@ -220,20 +261,19 @@
 <div class="preview-modal" id="previewModal">
   <div class="preview-content">
     <div class="preview-header">
-      <strong>🖨️ A4 Print Preview</strong>
+      <strong>🖨️ A4 Print Preview (2 columns)</strong>
       <div class="preview-actions">
         <button class="preview-btn" id="previewPrintBtn">🖨️ Print This</button>
         <button class="preview-close" id="previewCloseBtn">✕ Close</button>
       </div>
     </div>
     <div id="previewContent"></div>
-    <div class="preview-note">💡 Optimized for A4 • Dense layout • Ctrl+P for best results</div>
+    <div class="preview-note">💡 Double-column A4 layout • Minimal margins • Maximum exercises</div>
   </div>
 </div>
 
 <script>
 (function(){
-  // DOM elements
   const topicSelect = document.getElementById('topicSelect');
   const minInput = document.getElementById('minVal');
   const maxInput = document.getElementById('maxVal');
@@ -256,14 +296,11 @@
   const stampsContainer = document.getElementById('stampsContainer');
   const progressSpan = document.getElementById('progressCount');
   const toastDiv = document.getElementById('toastMsg');
-  
-  // Preview modal elements
   const previewModal = document.getElementById('previewModal');
   const previewContent = document.getElementById('previewContent');
   const previewCloseBtn = document.getElementById('previewCloseBtn');
   const previewPrintBtn = document.getElementById('previewPrintBtn');
 
-  // State
   let currentAnswers = [];
   let worksheetCompleted = false;
   let currentSeed = Date.now();
@@ -271,7 +308,6 @@
   let rng = seededRandom(currentSeed);
   let printMultiplier = 1;
 
-  // Helper functions
   function seededRandom(seed) {
     return function() {
       let t = (seed += 0x6D2B79F5);
@@ -291,7 +327,7 @@
     setTimeout(() => toastDiv.classList.remove('show'), 2000);
   }
   function mascotCheer() {
-    const mascots = ['🚀', '🦁', '🐠', '🍭', '🎈', '⭐'];
+    const mascots = ['🚀', '', '🐠', '🍭', '🎈', '⭐'];
     document.querySelector('.mascot').textContent = mascots[Math.floor(Math.random() * mascots.length)];
     showToast('You got this! 💪');
   }
@@ -303,7 +339,7 @@
     const diff = diffSelect.value;
     const rates = { easy: 0.3, medium: 0.45, hard: 0.65 };
     let multiplier = printMultiplier;
-    if (multiplier > 1 && (currentTopicId === 'compare' || currentTopicId === 'words')) multiplier = 5;
+    if (multiplier > 1 && (currentTopicId === 'compare' || currentTopicId === 'words')) multiplier = 8;
     let skipVal = parseInt(skipSelect.value);
     if (skipSelect.value === 'custom') {
       skipVal = parseInt(customSkipInput.value) || 2;
@@ -320,10 +356,10 @@
     if (isHidden) {
       if (options.type === 'compare' && isPrintMode()) {
         const blank = document.createElement('span');
-        blank.textContent = '______';
-        blank.style.fontSize = '1rem';
+        blank.textContent = '___';
+        blank.style.fontSize = '0.9rem';
         blank.style.fontWeight = 'bold';
-        blank.style.minWidth = '40px';
+        blank.style.minWidth = '28px';
         blank.style.textAlign = 'center';
         box.appendChild(blank);
         if (answerArray && idx >= 0) answerArray[idx] = value;
@@ -343,8 +379,8 @@
         const inp = document.createElement('input');
         inp.type = 'text';
         inp.dataset.answer = value.toString().toLowerCase();
-        inp.placeholder = '______';
-        if (isPrintMode()) inp.style.width = '90px';
+        inp.placeholder = '___';
+        if (isPrintMode()) inp.style.width = '70px';
         inp.addEventListener('input', () => {
           if (inp.value.trim().toLowerCase() === inp.dataset.answer) inp.classList.add('correct');
           else inp.classList.remove('correct');
@@ -386,7 +422,6 @@
     return box;
   }
 
-  // ---------- EXERCISE REGISTRY ----------
   const exercises = {};
 
   exercises.sequence = {
@@ -395,7 +430,7 @@
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
       const length = 7;
-      const rows = 4 * settings.multiplier;
+      const rows = 6 * settings.multiplier;
       const usedStarts = new Set();
       for (let r = 0; r < rows; r++) {
         let start;
@@ -420,7 +455,7 @@
       const container = document.createElement('div');
       const skip = settings.skipVal;
       const length = 7;
-      const rows = 4 * settings.multiplier;
+      const rows = 6 * settings.multiplier;
       const usedStarts = new Set();
       for (let r = 0; r < rows; r++) {
         let start;
@@ -444,7 +479,7 @@
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
       const ops = ['+', '-'];
-      const problemCount = 8 * settings.multiplier;
+      const problemCount = 12 * settings.multiplier;
       for (let i = 0; i < problemCount; i++) {
         const row = document.createElement('div'); row.className = 'arith-row';
         const op = ops[Math.floor(rand() * ops.length)];
@@ -482,7 +517,7 @@
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
       const target = settings.max <= 15 ? 10 : 20;
-      const problemCount = 6 * settings.multiplier;
+      const problemCount = 10 * settings.multiplier;
       for (let i = 0; i < problemCount; i++) {
         const row = document.createElement('div'); row.className = 'bond-container';
         const a = Math.floor(rand() * (target + 1));
@@ -511,7 +546,7 @@
     instructions: 'Write <, >, or = in the blank.',
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
-      const problemCount = 10 * settings.multiplier;
+      const problemCount = 15 * settings.multiplier;
       for (let i = 0; i < problemCount; i++) {
         const row = document.createElement('div'); row.className = 'compare-row';
         const a = Math.floor(rand() * (settings.max - settings.min + 1)) + settings.min;
@@ -532,7 +567,7 @@
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
       const patterns = [['A','B','A','B','?'], ['A','A','B','B','?'], ['A','B','C','A','B','?']];
-      const problemCount = 6 * settings.multiplier;
+      const problemCount = 8 * settings.multiplier;
       for (let p = 0; p < problemCount; p++) {
         const row = document.createElement('div'); row.className = 'pattern-row';
         const pat = patterns[Math.floor(rand() * patterns.length)].slice();
@@ -566,7 +601,7 @@
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
       const words = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
-      const problemCount = 10 * settings.multiplier;
+      const problemCount = 15 * settings.multiplier;
       for (let i = 0; i < problemCount; i++) {
         const row = document.createElement('div'); row.className = 'arith-row';
         const num = Math.floor(rand() * Math.min(21, settings.max - settings.min + 1)) + settings.min;
@@ -603,7 +638,6 @@
     }
   };
 
-  // Populate topic dropdown
   const topicNames = {
     sequence: 'Sequences', skip: 'Skip Counting', arithmetic: 'Arithmetic',
     bonds: 'Number Bonds', compare: 'Compare Numbers', pattern: 'Patterns',
@@ -627,7 +661,6 @@
   customSkipInput.addEventListener('input', updateSkipInput);
   updateSkipInput();
 
-  // Generate worksheet HTML string
   function generateWorksheetHTML(seed, settings, topicId, isDense = false) {
     const rand = seededRandom(seed);
     const ex = exercises[topicId];
@@ -647,7 +680,6 @@
     return temp.outerHTML;
   }
 
-  // Core generate function
   function generate(isDense = false) {
     const seedRaw = seedInput.value.trim();
     currentSeed = seedRaw ? stringToSeed(seedRaw) : Date.now();
@@ -678,15 +710,14 @@
         answerContentDiv.appendChild(item);
       }
     });
-    const modeMsg = isDense ? ' (A4 dense mode)' : '';
+    const modeMsg = isDense ? ' (A4 2-column dense)' : '';
     showToast(`✨ New worksheet ready${modeMsg}!`);
   }
 
-  // Print & Preview functions
   function preparePrintContent() {
     const originalMultiplier = printMultiplier;
-    printMultiplier = 4; // High multiplier for A4 fill
-    generate(true); // true = dense layout
+    printMultiplier = 6;
+    generate(true);
     return originalMultiplier;
   }
 
@@ -702,12 +733,12 @@
       window.removeEventListener('afterprint', handleAfterPrint);
     };
     window.addEventListener('afterprint', handleAfterPrint);
-    setTimeout(() => window.print(), 80);
+    setTimeout(() => window.print(), 100);
   }
 
   function showPrintPreview() {
     const originalMultiplier = printMultiplier;
-    printMultiplier = 4;
+    printMultiplier = 6;
     
     const seedRaw = seedInput.value.trim();
     const seed = seedRaw ? stringToSeed(seedRaw) : Date.now();
@@ -719,7 +750,7 @@
     
     printMultiplier = originalMultiplier;
     generate(false);
-    showToast('👁️ A4 Preview ready');
+    showToast('👁️ A4 Preview (2 columns)');
   }
 
   function closePreview() {
@@ -739,14 +770,14 @@
       <html><head><meta charset="UTF-8"><title>Print Worksheet</title>
       <style>${document.querySelector('style').innerHTML}</style></head>
       <body onload="setTimeout(()=>window.print(),100);setTimeout(()=>window.close(),5000);">
-      ${generateWorksheetHTML(seed, { ...settings, multiplier: 4 }, topicId, true)}
+      ${generateWorksheetHTML(seed, { ...settings, multiplier: 6 }, topicId, true)}
       </body></html>
     `);
     printWindow.document.close();
     closePreview();
   }
 
-  window.addEventListener('beforeprint', () => showToast('🖨️ Preparing A4 layout...'));
+  window.addEventListener('beforeprint', () => showToast('🖨️ Preparing A4 2-column layout...'));
 
   function checkComplete() {
     if (worksheetCompleted) return;
@@ -769,7 +800,6 @@
     }
   }
 
-  // Stamp management
   function loadStamps() { return JSON.parse(localStorage.getItem('pp_stamps') || '[]'); }
   function saveStamps(stamps) { localStorage.setItem('pp_stamps', JSON.stringify(stamps)); }
   function updateStampsUI() {
@@ -807,7 +837,6 @@
     setTimeout(() => c.style.display = 'none', 2500);
   }
 
-  // UI toggles
   function toggleAnswers() { answerKeyDiv.classList.toggle('visible'); showToast(answerKeyDiv.classList.contains('visible') ? 'Answers shown' : 'Answers hidden'); }
   function toggleCompact() { document.body.classList.toggle('compact'); compactBtn.classList.toggle('active'); localStorage.setItem('pp_compact', document.body.classList.contains('compact')); }
   function toggleSettingsPanel() { controlsPanel.classList.toggle('collapsed'); }
@@ -834,7 +863,6 @@
     localStorage.setItem('pp_customSkip', customSkipInput.value);
   }
 
-  // Event binding
   generateBtn.onclick = () => { printMultiplier = 1; generate(false); saveUISettings(); };
   answersBtn.onclick = toggleAnswers;
   compactBtn.onclick = toggleCompact;
@@ -853,7 +881,6 @@
   skipSelect.onchange = () => { saveUISettings(); updateSkipInput(); generate(false); };
   customSkipInput.onchange = () => { saveUISettings(); generate(false); };
 
-  // Create stamp UI
   for (let i = 0; i < 5; i++) {
     const stamp = document.createElement('div'); stamp.className = 'stamp'; stamp.textContent = i===4 ? '⭐' : (i+1);
     stampsContainer.appendChild(stamp);
@@ -873,5 +900,4 @@
 </script>
 </body>
 </html>
-
 
