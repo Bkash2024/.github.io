@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Singapore Math Bar Model Explorer</title>
+<style>
+  body { 
+    font-family: system-ui, -apple-system, sans-serif; 
+    padding: 2rem; 
+    max-width: 600px; 
+    margin: 0 auto; 
+    background-color: #f8f9fa;
+  }
+  .card {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  h2 { margin-top: 0; color: #333; }
+  .bar-container { 
+    display: flex; 
+    margin: 20px 0; 
+    height: 60px; 
+    border-radius: 6px; 
+    overflow: hidden; 
+    background: #e9ecef;
+  }
+  .part { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: white; 
+    font-size: 1.2rem;
+    font-weight: bold; 
+    transition: width 0.3s ease; 
+  }
+  .part-a { background-color: #3b82f6; } /* Blue */
+  .part-b { background-color: #10b981; } /* Green */
+  .equation {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 20px 0;
+    color: #4b5563;
+  }
+  .controls { display: flex; flex-direction: column; gap: 15px; }
+  .control-group { display: flex; flex-direction: column; gap: 5px; }
+  label { font-weight: 600; color: #4b5563; }
+  input[type=range] { width: 100%; cursor: pointer; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h2>Bar Model Explorer</h2>
+    <p>Adjust the sliders to see how Part A and Part B combine to form the total value. This bridges abstract numbers to proportional visual blocks.</p>
+    
+    <div class="bar-container">
+      <div class="part part-a" id="barA">40</div>
+      <div class="part part-b" id="barB">60</div>
+    </div>
+    
+    <div class="equation" id="equation">40 + 60 = 100</div>
+    
+    <div class="controls">
+      <div class="control-group">
+        <label>Part A (Blue): <span id="valA">40</span></label>
+        <input type="range" id="inputA" min="0" max="100" value="40">
+      </div>
+      <div class="control-group">
+        <label>Part B (Green): <span id="valB">60</span></label>
+        <input type="range" id="inputB" min="0" max="100" value="60">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Grab elements from the DOM
+    const inputA = document.getElementById('inputA');
+    const inputB = document.getElementById('inputB');
+    const barA = document.getElementById('barA');
+    const barB = document.getElementById('barB');
+    const valA = document.getElementById('valA');
+    const valB = document.getElementById('valB');
+    const equation = document.getElementById('equation');
+
+    // Update the visual blocks whenever a slider changes
+    function updateVisualization() {
+      const a = parseInt(inputA.value);
+      const b = parseInt(inputB.value);
+      const total = a + b;
+      
+      // Calculate proportional widths
+      const widthA = total === 0 ? 0 : (a / total) * 100;
+      const widthB = total === 0 ? 0 : (b / total) * 100;
+      
+      // Apply widths to the visual bars
+      barA.style.width = widthA + '%';
+      barB.style.width = widthB + '%';
+      
+      // Update text inside the bars (hide if 0 to prevent crowding)
+      barA.textContent = a > 0 ? a : '';
+      barB.textContent = b > 0 ? b : '';
+      
+      // Update the control labels and the math equation
+      valA.textContent = a;
+      valB.textContent = b;
+      equation.textContent = `${a} + ${b} = ${total}`;
+    }
+
+    // Listen for slider movements
+    inputA.addEventListener('input', updateVisualization);
+    inputB.addEventListener('input', updateVisualization);
+    
+    // Run once on load to set initial state
+    updateVisualization();
+  </script>
+</body>
+</html>
