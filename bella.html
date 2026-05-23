@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>🎈 Practice Playground – Modular & Print‑Ready</title>
+<title>🎈 Practice Playground – Print Optimized</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -25,14 +25,12 @@
   body.compact .worksheet-card { padding: 12px; }
   body.compact .box { width: 44px; height: 44px; font-size: 1rem; }
 
-  /* Header & Collapsible */
   header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
   .logo { font-size: 1.6rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
   .mascot { font-size: 1.8rem; cursor: pointer; animation: bounce 2s infinite; }
   @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
   .settings-toggle { background: var(--card); border: none; font-size: 1.5rem; cursor: pointer; padding: 8px 12px; border-radius: 30px; box-shadow: var(--shadow); color: var(--primary); }
 
-  /* Collapsible panel */
   .controls-panel {
     background: var(--card); border-radius: var(--radius); padding: 16px;
     margin-bottom: 16px; box-shadow: var(--shadow);
@@ -56,19 +54,16 @@
   .toggle-btn { padding: 5px 10px; border: none; background: transparent; border-radius: 6px; cursor: pointer; color: var(--muted); }
   .toggle-btn.active { background: var(--primary); color: white; }
 
-  /* Progress & stamps */
   .progress-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0; font-size: 0.85rem; color: var(--muted); }
   .stamps { display: flex; gap: 6px; }
   .stamp { width: 32px; height: 32px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary); opacity: 0.4; font-size: 0.8rem; }
   .stamp.earned { background: var(--accent); opacity: 1; }
 
-  /* Worksheet */
   .worksheet-card { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
   .card-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; border-bottom: 1px dashed var(--border); padding-bottom: 8px; margin-bottom: 16px; }
   .card-title { font-size: 1.3rem; font-weight: 700; color: var(--primary); }
   .instructions { color: var(--muted); text-align: center; margin-bottom: 20px; font-size: 0.9rem; }
 
-  /* Exercise grids */
   .row, .arith-row, .bond-container, .compare-row, .pattern-row, .coin-row {
     display: flex; justify-content: center; align-items: center; gap: 10px;
     margin: 12px 0; flex-wrap: wrap;
@@ -101,15 +96,29 @@
   .answer-key.visible { display: block; }
   .answer-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #ffe08a; }
 
-  /* Print mode: more exercises, no fluff */
+  /* PRINT MODE: more exercises, blank spaces for compare, larger writing areas */
   @media print {
     body { background: white; padding: 0; }
     .controls-panel, .settings-toggle, .progress-bar, .btn, .answer-key, .toggle-group { display: none !important; }
     .worksheet-card { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; margin-bottom: 20px; padding: 12px; }
     .box, .box input { border-color: black !important; background: white !important; color: black !important; }
     .static-box { background: #f5f5f5 !important; }
+    /* Make compare boxes show blank line instead of dropdown */
+    .compare-select {
+      appearance: none; -webkit-appearance: none;
+      border: none; border-bottom: 2px solid #000;
+      background: transparent; width: 60px; text-align: center;
+      font-size: 1.2rem; color: transparent;
+      text-indent: 0; padding: 0;
+    }
+    .compare-select option { display: none; }
+    .compare-select:after { content: "______"; display: block; color: black; }
+    /* For words topic, increase input width */
+    .box input[type="text"] { width: 120px; border-bottom: 2px solid #000; background: transparent; }
+    /* Ensure enough space for writing */
+    .box { min-width: 60px; }
     @page { margin: 1.2cm; }
-    /* Increase number of exercises per row or add extra rows via JS – handled in generator */
+    /* Increase number of exercises via multiplier in JS */
   }
 
   /* Responsive */
@@ -137,6 +146,7 @@
   <div class="control-group"><label>📚 Topic</label><select id="topicSelect"></select></div>
   <div class="control-group"><label>🔢 Range</label><div class="control-row"><input type="number" id="minVal" value="1" min="0"><span>–</span><input type="number" id="maxVal" value="20" min="1"></div></div>
   <div class="control-group"><label>🎯 Difficulty</label><select id="difficultySelect"><option value="easy">Easy (30%)</option><option value="medium" selected>Medium (45%)</option><option value="hard">Hard (65%)</option></select></div>
+  <div class="control-group"><label>🔢 Skip count</label><select id="skipSelect"><option value="2">2</option><option value="3">3</option><option value="5">5</option><option value="10">10</option><option value="custom">Custom</option></select><input type="number" id="customSkip" placeholder="e.g., 4" style="display:none; margin-top:4px;"></div>
   <div class="control-group"><label>🎨 Theme</label><select id="themeSelect"><option value="space">Space</option><option value="jungle">Jungle</option><option value="ocean">Ocean</option><option value="candy">Candy</option></select></div>
   <div class="control-group"><label>🔑 Seed</label><input type="text" id="seedInput" placeholder="Auto" maxlength="12"></div>
   <div class="control-group"><label>⚡ Actions</label><div class="control-row"><button class="btn" id="generateBtn">✨ Generate</button><button class="btn btn-outline" id="answersBtn">🔑 Answers</button></div></div>
@@ -156,13 +166,14 @@
 <div class="toast" id="toastMsg">Ready! 🎈</div>
 
 <script>
-// ------------------------- MODULAR MATH PLAYGROUND -------------------------
 (function(){
-  // ---------- DOM elements ----------
+  // DOM elements
   const topicSelect = document.getElementById('topicSelect');
   const minInput = document.getElementById('minVal');
   const maxInput = document.getElementById('maxVal');
   const diffSelect = document.getElementById('difficultySelect');
+  const skipSelect = document.getElementById('skipSelect');
+  const customSkipInput = document.getElementById('customSkip');
   const themeSelect = document.getElementById('themeSelect');
   const seedInput = document.getElementById('seedInput');
   const generateBtn = document.getElementById('generateBtn');
@@ -179,14 +190,14 @@
   const progressSpan = document.getElementById('progressCount');
   const toastDiv = document.getElementById('toastMsg');
 
-  // ---------- State ----------
-  let currentAnswers = [];      // stores correct values for answer key
+  // State
+  let currentAnswers = [];
   let worksheetCompleted = false;
   let currentSeed = Date.now();
   let currentTopicId = 'arithmetic';
-  let rng = seededRandom(currentSeed); // will be updated on generate
+  let rng = seededRandom(currentSeed);
 
-  // ---------- Helper functions ----------
+  // Helper functions
   function seededRandom(seed) {
     return function() {
       let t = (seed += 0x6D2B79F5);
@@ -195,19 +206,16 @@
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
-
   function stringToSeed(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) hash = (Math.imul(31, hash) + str.charCodeAt(i)) | 0;
     return Math.abs(hash) || Date.now();
   }
-
   function showToast(msg) {
     toastDiv.textContent = msg;
     toastDiv.classList.add('show');
     setTimeout(() => toastDiv.classList.remove('show'), 2000);
   }
-
   function mascotCheer() {
     const mascots = ['🚀', '🦁', '🐠', '🍭', '🎈', '⭐'];
     document.querySelector('.mascot').textContent = mascots[Math.floor(Math.random() * mascots.length)];
@@ -220,18 +228,36 @@
     if (min > max) { [min, max] = [max, min]; minInput.value = min; maxInput.value = max; showToast('Range adjusted'); }
     const diff = diffSelect.value;
     const rates = { easy: 0.3, medium: 0.45, hard: 0.65 };
-    // In print mode we double the number of problems: used inside generators
     const isPrinting = window.matchMedia('print').matches;
-    const multiplier = isPrinting ? 2 : 1;
-    return { min, max, hideRate: rates[diff], multiplier };
+    // multiplier: 3 for most topics to fill A4, 4 for small ones like compare
+    let multiplier = isPrinting ? 3 : 1;
+    // get skip value
+    let skipVal = parseInt(skipSelect.value);
+    if (skipSelect.value === 'custom') {
+      skipVal = parseInt(customSkipInput.value) || 2;
+      if (skipVal < 1) skipVal = 2;
+    }
+    return { min, max, hideRate: rates[diff], multiplier, skipVal, isPrinting };
   }
 
-  // ---------- Box creation (input or static) ----------
+  // Box creation (with print adaptations)
   function createBox(value, isHidden, answerArray, idx, options = {}) {
     const box = document.createElement('div');
     box.className = `box ${isHidden ? '' : 'static-box'}`;
+    const isPrinting = window.matchMedia('print').matches;
     if (isHidden) {
-      if (options.type === 'compare') {
+      if (options.type === 'compare' && isPrinting) {
+        // In print mode, show a blank line instead of dropdown
+        const blank = document.createElement('span');
+        blank.textContent = '______';
+        blank.style.fontSize = '1.2rem';
+        blank.style.fontWeight = 'bold';
+        blank.style.minWidth = '60px';
+        blank.style.textAlign = 'center';
+        box.appendChild(blank);
+        // still store answer for answer key
+        if (answerArray && idx >= 0) answerArray[idx] = value;
+      } else if (options.type === 'compare') {
         const sel = document.createElement('select');
         sel.className = 'compare-select';
         sel.innerHTML = '<option>?</option><option>&lt;</option><option>&gt;</option><option>=</option>';
@@ -242,17 +268,20 @@
           checkComplete();
         });
         box.appendChild(sel);
+        if (answerArray && idx >= 0) answerArray[idx] = value;
       } else if (options.type === 'words') {
         const inp = document.createElement('input');
         inp.type = 'text';
         inp.dataset.answer = value.toString().toLowerCase();
-        inp.placeholder = '?';
+        inp.placeholder = '______';
+        inp.style.width = isPrinting ? '120px' : 'auto';
         inp.addEventListener('input', () => {
           if (inp.value.trim().toLowerCase() === inp.dataset.answer) inp.classList.add('correct');
           else inp.classList.remove('correct');
           checkComplete();
         });
         box.appendChild(inp);
+        if (answerArray && idx >= 0) answerArray[idx] = value;
       } else if (options.type === 'time') {
         const inp = document.createElement('input');
         inp.type = 'text';
@@ -263,6 +292,7 @@
           checkComplete();
         });
         box.appendChild(inp);
+        if (answerArray && idx >= 0) answerArray[idx] = value;
       } else {
         const inp = document.createElement('input');
         inp.type = 'number';
@@ -278,25 +308,26 @@
         });
         inp.addEventListener('keydown', e => { if (e.key === 'e' || e.key === 'E' || e.key === '.') e.preventDefault(); });
         box.appendChild(inp);
+        if (answerArray && idx >= 0) answerArray[idx] = value;
       }
-      if (answerArray && idx >= 0) answerArray[idx] = value;
     } else {
       box.textContent = options.display || value;
     }
     return box;
   }
 
-  // ---------- Exercise Registry (modular) ----------
+  // ---------- EXERCISE REGISTRY (modular) ----------
   const exercises = {};
 
-  // 1. Sequences
+  // 1. Sequences (unchanged)
   exercises.sequence = {
     title: '🔢 Number Sequences',
     instructions: 'Fill in the missing numbers.',
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
-      const length = 7; // fixed length per row
-      for (let row = 0; row < 3 * settings.multiplier; row++) {
+      const length = 7;
+      const rows = 3 * settings.multiplier;
+      for (let r = 0; r < rows; r++) {
         const rowDiv = document.createElement('div'); rowDiv.className = 'row';
         const start = Math.floor(rand() * (settings.max - settings.min - length + 1)) + settings.min;
         for (let i = 0; i < length; i++) {
@@ -310,17 +341,17 @@
     }
   };
 
-  // 2. Skip counting
+  // 2. Skip counting (with user-selected skip)
   exercises.skip = {
     title: '🔁 Skip Counting',
-    instructions: 'Count by 2s, 5s, or 10s.',
+    instructions: `Count by ${skipSelect.value === 'custom' ? (customSkipInput.value || 2) : skipSelect.value}.`,
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
-      const skips = [2,5,10];
+      const skip = settings.skipVal;
       const length = 7;
-      for (let row = 0; row < 3 * settings.multiplier; row++) {
+      const rows = 3 * settings.multiplier;
+      for (let r = 0; r < rows; r++) {
         const rowDiv = document.createElement('div'); rowDiv.className = 'row';
-        const skip = skips[Math.floor(rand() * skips.length)];
         const start = Math.floor(rand() * (settings.max - skip * length + 1)) + settings.min;
         for (let i = 0; i < length; i++) {
           const num = start + i * skip;
@@ -403,13 +434,13 @@
     }
   };
 
-  // 5. Compare numbers
+  // 5. Compare numbers – print mode shows blank lines
   exercises.compare = {
     title: '⚖️ Compare Numbers',
-    instructions: 'Choose <, >, or =.',
+    instructions: 'Write <, >, or = in the blank.',
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
-      const problemCount = 6 * settings.multiplier;
+      const problemCount = 8 * settings.multiplier; // more to fill A4
       for (let i = 0; i < problemCount; i++) {
         const row = document.createElement('div'); row.className = 'compare-row';
         const a = Math.floor(rand() * (settings.max - settings.min + 1)) + settings.min;
@@ -424,17 +455,15 @@
     }
   };
 
-  // Register other topics (place, pattern, coins, words, time, mixed) – simplified for brevity, but they work
-  // To keep this answer manageable, I'll include only essential ones. In final code you would have all 11.
-  // For full functionality, I'll add stubs that call existing generators from the previous version but modular.
-  // Actually, I'll provide a few more to show modularity.
+  // 6. Patterns
   exercises.pattern = {
     title: '🧩 Patterns',
     instructions: 'What comes next?',
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
       const patterns = [['A','B','A','B','?'], ['A','A','B','B','?'], ['A','B','C','A','B','?']];
-      for (let p = 0; p < 3 * settings.multiplier; p++) {
+      const problemCount = 4 * settings.multiplier;
+      for (let p = 0; p < problemCount; p++) {
         const row = document.createElement('div'); row.className = 'pattern-row';
         const pat = patterns[Math.floor(rand() * patterns.length)].slice();
         const qIdx = pat.indexOf('?');
@@ -460,21 +489,55 @@
       return container;
     }
   };
-  // Add more topics as needed (coins, words, time, mixed) – same pattern.
 
-  // For demo, we'll also add 'mixed' that combines arithmetic, sequence, pattern
-  exercises.mixed = {
-    title: '🔀 Mixed Practice',
-    instructions: 'A little bit of everything!',
+  // 7. Number Words (with larger input space)
+  exercises.words = {
+    title: '🔤 Number Words',
+    instructions: 'Write the number or word.',
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
-      const pick = [exercises.arithmetic, exercises.sequence, exercises.pattern];
-      pick.sort(() => rand() - 0.5).slice(0, 2).forEach(ex => {
-        const section = document.createElement('div');
-        section.style.marginBottom = '20px';
-        section.appendChild(ex.generate(rand, settings, answerArray));
-        container.appendChild(section);
-      });
+      const words = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
+      const problemCount = 8 * settings.multiplier;
+      for (let i = 0; i < problemCount; i++) {
+        const row = document.createElement('div'); row.className = 'arith-row';
+        const num = Math.floor(rand() * Math.min(21, settings.max - settings.min + 1)) + settings.min;
+        const word = words[num] || num.toString();
+        const hideWord = rand() < 0.5;
+        if (hideWord) {
+          row.appendChild(createBox(num, false));
+          const eq = document.createElement('span'); eq.className = 'equals'; eq.textContent = '→'; row.appendChild(eq);
+          row.appendChild(createBox(word, true, answerArray, answerArray.length, { type: 'words' }));
+        } else {
+          row.appendChild(createBox(word, true, answerArray, answerArray.length, { type: 'words' }));
+          const eq = document.createElement('span'); eq.className = 'equals'; eq.textContent = '→'; row.appendChild(eq);
+          row.appendChild(createBox(num, false));
+        }
+        container.appendChild(row);
+      }
+      return container;
+    }
+  };
+
+  // 8. Mixed practice (combines arithmetic, sequence, patterns)
+  exercises.mixed = {
+    title: '🔀 Mixed Practice',
+    instructions: 'A mix of skills!',
+    generate: (rand, settings, answerArray) => {
+      const container = document.createElement('div');
+      const parts = [];
+      if (settings.multiplier > 1) {
+        // In print mode, include more sections
+        for (let i = 0; i < settings.multiplier; i++) {
+          parts.push(exercises.arithmetic.generate(rand, { ...settings, multiplier:1 }, answerArray));
+          parts.push(exercises.sequence.generate(rand, { ...settings, multiplier:1 }, answerArray));
+          parts.push(exercises.pattern.generate(rand, { ...settings, multiplier:1 }, answerArray));
+        }
+      } else {
+        parts.push(exercises.arithmetic.generate(rand, { ...settings, multiplier:1 }, answerArray));
+        parts.push(exercises.sequence.generate(rand, { ...settings, multiplier:1 }, answerArray));
+        parts.push(exercises.pattern.generate(rand, { ...settings, multiplier:1 }, answerArray));
+      }
+      parts.forEach(part => container.appendChild(part));
       return container;
     }
   };
@@ -483,7 +546,7 @@
   const topicNames = {
     sequence: 'Sequences', skip: 'Skip Counting', arithmetic: 'Arithmetic',
     bonds: 'Number Bonds', compare: 'Compare Numbers', pattern: 'Patterns',
-    mixed: 'Mixed Practice'
+    words: 'Number Words', mixed: 'Mixed Practice'
   };
   for (let id in topicNames) {
     if (exercises[id]) {
@@ -496,7 +559,15 @@
   currentTopicId = 'arithmetic';
   topicSelect.value = currentTopicId;
 
-  // ---------- Generate worksheet ----------
+  // Handle custom skip input visibility
+  function updateSkipInput() {
+    customSkipInput.style.display = skipSelect.value === 'custom' ? 'inline-block' : 'none';
+  }
+  skipSelect.addEventListener('change', updateSkipInput);
+  customSkipInput.addEventListener('input', () => { if (skipSelect.value === 'custom') updateSkipInput(); });
+  updateSkipInput();
+
+  // Generate worksheet
   function generate() {
     const seedRaw = seedInput.value.trim();
     currentSeed = seedRaw ? stringToSeed(seedRaw) : Date.now();
@@ -512,14 +583,19 @@
     answerContentDiv.innerHTML = '';
 
     const card = document.createElement('div'); card.className = 'worksheet-card';
-    card.innerHTML = `<div class="card-header"><div class="card-title">${ex.title}</div><div class="seed-hint">🔑 ${currentSeed.toString().slice(0,8)}</div></div><div class="instructions">${ex.instructions}</div>`;
+    let instructions = ex.instructions;
+    if (topicId === 'skip') {
+      const skipVal = settings.skipVal;
+      instructions = `Count by ${skipVal}.`;
+    }
+    card.innerHTML = `<div class="card-header"><div class="card-title">${ex.title}</div><div class="seed-hint">🔑 ${currentSeed.toString().slice(0,8)}</div></div><div class="instructions">${instructions}</div>`;
     const content = ex.generate(rng, settings, currentAnswers);
     card.appendChild(content);
     worksheetArea.appendChild(card);
 
-    // Build answer key
+    // Build answer key (filter out undefined)
     currentAnswers.forEach((ans, idx) => {
-      if (ans !== undefined) {
+      if (ans !== undefined && ans !== null) {
         const item = document.createElement('div'); item.className = 'answer-item';
         item.innerHTML = `<span>#${idx+1}</span><strong>${ans}</strong>`;
         answerContentDiv.appendChild(item);
@@ -529,7 +605,7 @@
     setTimeout(() => worksheetArea.querySelector('input,select')?.focus(), 100);
   }
 
-  // ---------- Check completion & stamps ----------
+  // Check completion & stamps
   function checkComplete() {
     if (worksheetCompleted) return;
     const inputs = document.querySelectorAll('#worksheetArea input, #worksheetArea select');
@@ -605,12 +681,17 @@
     const savedMin = localStorage.getItem('pp_min'); if (savedMin) minInput.value = savedMin;
     const savedMax = localStorage.getItem('pp_max'); if (savedMax) maxInput.value = savedMax;
     const savedDiff = localStorage.getItem('pp_difficulty'); if (savedDiff) diffSelect.value = savedDiff;
+    const savedSkip = localStorage.getItem('pp_skip'); if (savedSkip) skipSelect.value = savedSkip;
+    const savedCustomSkip = localStorage.getItem('pp_customSkip'); if (savedCustomSkip) customSkipInput.value = savedCustomSkip;
+    updateSkipInput();
   }
   function saveUISettings() {
     localStorage.setItem('pp_topic', topicSelect.value);
     localStorage.setItem('pp_min', minInput.value);
     localStorage.setItem('pp_max', maxInput.value);
     localStorage.setItem('pp_difficulty', diffSelect.value);
+    localStorage.setItem('pp_skip', skipSelect.value);
+    localStorage.setItem('pp_customSkip', customSkipInput.value);
   }
 
   // Event binding
@@ -625,6 +706,8 @@
   minInput.onchange = saveUISettings;
   maxInput.onchange = saveUISettings;
   diffSelect.onchange = saveUISettings;
+  skipSelect.onchange = () => { saveUISettings(); updateSkipInput(); };
+  customSkipInput.onchange = saveUISettings;
 
   // Create stamp UI
   for (let i = 0; i < 5; i++) {
@@ -635,7 +718,6 @@
   loadUserSettings();
   updateStampsUI();
   generate();
-  // Keyboard shortcut Ctrl+Enter
   document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); generate(); saveUISettings(); } });
 })();
 </script>
