@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>🎈 Practice Playground – Print Optimized</title>
+<title>🎈 Practice Playground – Print Optimized (Fixed)</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -98,30 +98,26 @@
 
   /* PRINT MODE: more exercises, blank spaces for compare, larger writing areas */
   @media print {
-    body { background: white; padding: 0; }
+    body { background: white; padding: 0; margin: 0; }
     .controls-panel, .settings-toggle, .progress-bar, .btn, .answer-key, .toggle-group { display: none !important; }
     .worksheet-card { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; margin-bottom: 20px; padding: 12px; }
     .box, .box input { border-color: black !important; background: white !important; color: black !important; }
     .static-box { background: #f5f5f5 !important; }
-    /* Make compare boxes show blank line instead of dropdown */
+    /* Compare: hide dropdown, show blank line */
     .compare-select {
       appearance: none; -webkit-appearance: none;
       border: none; border-bottom: 2px solid #000;
       background: transparent; width: 60px; text-align: center;
       font-size: 1.2rem; color: transparent;
-      text-indent: 0; padding: 0;
     }
     .compare-select option { display: none; }
-    .compare-select:after { content: "______"; display: block; color: black; }
-    /* For words topic, increase input width */
+    .compare-select:before { content: "______"; display: block; color: black; }
+    /* Words topic: larger input */
     .box input[type="text"] { width: 120px; border-bottom: 2px solid #000; background: transparent; }
-    /* Ensure enough space for writing */
     .box { min-width: 60px; }
     @page { margin: 1.2cm; }
-    /* Increase number of exercises via multiplier in JS */
   }
 
-  /* Responsive */
   @media (max-width: 600px) {
     body { padding: 8px; }
     .box { width: 46px; height: 46px; font-size: 1rem; }
@@ -196,6 +192,7 @@
   let currentSeed = Date.now();
   let currentTopicId = 'arithmetic';
   let rng = seededRandom(currentSeed);
+  let isPrintMode = false; // flag to control generation
 
   // Helper functions
   function seededRandom(seed) {
@@ -228,25 +225,25 @@
     if (min > max) { [min, max] = [max, min]; minInput.value = min; maxInput.value = max; showToast('Range adjusted'); }
     const diff = diffSelect.value;
     const rates = { easy: 0.3, medium: 0.45, hard: 0.65 };
-    const isPrinting = window.matchMedia('print').matches;
-    // multiplier: 3 for most topics to fill A4, 4 for small ones like compare
-    let multiplier = isPrinting ? 3 : 1;
-    // get skip value
+    // Use multiplier 3 for print mode, else 1
+    let multiplier = isPrintMode ? 3 : 1;
+    // For compare and words, maybe 4 to fill A4
+    if (isPrintMode && (currentTopicId === 'compare' || currentTopicId === 'words')) multiplier = 4;
+    // Get skip value
     let skipVal = parseInt(skipSelect.value);
     if (skipSelect.value === 'custom') {
       skipVal = parseInt(customSkipInput.value) || 2;
       if (skipVal < 1) skipVal = 2;
     }
-    return { min, max, hideRate: rates[diff], multiplier, skipVal, isPrinting };
+    return { min, max, hideRate: rates[diff], multiplier, skipVal, isPrintMode };
   }
 
-  // Box creation (with print adaptations)
+  // Box creation
   function createBox(value, isHidden, answerArray, idx, options = {}) {
     const box = document.createElement('div');
     box.className = `box ${isHidden ? '' : 'static-box'}`;
-    const isPrinting = window.matchMedia('print').matches;
     if (isHidden) {
-      if (options.type === 'compare' && isPrinting) {
+      if (options.type === 'compare' && isPrintMode) {
         // In print mode, show a blank line instead of dropdown
         const blank = document.createElement('span');
         blank.textContent = '______';
@@ -255,7 +252,6 @@
         blank.style.minWidth = '60px';
         blank.style.textAlign = 'center';
         box.appendChild(blank);
-        // still store answer for answer key
         if (answerArray && idx >= 0) answerArray[idx] = value;
       } else if (options.type === 'compare') {
         const sel = document.createElement('select');
@@ -274,7 +270,7 @@
         inp.type = 'text';
         inp.dataset.answer = value.toString().toLowerCase();
         inp.placeholder = '______';
-        inp.style.width = isPrinting ? '120px' : 'auto';
+        if (isPrintMode) inp.style.width = '120px';
         inp.addEventListener('input', () => {
           if (inp.value.trim().toLowerCase() === inp.dataset.answer) inp.classList.add('correct');
           else inp.classList.remove('correct');
@@ -316,10 +312,9 @@
     return box;
   }
 
-  // ---------- EXERCISE REGISTRY (modular) ----------
+  // ---------- EXERCISE REGISTRY (same as before, but uses getSettings multiplier) ----------
   const exercises = {};
 
-  // 1. Sequences (unchanged)
   exercises.sequence = {
     title: '🔢 Number Sequences',
     instructions: 'Fill in the missing numbers.',
@@ -341,7 +336,6 @@
     }
   };
 
-  // 2. Skip counting (with user-selected skip)
   exercises.skip = {
     title: '🔁 Skip Counting',
     instructions: `Count by ${skipSelect.value === 'custom' ? (customSkipInput.value || 2) : skipSelect.value}.`,
@@ -364,7 +358,6 @@
     }
   };
 
-  // 3. Arithmetic (fixed)
   exercises.arithmetic = {
     title: '➕➖ Arithmetic',
     instructions: 'Solve the missing number.',
@@ -403,7 +396,6 @@
     }
   };
 
-  // 4. Number Bonds
   exercises.bonds = {
     title: '🎯 Number Bonds',
     instructions: 'Find the missing addend to reach the target.',
@@ -434,13 +426,12 @@
     }
   };
 
-  // 5. Compare numbers – print mode shows blank lines
   exercises.compare = {
     title: '⚖️ Compare Numbers',
     instructions: 'Write <, >, or = in the blank.',
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
-      const problemCount = 8 * settings.multiplier; // more to fill A4
+      const problemCount = 8 * settings.multiplier;
       for (let i = 0; i < problemCount; i++) {
         const row = document.createElement('div'); row.className = 'compare-row';
         const a = Math.floor(rand() * (settings.max - settings.min + 1)) + settings.min;
@@ -455,7 +446,6 @@
     }
   };
 
-  // 6. Patterns
   exercises.pattern = {
     title: '🧩 Patterns',
     instructions: 'What comes next?',
@@ -490,7 +480,6 @@
     }
   };
 
-  // 7. Number Words (with larger input space)
   exercises.words = {
     title: '🔤 Number Words',
     instructions: 'Write the number or word.',
@@ -518,21 +507,13 @@
     }
   };
 
-  // 8. Mixed practice (combines arithmetic, sequence, patterns)
   exercises.mixed = {
     title: '🔀 Mixed Practice',
     instructions: 'A mix of skills!',
     generate: (rand, settings, answerArray) => {
       const container = document.createElement('div');
       const parts = [];
-      if (settings.multiplier > 1) {
-        // In print mode, include more sections
-        for (let i = 0; i < settings.multiplier; i++) {
-          parts.push(exercises.arithmetic.generate(rand, { ...settings, multiplier:1 }, answerArray));
-          parts.push(exercises.sequence.generate(rand, { ...settings, multiplier:1 }, answerArray));
-          parts.push(exercises.pattern.generate(rand, { ...settings, multiplier:1 }, answerArray));
-        }
-      } else {
+      for (let i = 0; i < settings.multiplier; i++) {
         parts.push(exercises.arithmetic.generate(rand, { ...settings, multiplier:1 }, answerArray));
         parts.push(exercises.sequence.generate(rand, { ...settings, multiplier:1 }, answerArray));
         parts.push(exercises.pattern.generate(rand, { ...settings, multiplier:1 }, answerArray));
@@ -559,15 +540,15 @@
   currentTopicId = 'arithmetic';
   topicSelect.value = currentTopicId;
 
-  // Handle custom skip input visibility
+  // Handle custom skip input
   function updateSkipInput() {
     customSkipInput.style.display = skipSelect.value === 'custom' ? 'inline-block' : 'none';
   }
   skipSelect.addEventListener('change', updateSkipInput);
-  customSkipInput.addEventListener('input', () => { if (skipSelect.value === 'custom') updateSkipInput(); });
+  customSkipInput.addEventListener('input', updateSkipInput);
   updateSkipInput();
 
-  // Generate worksheet
+  // Core generate function (uses current isPrintMode)
   function generate() {
     const seedRaw = seedInput.value.trim();
     currentSeed = seedRaw ? stringToSeed(seedRaw) : Date.now();
@@ -593,7 +574,6 @@
     card.appendChild(content);
     worksheetArea.appendChild(card);
 
-    // Build answer key (filter out undefined)
     currentAnswers.forEach((ans, idx) => {
       if (ans !== undefined && ans !== null) {
         const item = document.createElement('div'); item.className = 'answer-item';
@@ -601,11 +581,26 @@
         answerContentDiv.appendChild(item);
       }
     });
-    showToast('✨ New worksheet ready!');
-    setTimeout(() => worksheetArea.querySelector('input,select')?.focus(), 100);
+    showToast(isPrintMode ? '✨ Print-ready worksheet (more exercises)' : '✨ New worksheet ready!');
   }
 
-  // Check completion & stamps
+  // Print function: set print mode, regenerate, print, then restore
+  async function printWorksheet() {
+    // Save current settings to restore later
+    const originalMode = isPrintMode;
+    isPrintMode = true;
+    generate(); // generate with multiplier
+    // Wait for DOM to update
+    setTimeout(() => {
+      window.print();
+      // After print dialog closes (or user cancels), restore normal mode
+      setTimeout(() => {
+        isPrintMode = false;
+        generate(); // regenerate normal version
+      }, 100);
+    }, 100);
+  }
+
   function checkComplete() {
     if (worksheetCompleted) return;
     const inputs = document.querySelectorAll('#worksheetArea input, #worksheetArea select');
@@ -669,7 +664,6 @@
   function toggleAnswers() { answerKeyDiv.classList.toggle('visible'); showToast(answerKeyDiv.classList.contains('visible') ? 'Answers shown' : 'Answers hidden'); }
   function toggleCompact() { document.body.classList.toggle('compact'); compactBtn.classList.toggle('active'); localStorage.setItem('pp_compact', document.body.classList.contains('compact')); }
   function toggleSettingsPanel() { controlsPanel.classList.toggle('collapsed'); }
-  function handlePrint() { window.print(); }
 
   // Theme and settings persistence
   function applyTheme(theme) { document.body.className = `theme-${theme}`; localStorage.setItem('pp_theme', theme); }
@@ -695,19 +689,19 @@
   }
 
   // Event binding
-  generateBtn.onclick = () => { generate(); saveUISettings(); };
+  generateBtn.onclick = () => { isPrintMode = false; generate(); saveUISettings(); };
   answersBtn.onclick = toggleAnswers;
   compactBtn.onclick = toggleCompact;
-  printBtn.onclick = handlePrint;
+  printBtn.onclick = () => printWorksheet();
   resetStampsBtn.onclick = resetStamps;
   settingsToggle.onclick = toggleSettingsPanel;
   themeSelect.onchange = (e) => applyTheme(e.target.value);
-  topicSelect.onchange = saveUISettings;
-  minInput.onchange = saveUISettings;
-  maxInput.onchange = saveUISettings;
-  diffSelect.onchange = saveUISettings;
-  skipSelect.onchange = () => { saveUISettings(); updateSkipInput(); };
-  customSkipInput.onchange = saveUISettings;
+  topicSelect.onchange = () => { saveUISettings(); generate(); };
+  minInput.onchange = () => { saveUISettings(); generate(); };
+  maxInput.onchange = () => { saveUISettings(); generate(); };
+  diffSelect.onchange = () => { saveUISettings(); generate(); };
+  skipSelect.onchange = () => { saveUISettings(); updateSkipInput(); generate(); };
+  customSkipInput.onchange = () => { saveUISettings(); generate(); };
 
   // Create stamp UI
   for (let i = 0; i < 5; i++) {
@@ -717,8 +711,8 @@
 
   loadUserSettings();
   updateStampsUI();
-  generate();
-  document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); generate(); saveUISettings(); } });
+  generate(); // normal mode
+  document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); isPrintMode = false; generate(); saveUISettings(); } });
 })();
 </script>
 </body>
