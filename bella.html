@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>🎈 Practice Playground – Print Optimized (Fixed)</title>
+<title>🎈 Practice Playground – Print Multiplier Fixed</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -96,14 +96,13 @@
   .answer-key.visible { display: block; }
   .answer-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #ffe08a; }
 
-  /* PRINT MODE: more exercises, blank spaces for compare, larger writing areas */
+  /* PRINT MODE styles */
   @media print {
     body { background: white; padding: 0; margin: 0; }
     .controls-panel, .settings-toggle, .progress-bar, .btn, .answer-key, .toggle-group { display: none !important; }
     .worksheet-card { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; margin-bottom: 20px; padding: 12px; }
     .box, .box input { border-color: black !important; background: white !important; color: black !important; }
     .static-box { background: #f5f5f5 !important; }
-    /* Compare: hide dropdown, show blank line */
     .compare-select {
       appearance: none; -webkit-appearance: none;
       border: none; border-bottom: 2px solid #000;
@@ -112,7 +111,6 @@
     }
     .compare-select option { display: none; }
     .compare-select:before { content: "______"; display: block; color: black; }
-    /* Words topic: larger input */
     .box input[type="text"] { width: 120px; border-bottom: 2px solid #000; background: transparent; }
     .box { min-width: 60px; }
     @page { margin: 1.2cm; }
@@ -192,7 +190,7 @@
   let currentSeed = Date.now();
   let currentTopicId = 'arithmetic';
   let rng = seededRandom(currentSeed);
-  let isPrintMode = false; // flag to control generation
+  let printMultiplier = 1;      // will be set to 3 (or 4) when printing
 
   // Helper functions
   function seededRandom(seed) {
@@ -225,26 +223,27 @@
     if (min > max) { [min, max] = [max, min]; minInput.value = min; maxInput.value = max; showToast('Range adjusted'); }
     const diff = diffSelect.value;
     const rates = { easy: 0.3, medium: 0.45, hard: 0.65 };
-    // Use multiplier 3 for print mode, else 1
-    let multiplier = isPrintMode ? 3 : 1;
-    // For compare and words, maybe 4 to fill A4
-    if (isPrintMode && (currentTopicId === 'compare' || currentTopicId === 'words')) multiplier = 4;
+    // use the global printMultiplier
+    let multiplier = printMultiplier;
+    // For compare and words, make even more to fill A4
+    if (multiplier > 1 && (currentTopicId === 'compare' || currentTopicId === 'words')) multiplier = 4;
     // Get skip value
     let skipVal = parseInt(skipSelect.value);
     if (skipSelect.value === 'custom') {
       skipVal = parseInt(customSkipInput.value) || 2;
       if (skipVal < 1) skipVal = 2;
     }
-    return { min, max, hideRate: rates[diff], multiplier, skipVal, isPrintMode };
+    return { min, max, hideRate: rates[diff], multiplier, skipVal };
   }
 
-  // Box creation
+  // Box creation (print mode detected by printMultiplier > 1)
+  function isPrintMode() { return printMultiplier > 1; }
+
   function createBox(value, isHidden, answerArray, idx, options = {}) {
     const box = document.createElement('div');
     box.className = `box ${isHidden ? '' : 'static-box'}`;
     if (isHidden) {
-      if (options.type === 'compare' && isPrintMode) {
-        // In print mode, show a blank line instead of dropdown
+      if (options.type === 'compare' && isPrintMode()) {
         const blank = document.createElement('span');
         blank.textContent = '______';
         blank.style.fontSize = '1.2rem';
@@ -270,7 +269,7 @@
         inp.type = 'text';
         inp.dataset.answer = value.toString().toLowerCase();
         inp.placeholder = '______';
-        if (isPrintMode) inp.style.width = '120px';
+        if (isPrintMode()) inp.style.width = '120px';
         inp.addEventListener('input', () => {
           if (inp.value.trim().toLowerCase() === inp.dataset.answer) inp.classList.add('correct');
           else inp.classList.remove('correct');
@@ -312,7 +311,7 @@
     return box;
   }
 
-  // ---------- EXERCISE REGISTRY (same as before, but uses getSettings multiplier) ----------
+  // ---------- EXERCISE REGISTRY (each generator respects multiplier and creates distinct rows) ----------
   const exercises = {};
 
   exercises.sequence = {
@@ -322,9 +321,15 @@
       const container = document.createElement('div');
       const length = 7;
       const rows = 3 * settings.multiplier;
+      // Store used start values to ensure uniqueness
+      const usedStarts = new Set();
       for (let r = 0; r < rows; r++) {
+        let start;
+        do {
+          start = Math.floor(rand() * (settings.max - settings.min - length + 1)) + settings.min;
+        } while (usedStarts.has(start));
+        usedStarts.add(start);
         const rowDiv = document.createElement('div'); rowDiv.className = 'row';
-        const start = Math.floor(rand() * (settings.max - settings.min - length + 1)) + settings.min;
         for (let i = 0; i < length; i++) {
           const num = start + i;
           const hide = (i > 0) && (rand() < settings.hideRate);
@@ -344,9 +349,14 @@
       const skip = settings.skipVal;
       const length = 7;
       const rows = 3 * settings.multiplier;
+      const usedStarts = new Set();
       for (let r = 0; r < rows; r++) {
+        let start;
+        do {
+          start = Math.floor(rand() * (settings.max - skip * length + 1)) + settings.min;
+        } while (usedStarts.has(start));
+        usedStarts.add(start);
         const rowDiv = document.createElement('div'); rowDiv.className = 'row';
-        const start = Math.floor(rand() * (settings.max - skip * length + 1)) + settings.min;
         for (let i = 0; i < length; i++) {
           const num = start + i * skip;
           const hide = (i > 0) && (rand() < settings.hideRate);
@@ -548,7 +558,7 @@
   customSkipInput.addEventListener('input', updateSkipInput);
   updateSkipInput();
 
-  // Core generate function (uses current isPrintMode)
+  // Core generate function (uses current printMultiplier)
   function generate() {
     const seedRaw = seedInput.value.trim();
     currentSeed = seedRaw ? stringToSeed(seedRaw) : Date.now();
@@ -581,22 +591,23 @@
         answerContentDiv.appendChild(item);
       }
     });
-    showToast(isPrintMode ? '✨ Print-ready worksheet (more exercises)' : '✨ New worksheet ready!');
+    const modeMsg = printMultiplier > 1 ? ' (Print mode: more exercises)' : '';
+    showToast(`✨ New worksheet ready${modeMsg}!`);
   }
 
-  // Print function: set print mode, regenerate, print, then restore
+  // Print function: set multiplier to 3, generate, print, then restore
   async function printWorksheet() {
-    // Save current settings to restore later
-    const originalMode = isPrintMode;
-    isPrintMode = true;
-    generate(); // generate with multiplier
-    // Wait for DOM to update
+    // Save current multiplier and topic
+    const originalMultiplier = printMultiplier;
+    printMultiplier = 3;   // enough to fill A4
+    generate();            // regenerate with multiplier
+    // Wait a moment for DOM to fully render
     setTimeout(() => {
       window.print();
-      // After print dialog closes (or user cancels), restore normal mode
+      // After print dialog closes, restore normal multiplier and regenerate
       setTimeout(() => {
-        isPrintMode = false;
-        generate(); // regenerate normal version
+        printMultiplier = 1;
+        generate();
       }, 100);
     }, 100);
   }
@@ -689,7 +700,7 @@
   }
 
   // Event binding
-  generateBtn.onclick = () => { isPrintMode = false; generate(); saveUISettings(); };
+  generateBtn.onclick = () => { printMultiplier = 1; generate(); saveUISettings(); };
   answersBtn.onclick = toggleAnswers;
   compactBtn.onclick = toggleCompact;
   printBtn.onclick = () => printWorksheet();
@@ -711,8 +722,9 @@
 
   loadUserSettings();
   updateStampsUI();
-  generate(); // normal mode
-  document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); isPrintMode = false; generate(); saveUISettings(); } });
+  printMultiplier = 1; // ensure normal mode
+  generate();
+  document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); printMultiplier = 1; generate(); saveUISettings(); } });
 })();
 </script>
 </body>
